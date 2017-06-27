@@ -1,0 +1,104 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".UnifingerMain" android:background="#3176BD">
+
+    <TextView android:id="@+id/test" android:text="" android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:textSize="25dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/layout1"
+        android:layout_above="@+id/linearLayout"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="62dp">
+
+
+
+        <ImageView
+        android:layout_width="163dp"
+        android:layout_height="163dp"
+        android:minHeight="200dp"
+        android:minWidth="180dp"
+        android:id="@+id/fingerImage"
+        android:src="@drawable/scan_ready"
+        android:layout_toEndOf="@+id/EnrollBtn"
+        android:layout_gravity="center_horizontal" />
+
+        <EditText android:id="@+id/UserID" android:hint="input user id" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_below="@id/test" android:inputType="number" android:digits="0123456789"
+            android:layout_gravity="center_horizontal" android:layout_marginTop="30dp" />
+
+
+    </LinearLayout>
+    <ImageView
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/suprema_logo_simple"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/imageView3" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/imageView3"
+        android:layout_marginBottom="30dp"
+        android:id="@+id/linearLayout">
+        <ImageButton
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:id="@+id/EnrollBtn"
+            android:background="@drawable/enroll_click"
+            android:layout_marginRight="10dp"/>
+
+        <ImageButton
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:id="@+id/IdentifyBtn"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/identify_click"
+            android:layout_marginRight="10dp"/>
+
+        <ImageButton
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:id="@+id/VerifyBtn"
+            android:layout_gravity="right"
+            android:background="@drawable/verify_click"/>
+
+        <!--<Button-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="Enroll"-->
+            <!--android:id="@+id/EnrollBtn"/>-->
+
+        <!--<Button-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="Identify"-->
+            <!--android:id="@+id/IdentifyBtn"-->
+            <!--android:layout_gravity="center_horizontal" />-->
+
+        <!--<Button-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="Verify"-->
+            <!--android:id="@+id/VerifyBtn"-->
+            <!--android:layout_gravity="right" />-->
+
+    </LinearLayout>
+
+
+
+</RelativeLayout>

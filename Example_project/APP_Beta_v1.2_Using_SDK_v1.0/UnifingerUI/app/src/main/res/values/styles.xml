@@ -1,0 +1,22 @@
+<resources>
+
+    <style name="Custom" parent="android:Theme.Holo.Light.DarkActionBar">
+        <!--<item name="android:textColor">#ffffff</item>-->
+        <item name="android:icon">@drawable/surpema</item>
+
+        <!--<item name="android:actionBarStyle">@style/MyActionBar</item>-->
+
+    </style>
+
+    <style name="MyActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
+
+        <item name="android:icon">@drawable/surpema</item>
+        <item name="android:background">#3189D1</item>
+
+
+    </style>
+
+
+
+
+</resources>
