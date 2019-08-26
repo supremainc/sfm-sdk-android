@@ -11,11 +11,15 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
+import com.supremainc.sfm_sdk.UF_GPIO_PORT;
 
 import java.lang.ref.WeakReference;
 import java.util.Set;
@@ -71,6 +75,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mHandler = new MyHandler(this);
+
+        SFM_SDK_ANDROID sdk = new SFM_SDK_ANDROID();
+        String version = sdk.UF_GetSDKVersion();
+
+        Log.i("[INFO]",version);
+
+        ///////////////////////////////////////
 
         display = (TextView) findViewById(R.id.textView1);
         editText = (EditText) findViewById(R.id.editText1);

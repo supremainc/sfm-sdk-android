@@ -1,0 +1,25 @@
+package com.supremainc.sfm_sdk;
+
+public enum UF_MODULE_TYPE {
+    UF_MODULE_3000(0),
+    UF_MODULE_3500(1),
+    UF_BIOENTRY_SMART(2),
+    UF_BIOENTRY_PASS(3),
+    UF_SFOD_3100(4),
+    UF_3000FC(5),
+    UF_MODULE_4000(6),
+    UF_MODULE_5000(7),
+    UF_MODULE_5500(8),
+    UF_MODULE_6000(9),
+    UF_MODULE_UNKNOWN(-1),
+    ;
+    private int value;
+
+    UF_MODULE_TYPE(int i) {
+        this.value = i;
+    }
+
+    public int getValue() {
+        return this.value;
+    }
+}
