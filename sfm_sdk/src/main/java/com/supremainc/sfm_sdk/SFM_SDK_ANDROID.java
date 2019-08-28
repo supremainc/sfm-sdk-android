@@ -1,21 +1,87 @@
 package com.supremainc.sfm_sdk;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.support.v7.app.AppCompatActivity;
+
 import java.util.Arrays;
+import java.util.Set;
 
 public class SFM_SDK_ANDROID {
 
-    static {
 
-        System.loadLibrary("native-lib");
-    }
+    private UsbService usbService = null;
+    private MessageHandler mHandler = null;
+    private static AppCompatActivity mActivity = null;
+    private static BroadcastReceiver mUsbReceiver = null;
+
 
     /**
      * Constructor
      */
-    public SFM_SDK_ANDROID(){
 
-
+    public SFM_SDK_ANDROID(AppCompatActivity activity)
+    {
+        mActivity = activity;
     }
+    public SFM_SDK_ANDROID(AppCompatActivity activity, MessageHandler handler)
+    {
+        mActivity = activity;
+        mHandler = handler;
+    }
+    public SFM_SDK_ANDROID(AppCompatActivity activity, MessageHandler handler, BroadcastReceiver receiver){
+        mActivity = activity;
+        mHandler = handler;
+        mUsbReceiver = receiver;
+    }
+    private final ServiceConnection usbConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName arg0, IBinder arg1) {
+            usbService = ((UsbService.UsbBinder) arg1).getService();
+            if(mHandler != null)
+                usbService.setHandler(mHandler);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            usbService = null;
+        }
+    };
+
+    private void startService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
+        if (!UsbService.SERVICE_CONNECTED) {
+            Intent startService = new Intent(mActivity, service);
+            if (extras != null && !extras.isEmpty()) {
+                Set<String> keys = extras.keySet();
+                for (String key : keys) {
+                    String extra = extras.getString(key);
+                    startService.putExtra(key, extra);
+                }
+            }
+            mActivity.startService(startService);
+        }
+        Intent bindingIntent = new Intent(mActivity, service);
+        mActivity.bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private void setFilters() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(UsbService.ACTION_USB_PERMISSION_GRANTED);
+        filter.addAction(UsbService.ACTION_NO_USB);
+        filter.addAction(UsbService.ACTION_USB_DISCONNECTED);
+        filter.addAction(UsbService.ACTION_USB_NOT_SUPPORTED);
+        filter.addAction(UsbService.ACTION_USB_PERMISSION_NOT_GRANTED);
+        if(mUsbReceiver != null)
+            mActivity.registerReceiver(mUsbReceiver, filter);
+    }
+
+
 
     private static String IntArrayToString(int[] arr)
     {
@@ -50,10 +116,61 @@ public class SFM_SDK_ANDROID {
     }
 
 
+    public void WriteTest(String data)
+    {
+        if (usbService != null) { // if UsbService was correctly binded, Send data
+            usbService.write(data.getBytes());
+        }
+    }
+
+    public void resumeService()
+    {
+        setFilters();  // Start listening notifications from UsbService
+        startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
+
+    }
+
+    public void pauseService()
+    {
+        if(mUsbReceiver !=null)
+            mActivity.unregisterReceiver(mUsbReceiver);
+        mActivity.unbindService(usbConnection);
+    }
 
     /**
      * Native Functions
      */
     public native String stringFromJNI();
     public native void UF_GetSDKVersion(int[] major, int[] minor, int[] revision);
+
+    /**
+     * Initialize serial communication
+     */
+    public native UF_RET_CODE UF_InitCommPort(String commPort, int baudrate, boolean asciiMode);
+    public native UF_RET_CODE UF_CloseCommPort();
+    // Deprecated
+    // public native UF_RET_CODE UF_InitSocket(String inetAddr, int port, boolean asciiMode);
+    // public native UF_RET_CODE UF_CloseSocket();
+
+    public native void UF_Reconnect();
+    public native UF_RET_CODE UF_SetBaudrate(int baudrate);
+    public native void UF_SetAsciiMode(boolean asciiMode);
+
+    /**
+     * Basic packet interface
+     */
+    public native UF_RET_CODE UF_SendPacket(byte command, int param, int size, byte flag, int timeout);
+    public native UF_RET_CODE UF_SendNetworkPacket(byte command, short terminalID, int param, int size, byte flag, int timeout);
+    public native UF_RET_CODE UF_ReceivePakcet(byte[] packet, int timeout);
+    public native UF_RET_CODE UF_ReceiveNetworkPakcet(byte[] packet, int timeout);
+    public native UF_RET_CODE UF_SendRawData(byte[] buf, int size, int timeout);
+    public native UF_RET_CODE UF_ReceiveRawData(byte[] buf, int size, int timeout, boolean checkEndCode);
+    public native UF_RET_CODE UF_SendDataPacket(byte command, byte[] buf, int dataSize, int dataPacketSize);
+    public native UF_RET_CODE UF_ReceiveDataPacket(byte command, byte[] buf, int dataSize);
+
+    static {
+
+        System.loadLibrary("native-lib");
+    }
+
 }

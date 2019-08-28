@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk_android;
+package com.supremainc.sfm_sdk;
 
 import android.app.PendingIntent;
 import android.app.Service;
@@ -249,6 +249,10 @@ public class UsbService extends Service {
         @Override
         public void run() {
             serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
+
+            String deviceName = device.getDeviceName();
+            Log.i(TAG, deviceName);
+
             if (serialPort != null) {
                 if (serialPort.open()) {
                     serialPortConnected = true;

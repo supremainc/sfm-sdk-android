@@ -20,7 +20,7 @@
             </intent-filter>
         </activity>
         <service
-            android:name="com.supremainc.sfm_sdk_android.UsbService"
+            android:name="com.supremainc.sfm_sdk.UsbService"
             android:enabled="true">
         </service>
     </application>
