@@ -12,13 +12,16 @@ import android.hardware.usb.UsbManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
+import android.os.SystemClock;
 
 import com.felhr.usbserial.CDCSerialDevice;
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
+import com.supremainc.sfm_sdk.debug_message.DebugMessage;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +42,7 @@ public class UsbService extends Service {
     public static final int MESSAGE_FROM_SERIAL_PORT = 0;
     public static final int CTS_CHANGE = 1;
     public static final int DSR_CHANGE = 2;
+    public static final int SYNC_READ = 3;
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
     private static final int BAUD_RATE = 115200 ; // BaudRate. Change this value if you need
     public static boolean SERVICE_CONNECTED = false;
@@ -53,6 +57,11 @@ public class UsbService extends Service {
     private UsbSerialDevice serialPort;
 
     private boolean serialPortConnected;
+
+    private ByteBuffer serialByteBuffer = ByteBuffer.allocate(16*1024);
+
+    private static DebugMessage dlog = new DebugMessage(true);
+
     /*
      *  Data received from serial port will be received here. Just populate onReceivedData with your code
      *  In this particular example. byte stream is converted to String and send to UI thread to
@@ -120,7 +129,7 @@ public class UsbService extends Service {
                 Intent intent = new Intent(ACTION_USB_DISCONNECTED);
                 arg0.sendBroadcast(intent);
                 if (serialPortConnected) {
-                    serialPort.close();
+                    serialPort.syncClose();
                 }
                 serialPortConnected = false;
             }
@@ -139,6 +148,10 @@ public class UsbService extends Service {
         setFilter();
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         findSerialPortDevice();
+//        serialByteBuffer.clear();
+//        serialByteBuffer.reset();
+
+//        serialByteBuffer.reset();
     }
 
     /* MUST READ about services
@@ -158,7 +171,8 @@ public class UsbService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        serialPort.close();
+        if(serialPortConnected)
+            serialPort.syncClose();
         unregisterReceiver(usbReceiver);
         UsbService.SERVICE_CONNECTED = false;
     }
@@ -171,6 +185,119 @@ public class UsbService extends Service {
             serialPort.write(data);
     }
 
+    synchronized int writeSerial(byte[]data, int timeout)
+    {
+        if(serialPort != null) {
+            int ret = serialPort.syncWrite(data, timeout);
+            dlog.d("writeSerial :",Arrays.toString(data));
+            return ret;
+        }
+
+        return -1;
+    }
+
+
+    byte[] tempSerialBuffer = new byte[16384];
+    synchronized int readSerial(byte[] data, int timeout)
+    {
+
+        long startTime = SystemClock.currentThreadTimeMillis();
+
+        dlog.d(TAG, String.format("[1] pos [%d]  limit [%d]  capacity [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity()));
+
+        if(serialPort != null) {
+
+            int ret = -1;
+            int received = 0;
+
+            // Clear read serial buffer.
+            if(data == null && timeout == 0) // condition of the initialization of the serial buffer.
+            {
+                for(int i=0; i<tempSerialBuffer.length; i++)
+                {
+                    tempSerialBuffer[i] = 0;
+
+                }
+                for(int i=0; i<serialByteBuffer.capacity(); i++)
+                {
+                    serialByteBuffer.array()[i] = 0;
+                }
+                serialByteBuffer.clear();
+
+            }
+            do {
+                if(serialByteBuffer.position() == 0 || serialByteBuffer.position() < data.length) {
+                    ret = serialPort.syncRead(tempSerialBuffer, 1);
+                    dlog.d(TAG, String.format("[2] pos [%d]  limit [%d]  capacity [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity()));
+
+
+                    if (ret > 0) {
+                        for (int i = 0; i < ret; i++)
+                            serialByteBuffer.put(tempSerialBuffer[i]);
+                        dlog.d(TAG, String.format("[3] pos [%d]  limit [%d]  capacity [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity()));
+                        received += ret;
+                        dlog.d(TAG, String.format("[4] pos [%d]  limit [%d]  capacity [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity()));
+                    }
+
+                    if (ret < 0)
+                        break;
+
+                    if (received >= data.length) {
+                        serialByteBuffer.flip();
+                        dlog.d(TAG, String.format("[5] pos [%d]  limit [%d]  capacity [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity()));
+                        serialByteBuffer.get(data, 0, data.length);
+                        dlog.d(TAG, String.format("[6] pos [%d]  limit [%d]  capacity [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity()));
+                        serialByteBuffer.compact();
+                        dlog.d(TAG, String.format("[7] pos [%d]  limit [%d]  capacity [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity()));
+                        return data.length;
+                    }
+                }
+                else
+                {
+                    int pos = serialByteBuffer.position();
+                    //int limit = serialByteBuffer.limit();
+                    dlog.d(TAG, String.format("[8_0] pos [%d]  limit [%d]  capacity [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity()));
+                    serialByteBuffer.flip();
+                    dlog.d(TAG, String.format("[8] pos [%d]  limit [%d]  capacity [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity()));
+                    if(serialByteBuffer.remaining() >= data.length) {
+                        serialByteBuffer.get(data, 0, data.length);
+                        dlog.d(TAG, String.format("[9] pos [%d]  limit [%d]  capacity [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity()));
+                        serialByteBuffer.compact();
+                        dlog.d(TAG, String.format("[10] pos [%d]  limit [%d]  capacity [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity()));
+                        return data.length;
+                    }
+                    serialByteBuffer.compact();
+                    serialByteBuffer.position(pos);
+                    dlog.d(TAG, String.format("[11] pos [%d]  limit [%d]  capacity [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity()));
+
+                }
+
+            }while(SystemClock.currentThreadTimeMillis() - startTime < timeout);
+
+            dlog.d("readSerial :", String.format("ret :%d, %s", ret, Arrays.toString(data)));
+        }
+        return -1;
+    }
+
+    public void setBuadrate(int baudrate)
+    {
+        if(serialPort != null)
+            serialPort.setBaudRate(baudrate);
+    }
+
+    /*
+     * This function will get the name of serialPort
+     */
+
+    public String getUsbDeviceName()
+    {
+        String deviceName = null;
+        if(serialPort != null)
+            deviceName = device.getDeviceName();
+
+        return deviceName;
+    }
+
     public void setHandler(Handler mHandler) {
         this.mHandler = mHandler;
     }
@@ -179,11 +306,11 @@ public class UsbService extends Service {
         // This snippet will try to open the first encountered usb device connected, excluding usb root hubs
         HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
         if (!usbDevices.isEmpty()) {
-            
+
             // first, dump the hashmap for diagnostic purposes
             for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
                 device = entry.getValue();
-                Log.d(TAG, String.format("USBDevice.HashMap (vid:pid) (%X:%X)-%b class:%X:%X name:%s",
+                dlog.d(TAG, String.format("USBDevice.HashMap (vid:pid) (%X:%X)-%b class:%X:%X name:%s",
                         device.getVendorId(), device.getProductId(),
                         UsbSerialDevice.isSupported(device),
                         device.getDeviceClass(), device.getDeviceSubclass(),
@@ -211,7 +338,7 @@ public class UsbService extends Service {
                 sendBroadcast(intent);
             }
         } else {
-            Log.d(TAG, "findSerialPortDevice() usbManager returned empty device list." );
+            dlog.d(TAG, "findSerialPortDevice() usbManager returned empty device list." );
             // There is no USB devices connected. Send an intent to MainActivity
             Intent intent = new Intent(ACTION_NO_USB);
             sendBroadcast(intent);
@@ -230,7 +357,7 @@ public class UsbService extends Service {
      * Request user permission. The response will be received in the BroadcastReceiver
      */
     private void requestUserPermission() {
-        Log.d(TAG, String.format("requestUserPermission(%X:%X)", device.getVendorId(), device.getProductId() ) );
+        dlog.d(TAG, String.format("requestUserPermission(%X:%X)", device.getVendorId(), device.getProductId() ) );
         PendingIntent mPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
         usbManager.requestPermission(device, mPendingIntent);
     }
@@ -251,10 +378,10 @@ public class UsbService extends Service {
             serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
 
             String deviceName = device.getDeviceName();
-            Log.i(TAG, deviceName);
+            dlog.i(TAG, deviceName);
 
             if (serialPort != null) {
-                if (serialPort.open()) {
+                if (serialPort.syncOpen()) {
                     serialPortConnected = true;
                     serialPort.setBaudRate(BAUD_RATE);
                     serialPort.setDataBits(UsbSerialInterface.DATA_BITS_8);
@@ -267,15 +394,16 @@ public class UsbService extends Service {
                      * UsbSerialInterface.FLOW_CONTROL_DSR_DTR only for CP2102 and FT232
                      */
                     serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
-                    serialPort.read(mCallback);
+//                    serialPort.read(mCallback);
                     serialPort.getCTS(ctsCallback);
                     serialPort.getDSR(dsrCallback);
-                    
+
+                    //new ReadThread().start();
                     //
-                    // Some Arduinos would need some sleep because firmware wait some time to know whether a new sketch is going 
+                    // Some Arduinos would need some sleep because firmware wait some time to know whether a new sketch is going
                     // to be uploaded or not
                     //Thread.sleep(2000); // sleep some. YMMV with different chips.
-                    
+
                     // Everything went as expected. Send an intent to MainActivity
                     Intent intent = new Intent(ACTION_USB_READY);
                     context.sendBroadcast(intent);
@@ -294,6 +422,23 @@ public class UsbService extends Service {
                 // No driver for given device, even generic CDC driver could not be loaded
                 Intent intent = new Intent(ACTION_USB_NOT_SUPPORTED);
                 context.sendBroadcast(intent);
+            }
+        }
+    }
+
+    private class ReadThread extends Thread {
+        @Override
+        public void run() {
+            while(true){
+                byte[] buffer = new byte[100];
+                int n = serialPort.syncRead(buffer, 0);
+                if(n > 0) {
+//                    byte[] received = new byte[n];
+//                    System.arraycopy(buffer, 0, received, 0, n);
+//                    String receivedStr = new String(received);
+//                    mHandler.obtainMessage(SYNC_READ, receivedStr).sendToTarget();
+                    serialByteBuffer.put(buffer);
+                }
             }
         }
     }

@@ -37,11 +37,9 @@ typedef enum
 extern "C"
 {
 #endif
-
 	UF_API int UF_ReadSerial(unsigned char *buf, int size, int timeout);
 	UF_API int UF_WriteSerial(unsigned char *buf, int size, int timeout);
-	UF_API HANDLE UF_GetCommHandle();
-
+	
 	int UF_OpenSerial(const char *deviceName);
 	int UF_CloseSerial();
 	int UF_SetupSerial(int baudrate);

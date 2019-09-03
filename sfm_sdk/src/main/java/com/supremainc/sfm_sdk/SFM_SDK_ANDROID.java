@@ -9,7 +9,11 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
+import com.supremainc.sfm_sdk.enumeration.UF_RET_CODE;
+
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -97,7 +101,6 @@ public class SFM_SDK_ANDROID {
 
     }
 
-
     /**
      * Overloaded functions
      * */
@@ -115,11 +118,35 @@ public class SFM_SDK_ANDROID {
         return retval;
     }
 
+    public UF_RET_CODE UF_InitCommPort(int baudrate, boolean asciiMode) {
+        String commPort = null;
+        if (usbService != null)
+            commPort = usbService.getUsbDeviceName();
+
+
+        // set callback funcgtion.
+        UF_SetSetupSerialCallback_Android();
+        UF_SetReadSerialCallback_Android();
+        UF_SetWriteSerialCallback_Android();
+
+
+        UF_RET_CODE ret = UF_InitCommPort(commPort, baudrate, asciiMode);
+
+        return ret;
+    }
+
 
     public void WriteTest(String data)
     {
         if (usbService != null) { // if UsbService was correctly binded, Send data
-            usbService.write(data.getBytes());
+            byte[] a = data.getBytes();
+            Log.d("[INFO write]", Arrays.toString(a));
+            usbService.writeSerial(data.getBytes(), 1000);
+
+            byte[] readpacket = new byte[4];
+            usbService.readSerial(readpacket, 1000);
+            Log.d("[INFO read]", Arrays.toString(readpacket));
+
         }
     }
 
@@ -137,6 +164,27 @@ public class SFM_SDK_ANDROID {
         mActivity.unbindService(usbConnection);
     }
 
+    public void cbSetupSerial(int baudrate)
+    {
+        if(usbService != null)
+            usbService.setBuadrate(baudrate);
+    }
+
+    public int cbReadSerial(byte[] data, int timeout) throws UnsupportedEncodingException {
+
+        int ret = usbService.readSerial(data, timeout);
+        Log.d("[INFO] cbReadSerial", Arrays.toString(data));
+        Log.d("[INFO]", String.format("ret : %d timeout : %d", ret, timeout));
+
+        return ret;
+    }
+
+    public int cbWriteSerial(byte[] data, int timeout) throws UnsupportedEncodingException {
+        Log.d("[INFO] cbWriteSerial", Arrays.toString(data));
+        int ret = usbService.writeSerial(data, timeout);
+        return ret;
+    }
+
     /**
      * Native Functions
      */
@@ -148,9 +196,18 @@ public class SFM_SDK_ANDROID {
      */
     public native UF_RET_CODE UF_InitCommPort(String commPort, int baudrate, boolean asciiMode);
     public native UF_RET_CODE UF_CloseCommPort();
+
     // Deprecated
     // public native UF_RET_CODE UF_InitSocket(String inetAddr, int port, boolean asciiMode);
     // public native UF_RET_CODE UF_CloseSocket();
+
+    /**
+     *  Set callback funtions for android
+     */
+    public native void UF_SetSetupSerialCallback_Android();
+    public native void UF_SetReadSerialCallback_Android();
+    public native void UF_SetWriteSerialCallback_Android();
+
 
     public native void UF_Reconnect();
     public native UF_RET_CODE UF_SetBaudrate(int baudrate);
@@ -167,6 +224,10 @@ public class SFM_SDK_ANDROID {
     public native UF_RET_CODE UF_ReceiveRawData(byte[] buf, int size, int timeout, boolean checkEndCode);
     public native UF_RET_CODE UF_SendDataPacket(byte command, byte[] buf, int dataSize, int dataPacketSize);
     public native UF_RET_CODE UF_ReceiveDataPacket(byte command, byte[] buf, int dataSize);
+
+    public native long UF_GetModuleID();
+    public native void UF_InitSysParameter();
+    public native UF_RET_CODE UF_GetSysParameter(UF_SYS_PARAM parameter, int[] value);
 
     static {
 

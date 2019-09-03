@@ -65,6 +65,23 @@ extern "C"
     UF_API UF_RET_CODE UF_SetBaudrate(int baudrate);
     UF_API void UF_SetAsciiMode(BOOL asciiMode);
 
+#ifdef __ANDROID__
+    //
+    // Callback functions for android 
+    //
+    
+    // Open serial
+    //UF_API void UF_SetOpenSerialCallback_Android(BOOL(*Callback)(void));
+    // Cloase serial
+    //UF_API void UF_SetCloseSerialCallback_Android(void(*Callback)(void));
+    // Set baudrate
+    UF_API void UF_SetSetupSerialCallback_Android(void(*Callback)(int));
+    // Read serial
+    UF_API void UF_SetReadSerialCallback_Android(int(*Callback)(BYTE*, int, int));
+    // Write serial
+    UF_API void UF_SetWriteSerialCallback_Android(int(*Callback)(BYTE*, int, int));
+#endif
+
     //
     // Basic packet interface
     //

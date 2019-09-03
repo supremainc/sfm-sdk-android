@@ -1,5 +1,4 @@
-package com.supremainc.sfm_sdk;
-
+package com.supremainc.sfm_sdk.enumeration;
 public enum UF_RET_CODE {
     UF_RET_SUCCESS(0),
 
@@ -66,4 +65,20 @@ public enum UF_RET_CODE {
     public int getValue() {
         return this.value;
     }
+
+    public static UF_RET_CODE ToRetCode(int i)
+    {
+        UF_RET_CODE result = null;
+
+        for(UF_RET_CODE iter : UF_RET_CODE.values())
+        {
+            if(i == iter.getValue())
+            {
+                result = iter;
+            }
+        }
+        return result;
+    }
+
 }
+

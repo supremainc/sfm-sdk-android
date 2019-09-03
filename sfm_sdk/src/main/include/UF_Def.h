@@ -75,7 +75,7 @@ typedef uint8_t BYTE;
 #ifndef BOOL
 #ifndef _Bool
 typedef bool BOOL;
-#elif
+#else
 typedef _Bool BOOL;
 #endif
 #endif
