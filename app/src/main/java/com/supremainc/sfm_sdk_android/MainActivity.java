@@ -138,6 +138,8 @@ public class MainActivity extends AppCompatActivity {
                     ret = sdk.UF_SetBaudrate(115200);
                     Log.d("UF_SetBaudrate", ret.toString());
 
+                    // UF_SetAsciiMode
+                    sdk.UF_SetAsciiMode(false);
 
                     int[] value = new int[10];
                     UF_RET_CODE result = sdk.UF_GetSysParameter(UF_SYS_PARAM.UF_SYS_BAUDRATE, value );

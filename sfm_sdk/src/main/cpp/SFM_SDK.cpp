@@ -210,8 +210,6 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Ini
 
 }
 
-
-
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_SetSetupSerialCallback_Android
@@ -271,6 +269,18 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Set
     g_obj = obj;
     UF_RET_CODE ret = UF_SetBaudrate(baudrate);
     return getObjectofRetCode(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SetAsciiMode
+ * Signature: (Z)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetAsciiMode
+        (JNIEnv *env, jobject obj, jboolean asciiMode)
+{
+    g_obj = obj;
+    UF_SetAsciiMode(asciiMode);
 }
 
 
