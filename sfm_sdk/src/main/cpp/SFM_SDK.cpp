@@ -256,10 +256,22 @@ JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetWri
 JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Reconnect
         (JNIEnv *env, jobject obj)
 {
+    g_obj = obj;
     UF_Reconnect();
 }
 
-
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SetBaudrate
+ * Signature: (I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetBaudrate
+        (JNIEnv *env, jobject obj, jint baudrate)
+{
+    g_obj = obj;
+    UF_RET_CODE ret = UF_SetBaudrate(baudrate);
+    return getObjectofRetCode(env, obj, ret);
+}
 
 
 /*
@@ -270,6 +282,7 @@ JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Reconn
 JNIEXPORT jlong JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetModuleID
         (JNIEnv *env, jobject obj)
 {
+    g_obj = obj;
     long moduleID = UF_GetModuleID();
 
     return moduleID;

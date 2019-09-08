@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -129,8 +130,13 @@ public class MainActivity extends AppCompatActivity {
 //                    String writtenData = "[SEND] " + data + "\n";
 //                    display.append(writtenData);
 
+                    UF_RET_CODE ret;
                     // UF_Reconnect
                     sdk.UF_Reconnect();
+
+                    // UF_SetBaudrate
+                    ret = sdk.UF_SetBaudrate(115200);
+                    Log.d("UF_SetBaudrate", ret.toString());
 
 
                     int[] value = new int[10];
