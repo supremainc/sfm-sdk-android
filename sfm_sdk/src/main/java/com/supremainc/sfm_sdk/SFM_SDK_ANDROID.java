@@ -209,7 +209,7 @@ public class SFM_SDK_ANDROID {
     public native void UF_SetWriteSerialCallback_Android();
 
 
-    public native void UF_Reconnect();
+    public native void UF_Reconnect(); // OK
     public native UF_RET_CODE UF_SetBaudrate(int baudrate);
     public native void UF_SetAsciiMode(boolean asciiMode);
 

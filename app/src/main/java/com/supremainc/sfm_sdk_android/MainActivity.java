@@ -129,7 +129,10 @@ public class MainActivity extends AppCompatActivity {
 //                    String writtenData = "[SEND] " + data + "\n";
 //                    display.append(writtenData);
 
-                    sdk.UF_InitSysParameter();
+                    // UF_Reconnect
+                    sdk.UF_Reconnect();
+
+
                     int[] value = new int[10];
                     UF_RET_CODE result = sdk.UF_GetSysParameter(UF_SYS_PARAM.UF_SYS_BAUDRATE, value );
                     display.append(result.toString());
