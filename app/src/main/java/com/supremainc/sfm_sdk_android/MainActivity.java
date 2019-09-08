@@ -18,6 +18,8 @@ import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
 import com.supremainc.sfm_sdk.UF_SYS_PARAM;
 import com.supremainc.sfm_sdk.UsbService;
 import com.supremainc.sfm_sdk.enumeration.UF_RET_CODE;
+
+import java.util.Arrays;
 //import com.supremainc.sfm_sdk.MessageHandler;
 //import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
 //import com.supremainc.sfm_sdk.UsbService;
@@ -112,6 +114,13 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    String byteArrayToHex(byte[] a) {
+        StringBuilder sb = new StringBuilder();
+        for(final byte b: a)
+            sb.append(String.format("%02X ", b&0xff));
+        return sb.toString();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,6 +149,27 @@ public class MainActivity extends AppCompatActivity {
 
                     // UF_SetAsciiMode
                     sdk.UF_SetAsciiMode(false);
+
+                    // UF_SendPacket
+                    ret = sdk.UF_SendPacket((byte)0x04, 0,0,(byte)0,1000);
+                    Log.d("UF_SendPacket", ret.toString());
+
+
+                    byte[] receivedPacket = new byte[15];
+                    // UF_ReceivePacket
+                    ret = sdk.UF_ReceivePakcet(receivedPacket, 1000);
+                    Log.d("UF_ReceivePacket", ret.toString());
+                    Log.d("UF_ReceivePacket", Arrays.toString(receivedPacket));
+
+                    // UF_SendNetworkPacket
+                    ret = sdk.UF_SendNetworkPacket((byte)0x04, (short)1,0,0,(byte)0,1000);
+                    Log.d("UF_SendNetworkPacket", ret.toString());
+
+                    // UF_ReceiveNetworkPacket
+                    ret = sdk.UF_ReceiveNetworkPakcet(receivedPacket, 1000);
+                    Log.d("UF_ReceiveNetworkPacket", ret.toString());
+                    Log.d("UF_ReceiveNetworkPacket", byteArrayToHex(receivedPacket));
+
 
                     int[] value = new int[10];
                     UF_RET_CODE result = sdk.UF_GetSysParameter(UF_SYS_PARAM.UF_SYS_BAUDRATE, value );

@@ -212,6 +212,20 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Ini
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_CloseCommPort
+ * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1CloseCommPort
+        (JNIEnv *env, jobject obj)
+{
+    g_obj = obj;
+    UF_RET_CODE ret = UF_CloseCommPort();
+    return getObjectofRetCode(env, obj, ret);
+}
+
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_SetSetupSerialCallback_Android
  * Signature: ()V
  */
@@ -282,6 +296,94 @@ JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetAsc
     g_obj = obj;
     UF_SetAsciiMode(asciiMode);
 }
+
+// Basic packet interface
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SendPacket
+ * Signature: (BIIBI)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SendPacket
+        (JNIEnv *env, jobject obj, jbyte _command, jint _param, jint _size, jbyte _flag, jint _timeout)
+{
+    g_obj = obj;
+    BYTE command = (BYTE)_command;
+    UINT32 param = (UINT32)_param;
+    UINT32 size = (UINT32)_size;
+    BYTE flag = (BYTE)_flag;
+    int timeout = (int)_timeout;
+
+    UF_RET_CODE ret = UF_SendPacket(command, param, size, flag, timeout);
+    return getObjectofRetCode(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SendNetworkPacket
+ * Signature: (BSIIBI)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SendNetworkPacket
+        (JNIEnv *env, jobject obj, jbyte _command, jshort _terminalID, jint _param, jint _size, jbyte _flag, jint _timeout)
+{
+    g_obj = obj;
+    BYTE command = (BYTE)_command;
+    USHORT terminalID = (USHORT)_terminalID;
+    UINT32 param = (UINT32)_param;
+    UINT32 size = (UINT32)_size;
+    BYTE flag = (BYTE)_flag;
+    int timeout = (int)_timeout;
+
+    UF_RET_CODE ret = UF_SendNetworkPacket(command, terminalID, param, size, flag, timeout);
+    return getObjectofRetCode(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_ReceivePakcet
+ * Signature: ([BI)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ReceivePakcet
+        (JNIEnv *env, jobject obj, jbyteArray _packet, jint _timeout)
+{
+    g_obj = obj;
+    jsize len = env->GetArrayLength(_packet);
+    BYTE *packet = (BYTE*)env->GetByteArrayElements(_packet, 0);
+    int timeout = (int)_timeout;
+    UF_RET_CODE ret = UF_ReceivePacket(packet, timeout);
+
+    if(ret == UF_RET_SUCCESS)
+    {
+        env->SetByteArrayRegion(_packet, 0, len, reinterpret_cast<const jbyte *>(packet));
+    }
+
+    env->ReleaseByteArrayElements(_packet, reinterpret_cast<jbyte *>(packet), 0);
+
+    return getObjectofRetCode(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_ReceiveNetworkPakcet
+ * Signature: ([BI)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ReceiveNetworkPakcet
+        (JNIEnv *env, jobject obj, jbyteArray _packet, jint _timeout)
+{
+    g_obj = obj;
+    jsize len = env->GetArrayLength(_packet);
+    BYTE *packet = (BYTE*)env->GetByteArrayElements(_packet, 0);
+    int timeout = (int)_timeout;
+    UF_RET_CODE ret = UF_ReceiveNetworkPacket(packet, timeout);
+    if(ret == UF_RET_SUCCESS)
+    {
+        env->SetByteArrayRegion(_packet, 0, len, reinterpret_cast<const jbyte *>(packet));
+    }
+    env->ReleaseByteArrayElements(_packet, reinterpret_cast<jbyte *>(packet), 0);
+
+    return getObjectofRetCode(env, obj, ret);
+}
+
 
 
 /*
