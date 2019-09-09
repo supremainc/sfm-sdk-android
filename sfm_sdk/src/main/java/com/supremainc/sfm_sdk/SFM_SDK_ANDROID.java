@@ -26,6 +26,7 @@ public class SFM_SDK_ANDROID {
     private static BroadcastReceiver mUsbReceiver = null;
 
 
+
     /**
      * Constructor
      */
@@ -125,9 +126,9 @@ public class SFM_SDK_ANDROID {
 
 
         // set callback funcgtion.
-        UF_SetSetupSerialCallback_Android();
-        UF_SetReadSerialCallback_Android();
-        UF_SetWriteSerialCallback_Android();
+        UF_SetSetupSerialCallback(setupSerialCallback);
+        UF_SetWriteSerialCallback(writeSerialCallback);
+        UF_SetReadSerialCallback(readSerialCallback);
 
 
         UF_RET_CODE ret = UF_InitCommPort(commPort, baudrate, asciiMode);
@@ -164,26 +165,111 @@ public class SFM_SDK_ANDROID {
         mActivity.unbindService(usbConnection);
     }
 
+    /**
+     * Interfaces for callback functions from Java
+     */
+
+
+    public static interface SetupSerialCallback{
+        public void callback(int baudrate);
+    }
+
+    public static interface ReadSerialCallback {
+        public int callback(byte[] data, int size, int timeout);
+    }
+
+    public static interface WriteSerialCallback{
+        public int callback(byte[] data, int size, int timeout);
+    }
+
+    /**
+     * Callback functions from JNI
+     */
+
     public void cbSetupSerial(int baudrate)
     {
-        if(usbService != null)
-            usbService.setBuadrate(baudrate);
+        if(setupSerialCallback != null)
+            setupSerialCallback.callback(baudrate);
     }
 
     public int cbReadSerial(byte[] data, int timeout) throws UnsupportedEncodingException {
 
-        int ret = usbService.readSerial(data, timeout);
-        Log.d("[INFO] cbReadSerial", Arrays.toString(data));
-        Log.d("[INFO]", String.format("ret : %d timeout : %d", ret, timeout));
-
+        int ret = 0;
+        if(readSerialCallback != null)
+        {
+            ret = readSerialCallback.callback(data, data.length, timeout);
+        }
         return ret;
     }
 
     public int cbWriteSerial(byte[] data, int timeout) throws UnsupportedEncodingException {
-        Log.d("[INFO] cbWriteSerial", Arrays.toString(data));
-        int ret = usbService.writeSerial(data, timeout);
+
+        int ret = 0;
+
+        if(writeSerialCallback != null)
+        {
+            ret = writeSerialCallback.callback(data, data.length, timeout);
+        }
         return ret;
     }
+
+    /**
+     *  Implementations of callback functions from Java
+     */
+
+    private SetupSerialCallback setupSerialCallback = new SetupSerialCallback() {
+        @Override
+        public void callback(int baudrate) {
+            if(usbService != null)
+                usbService.setBuadrate(baudrate);
+        }
+    };
+
+    private ReadSerialCallback readSerialCallback = new ReadSerialCallback() {
+        @Override
+        public int callback(byte[] data, int size, int timeout) {
+
+            int ret = usbService.readSerial(data, timeout);
+            Log.d("[INFO] cbReadSerial", Arrays.toString(data));
+            Log.d("[INFO]", String.format("ret : %d timeout : %d", ret, timeout));
+
+            return ret;
+        }
+    };
+
+    private WriteSerialCallback writeSerialCallback = new WriteSerialCallback() {
+        @Override
+        public int callback(byte[] data, int size, int timeout) {
+            Log.d("[INFO] cbWriteSerial", Arrays.toString(data));
+            int ret = usbService.writeSerial(data, timeout);
+            return ret;
+        }
+    };
+
+    /**
+     * Registering functions for callback functions from Java
+     */
+
+    public void UF_SetSetupSerialCallback(SetupSerialCallback callback)
+    {
+        setupSerialCallback = callback;
+        UF_SetSetupSerialCallback_Android();
+    }
+
+
+    public void UF_SetReadSerialCallback(ReadSerialCallback callback)
+    {
+        readSerialCallback = callback;
+        UF_SetReadSerialCallback_Android();
+    }
+
+    public void UF_SetWriteSerialCallback(WriteSerialCallback callback)
+    {
+        writeSerialCallback = callback;
+        UF_SetWriteSerialCallback_Android();
+    }
+
+
 
     /**
      * Native Functions
@@ -201,13 +287,10 @@ public class SFM_SDK_ANDROID {
     // public native UF_RET_CODE UF_InitSocket(String inetAddr, int port, boolean asciiMode);
     // public native UF_RET_CODE UF_CloseSocket();
 
-    /**
-     *  Set callback funtions for android
-     */
+
     public native void UF_SetSetupSerialCallback_Android();
     public native void UF_SetReadSerialCallback_Android();
     public native void UF_SetWriteSerialCallback_Android();
-
 
     public native void UF_Reconnect(); // OK
     public native UF_RET_CODE UF_SetBaudrate(int baudrate);
@@ -233,5 +316,7 @@ public class SFM_SDK_ANDROID {
 
         System.loadLibrary("native-lib");
     }
+
+
 
 }
