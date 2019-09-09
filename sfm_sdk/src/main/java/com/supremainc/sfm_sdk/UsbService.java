@@ -198,7 +198,8 @@ public class UsbService extends Service {
 
 
     byte[] tempSerialBuffer = new byte[16384];
-    synchronized int readSerial(byte[] data, int timeout)
+
+    int readSerial(byte[] data, int timeout)
     {
 
         long startTime = SystemClock.currentThreadTimeMillis();
@@ -225,10 +226,11 @@ public class UsbService extends Service {
                 serialByteBuffer.clear();
 
             }
+
             do {
                 if(serialByteBuffer.position() == 0 || serialByteBuffer.position() < data.length) {
                     ret = serialPort.syncRead(tempSerialBuffer, 1);
-                    dlog.d(TAG, String.format("[2] pos [%d]  limit [%d]  capacity [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity()));
+                    dlog.d(TAG, String.format("[2] pos [%d]  limit [%d]  capacity [%d] ret [%d] data length [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity(), ret, data.length));
 
 
                     if (ret > 0) {
@@ -239,8 +241,8 @@ public class UsbService extends Service {
                         dlog.d(TAG, String.format("[4] pos [%d]  limit [%d]  capacity [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity()));
                     }
 
-                    if (ret < 0)
-                        break;
+//                    if (ret < 0)
+//                        break;
 
                     if (received >= data.length) {
                         serialByteBuffer.flip();

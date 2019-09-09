@@ -17,6 +17,7 @@ import com.supremainc.sfm_sdk.MessageHandler;
 import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
 import com.supremainc.sfm_sdk.UF_SYS_PARAM;
 import com.supremainc.sfm_sdk.UsbService;
+import com.supremainc.sfm_sdk.enumeration.UF_PROTOCOL;
 import com.supremainc.sfm_sdk.enumeration.UF_RET_CODE;
 
 import java.util.Arrays;
@@ -175,6 +176,24 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    SFM_SDK_ANDROID.MsgCallback msgCallback = new SFM_SDK_ANDROID.MsgCallback() {
+        @Override
+        public boolean callback(byte message) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    display.append(String.format("CommandEx callback : 0x%02X\n", message));
+                }
+            });
+
+            if (message == 0x62)
+                return false;
+            else
+                return true;
+        }
+    };
+
+
     private void Test_Basic_Packet_Interface() {
         UF_RET_CODE ret;
         // UF_Reconnect
@@ -235,6 +254,131 @@ public class MainActivity extends AppCompatActivity {
         display.append(String.format("Default Packet Size %d\n", defaultPacketSize));
     }
 
+    private void Test_Generic_Command_Interface() {
+        UF_RET_CODE ret;
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+        sdk.UF_SetSendRawDataCallback(sendRawDataCallback);
+        sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
+
+        // UF_SetBaudrate
+        ret = sdk.UF_SetBaudrate(115200);
+        Log.d("UF_SetBaudrate", ret.toString());
+
+        // UF_SetAsciiMode
+        sdk.UF_SetAsciiMode(false);
+
+        // UF_GetProtocol
+        UF_PROTOCOL protocol = sdk.UF_GetProtocol();
+        int moduleID = sdk.UF_GetModuleID();
+        Log.d("UF_GetProtocol : ", String.format("protocol : %s, module ID : %d", protocol.toString(), moduleID));
+        // UF_SetProtocol
+        sdk.UF_SetProtocol(UF_PROTOCOL.UF_NETWORK_PROTOCOL, 2);
+        Log.d("UF_SetProtocol : ", String.format("UF_NETWORK_PROTOCOL, moduleID : 2"));
+        // UF_GetProtocol
+        protocol = sdk.UF_GetProtocol();
+        moduleID = sdk.UF_GetModuleID();
+        Log.d("UF_GetProtocol : ", String.format("protocol : %s, module ID : %d", protocol.toString(), moduleID));
+        // UF_SetProtocol
+        sdk.UF_SetProtocol(UF_PROTOCOL.UF_SINGLE_PROTOCOL, 1);
+        Log.d("UF_SetProtocol : ", String.format("UF_SINGLE_PROTOCOL, moduleID : 1"));
+        // UF_GetProtocol
+        protocol = sdk.UF_GetProtocol();
+        moduleID = sdk.UF_GetModuleID();
+        Log.d("UF_GetProtocol : ", String.format("protocol : %s, module ID : %d", protocol.toString(), moduleID));
+
+        // UF_SendPacket
+        ret = sdk.UF_SendPacket((byte) 0x04, 0, 0, (byte) 0, 1000);
+        Log.d("UF_SendPacket", ret.toString());
+
+
+        byte[] receivedPacket = new byte[15];
+        // UF_ReceivePacket
+        ret = sdk.UF_ReceivePakcet(receivedPacket, 1000);
+        Log.d("UF_ReceivePacket", ret.toString());
+        Log.d("UF_ReceivePacket", Arrays.toString(receivedPacket));
+
+        // UF_SetGenericCommandTimeout
+        int old = sdk.UF_GetGenericCommandTimeout();
+        Log.d("UF_GetGenericCommandTim", String.format("old generic command timeout : %d", old));
+
+        // UF_SetGenericCommandTimeout
+        sdk.UF_SetGenericCommandTimeout(10000);
+
+        // UF_SetGenericCommandTimeout
+        int changed = sdk.UF_GetGenericCommandTimeout();
+        Log.d("UF_GetGenericCommandTim", String.format("changed generic command timeout : %d", changed));
+
+        // UF_SetGenericCommandTimeout
+        sdk.UF_SetGenericCommandTimeout(old);
+
+        // UF_GetInputCommandTimeout
+        old = sdk.UF_GetInputCommandTimeout();
+        Log.d("UF_GetInputCommandTim", String.format("old input command timeout : %d", old));
+
+        // UF_SetInputCommandTimeout
+        sdk.UF_SetInputCommandTimeout(1000);
+
+        // UF_GetInputCommandTimeout
+        changed = sdk.UF_GetInputCommandTimeout();
+        Log.d("UF_GetInputCommandTim", String.format("changed input command timeout : %d", changed));
+
+        // UF_SetInputCommandTimeout
+        sdk.UF_SetInputCommandTimeout(old);
+
+        // UF_GetNetworkDelay
+        old = sdk.UF_GetNetworkDelay();
+        Log.d("UF_GetNetworkDelay", String.format("old network delay : %d", old));
+
+        // UF_SetNetworkDelay
+        sdk.UF_SetNetWorkDelay(1000);
+
+        // UF_GetNetworkDelay
+        changed = sdk.UF_GetNetworkDelay();
+        Log.d("UF_GetNetworkDelay", String.format("changed network delay : %d", changed));
+
+        // UF_SetNetworkDelay
+        sdk.UF_SetNetWorkDelay(old);
+
+
+        // Read all system parameters
+        int[] vParam = new int[1];
+
+        for (UF_SYS_PARAM iter : UF_SYS_PARAM.values()) {
+            sdk.UF_GetSysParameter(iter, vParam);
+            Log.d("UF_GetSysParam", iter.toString() + " : " + String.format("0x%02X", vParam[0]));
+
+        }
+
+
+        // UF_Command
+        int[] param = new int[]{0};
+        int[] size = new int[]{0};
+        byte[] flag = new byte[]{(byte) 0x79};
+
+//        ret = sdk.UF_Command((byte)0x04, param, size, flag);
+//        Log.d("UF_Command", ret.toString());
+
+        ret = sdk.UF_CommandEx((byte) 0x05, param, size, flag, msgCallback);
+        Log.d("UF_CommandEx", ret.toString());
+        Log.d("UF_CommandEx", String.format("%X %X %X", param[0], size[0], flag[0]));
+
+//        ret = sdk.UF_Cancel(true);
+//        Log.d("UF_Cancel", ret.toString());
+//
+//        byte[] data = new byte[384];
+//
+//        ret = sdk.UF_CommandSendData((byte)0x87, param, size, flag, data, 384);
+//        Log.d("UF_CommandSendData", ret.toString());
+//        Log.d("UF_CommandSendData", String.format("%d %d %d", param[0], size[0], flag[0]));
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -253,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (!editText.getText().toString().equals("")) {
 
-                    Test_Basic_Packet_Interface();
+                    Test_Generic_Command_Interface();
                 }
             }
         });

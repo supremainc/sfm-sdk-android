@@ -11,6 +11,7 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.supremainc.sfm_sdk.enumeration.UF_PROTOCOL;
 import com.supremainc.sfm_sdk.enumeration.UF_RET_CODE;
 
 import java.io.UnsupportedEncodingException;
@@ -206,6 +207,10 @@ public class SFM_SDK_ANDROID {
         public void callback(int readLen, int totalSize);
     }
 
+    public static interface MsgCallback {
+        public boolean callback(byte message);
+    }
+
 
     /**
      * Implementations of callback functions from Java
@@ -219,12 +224,20 @@ public class SFM_SDK_ANDROID {
         }
     };
 
+
+    String byteArrayToHex(byte[] a) {
+        StringBuilder sb = new StringBuilder();
+        for (final byte b : a)
+            sb.append(String.format("%02X ", b & 0xff));
+        return sb.toString();
+    }
+
     private ReadSerialCallback readSerialCallback = new ReadSerialCallback() {
         @Override
         public int callback(byte[] data, int size, int timeout) {
 
             int ret = usbService.readSerial(data, timeout);
-            Log.d("[INFO] cbReadSerial", Arrays.toString(data));
+            Log.d("[INFO] cbReadSerial", byteArrayToHex(data));
             Log.d("[INFO]", String.format("ret : %d timeout : %d", ret, timeout));
 
             return ret;
@@ -282,6 +295,13 @@ public class SFM_SDK_ANDROID {
         }
     };
 
+    public MsgCallback msgCallback = new MsgCallback() {
+        @Override
+        public boolean callback(byte message) {
+            return false;
+        }
+    };
+
 
     /**
      * Registering functions for callback functions from Java
@@ -325,6 +345,10 @@ public class SFM_SDK_ANDROID {
 
     public void UF_SetReceiveRawDataCallback(ReceiveRawDataCallback callback) {
         receiveRawDataCallback = callback;
+    }
+
+    private void SetCommandExCallback(MsgCallback callback) {
+        msgCallback = callback;
     }
 
     /**
@@ -425,13 +449,29 @@ public class SFM_SDK_ANDROID {
     public native UF_RET_CODE UF_ReceiveRawData(byte[] buf, int size, int timeout, boolean checkEndCode);
     public native UF_RET_CODE UF_SendDataPacket(byte command, byte[] buf, int dataSize, int dataPacketSize);
     public native UF_RET_CODE UF_ReceiveDataPacket(byte command, byte[] buf, int dataSize);
-
     public native void UF_SetDefaultPacketSize(int defualtSize);
-
     public native int UF_GetDefaultPacketSize();
 
+    /**
+     * Generic command interface
+     */
 
-    public native long UF_GetModuleID();
+    public native void UF_SetProtocol(UF_PROTOCOL protocol, int moduleID);
+    public native UF_PROTOCOL UF_GetProtocol();
+    public native int UF_GetModuleID();
+    public native void UF_SetGenericCommandTimeout(int timeout);
+    public native void UF_SetInputCommandTimeout(int timeout);
+    public native int UF_GetGenericCommandTimeout();
+    public native int UF_GetInputCommandTimeout();
+    public native void UF_SetNetWorkDelay(int delay);
+    public native int UF_GetNetworkDelay();
+    public native UF_RET_CODE UF_Command(byte command, int[] param, int[] size, byte[] flag);
+    public native UF_RET_CODE UF_CommandEx(byte command, int[] param, int[] size, byte[] flag, MsgCallback callback);
+    public native UF_RET_CODE UF_CommandSendData(byte command, int[] param, int[] size, byte[] flag, byte[] data, int dataSize);
+    public native UF_RET_CODE UF_CommandSendDataEx(byte command, int[] param, int[] size, byte[] flag, byte[] data, int dataSize, MsgCallback callback, boolean waitUserInput);
+    public native UF_RET_CODE UF_Cancel(boolean receivePacket);
+
+
     public native void UF_InitSysParameter();
     public native UF_RET_CODE UF_GetSysParameter(UF_SYS_PARAM parameter, int[] value);
 
