@@ -121,6 +121,120 @@ public class MainActivity extends AppCompatActivity {
         return sb.toString();
     }
 
+    SFM_SDK_ANDROID.SendPacketCallback sendPacketCallback = new SFM_SDK_ANDROID.SendPacketCallback() {
+        @Override
+        public void callback(byte[] data) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    final String str = "[SEND]" + byteArrayToHex(data) + "\n";
+                    display.append(str);
+                }
+            });
+        }
+    };
+
+    SFM_SDK_ANDROID.ReceivePacketCallback receivePacketCallback = new SFM_SDK_ANDROID.ReceivePacketCallback() {
+        @Override
+        public void callback(byte[] data) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    final String str = "[RECV]" + byteArrayToHex(data) + "\n";
+                    display.append(str);
+                }
+            });
+        }
+    };
+
+    SFM_SDK_ANDROID.SendDataPacketCallback sendDataPacketCallback = new SFM_SDK_ANDROID.SendDataPacketCallback() {
+        @Override
+        public void callback(int index, int numOfPacket) {
+
+        }
+    };
+
+    SFM_SDK_ANDROID.ReceiveDataPacketCallback receiveDataPacketCallback = new SFM_SDK_ANDROID.ReceiveDataPacketCallback() {
+        @Override
+        public void callback(int index, int numOfPacket) {
+
+        }
+    };
+
+    SFM_SDK_ANDROID.SendRawDataCallback sendRawDataCallback = new SFM_SDK_ANDROID.SendRawDataCallback() {
+        @Override
+        public void callback(int writtenLen, int totalSize) {
+
+        }
+    };
+
+    SFM_SDK_ANDROID.ReceiveRawDataCallback receiveRawDataCallback = new SFM_SDK_ANDROID.ReceiveRawDataCallback() {
+        @Override
+        public void callback(int readLen, int totalSize) {
+
+        }
+    };
+
+    private void Test_Basic_Packet_Interface() {
+        UF_RET_CODE ret;
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+        sdk.UF_SetSendRawDataCallback(sendRawDataCallback);
+        sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
+
+        // UF_SetBaudrate
+        ret = sdk.UF_SetBaudrate(115200);
+        Log.d("UF_SetBaudrate", ret.toString());
+
+        // UF_SetAsciiMode
+        sdk.UF_SetAsciiMode(false);
+
+        // UF_SendPacket
+        ret = sdk.UF_SendPacket((byte) 0x04, 0, 0, (byte) 0, 1000);
+        Log.d("UF_SendPacket", ret.toString());
+
+
+        byte[] receivedPacket = new byte[15];
+        // UF_ReceivePacket
+        ret = sdk.UF_ReceivePakcet(receivedPacket, 1000);
+        Log.d("UF_ReceivePacket", ret.toString());
+        Log.d("UF_ReceivePacket", Arrays.toString(receivedPacket));
+
+
+        // UF_SendNetworkPacket
+        ret = sdk.UF_SendNetworkPacket((byte) 0x04, (short) 1, 0, 0, (byte) 0, 1000);
+        Log.d("UF_SendNetworkPacket", ret.toString());
+
+        // UF_ReceiveNetworkPacket
+        ret = sdk.UF_ReceiveNetworkPakcet(receivedPacket, 1000);
+        Log.d("UF_ReceiveNetworkPacket", ret.toString());
+        Log.d("UF_ReceiveNetworkPacket", byteArrayToHex(receivedPacket));
+
+
+        int[] value = new int[10];
+        UF_RET_CODE result = sdk.UF_GetSysParameter(UF_SYS_PARAM.UF_SYS_BAUDRATE, value);
+        display.post(new Runnable() {
+            @Override
+            public void run() {
+                display.append(result.toString());
+                display.append(String.format(" (0x%02X)", value[0]));
+            }
+        });
+
+        // UF_SetDefaultPacketSize
+        sdk.UF_SetDefaultPacketSize(1024);
+
+        // UF_GetDefaultPacketSize
+        int defaultPacketSize = sdk.UF_GetDefaultPacketSize();
+        display.append(String.format("Default Packet Size %d\n", defaultPacketSize));
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -130,52 +244,17 @@ public class MainActivity extends AppCompatActivity {
         editText = (EditText) findViewById(R.id.editText1);
         sdk = new SFM_SDK_ANDROID(this, mHandler, mUsbReceiver);
         Button sendButton = (Button) findViewById(R.id.buttonSend);
+
+
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
                 if (!editText.getText().toString().equals("")) {
-//                    String data = editText.getText().toString();
-//                    sdk.WriteTest(data);
-//                    String writtenData = "[SEND] " + data + "\n";
-//                    display.append(writtenData);
 
-                    UF_RET_CODE ret;
-                    // UF_Reconnect
-                    sdk.UF_Reconnect();
-
-                    // UF_SetBaudrate
-                    ret = sdk.UF_SetBaudrate(115200);
-                    Log.d("UF_SetBaudrate", ret.toString());
-
-                    // UF_SetAsciiMode
-                    sdk.UF_SetAsciiMode(false);
-
-                    // UF_SendPacket
-                    ret = sdk.UF_SendPacket((byte)0x04, 0,0,(byte)0,1000);
-                    Log.d("UF_SendPacket", ret.toString());
-
-
-                    byte[] receivedPacket = new byte[15];
-                    // UF_ReceivePacket
-                    ret = sdk.UF_ReceivePakcet(receivedPacket, 1000);
-                    Log.d("UF_ReceivePacket", ret.toString());
-                    Log.d("UF_ReceivePacket", Arrays.toString(receivedPacket));
-
-                    // UF_SendNetworkPacket
-                    ret = sdk.UF_SendNetworkPacket((byte)0x04, (short)1,0,0,(byte)0,1000);
-                    Log.d("UF_SendNetworkPacket", ret.toString());
-
-                    // UF_ReceiveNetworkPacket
-                    ret = sdk.UF_ReceiveNetworkPakcet(receivedPacket, 1000);
-                    Log.d("UF_ReceiveNetworkPacket", ret.toString());
-                    Log.d("UF_ReceiveNetworkPacket", byteArrayToHex(receivedPacket));
-
-
-                    int[] value = new int[10];
-                    UF_RET_CODE result = sdk.UF_GetSysParameter(UF_SYS_PARAM.UF_SYS_BAUDRATE, value );
-                    display.append(result.toString());
-                    display.append(String.format(" (0x%02X)", value[0]));
-               }
+                    Test_Basic_Packet_Interface();
+                }
             }
         });
     }

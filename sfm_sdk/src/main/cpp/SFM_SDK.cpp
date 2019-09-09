@@ -50,19 +50,10 @@ jobject getObjectofRetCode(JNIEnv* env, jobject thiz, UF_RET_CODE retCode) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Utilities for JNI
+ */
 
-void SetupSerialCallback(int baudrate) {
-
-    static jmethodID cbSetupSerial = NULL;
-
-    if (cbSetupSerial == NULL) {
-        cbSetupSerial = g_env->GetMethodID(g_cls, "cbSetupSerial", "(I)V");
-        if (cbSetupSerial == NULL)
-            return;
-    }
-
-    g_env->CallVoidMethod(g_obj, cbSetupSerial, baudrate);
-}
 
 jbyteArray as_byte_array(unsigned char* buf, int len) {
     jbyteArray array = g_env->NewByteArray (len);
@@ -75,6 +66,23 @@ unsigned char* as_unsigned_char_array(jbyteArray array) {
     unsigned char* buf = new unsigned char[len];
     g_env->GetByteArrayRegion (array, 0, len, reinterpret_cast<jbyte*>(buf));
     return buf;
+}
+
+/**
+ * Callback functions
+ */
+
+void SetupSerialCallback(int baudrate) {
+
+    static jmethodID cbSetupSerial = NULL;
+
+    if (cbSetupSerial == NULL) {
+        cbSetupSerial = g_env->GetMethodID(g_cls, "cbSetupSerial", "(I)V");
+        if (cbSetupSerial == NULL)
+            return;
+    }
+
+    g_env->CallVoidMethod(g_obj, cbSetupSerial, baudrate);
 }
 
 
@@ -113,11 +121,85 @@ int WriteSerialCallback(unsigned char *data, int size, int timeout) {
     jbyteArray _data = as_byte_array(data, size);
 
     int ret = (int)g_env->CallIntMethod(g_obj,cbWriteSerial, _data, timeout);
-    //g_env->DeleteLocalRef(_data);
 
     return ret;
 }
 
+void SendPacketCallback(unsigned char *data) {
+    static jmethodID cbSendPacket = NULL;
+
+    if (cbSendPacket == NULL) {
+        cbSendPacket = g_env->GetMethodID(g_cls, "cbSendPacket", "([B)V");
+        if (cbSendPacket == NULL)
+            return;
+    }
+
+    jbyteArray _data = as_byte_array(data, UF_PACKET_LEN);
+    g_env->CallVoidMethod(g_obj, cbSendPacket, _data);
+}
+
+
+void ReceivePacketCallback(unsigned char *data) {
+    static jmethodID cbReceivePacket = NULL;
+    if (cbReceivePacket == NULL) {
+        cbReceivePacket = g_env->GetMethodID(g_cls, "cbReceivePacket", "([B)V");
+        if (cbReceivePacket == NULL)
+            return;
+    }
+
+    jbyteArray _data = as_byte_array(data, UF_PACKET_LEN);
+    g_env->CallVoidMethod(g_obj, cbReceivePacket, _data);
+}
+
+void SendDataPacketCallback(int index, int numOfPacket) {
+    static jmethodID cbSendDataPacket = NULL;
+    if (cbSendDataPacket == NULL) {
+        cbSendDataPacket = g_env->GetMethodID(g_cls, "cbSendDataPacket", "(II)V");
+        if (cbSendDataPacket == NULL)
+            return;
+    }
+
+    g_env->CallVoidMethod(g_obj, cbSendDataPacket, index, numOfPacket);
+}
+
+void ReceiveDataPacketCallback(int index, int numOfPacket) {
+    static jmethodID cbReceiveDataPacket = NULL;
+    if (cbReceiveDataPacket == NULL) {
+        cbReceiveDataPacket = g_env->GetMethodID(g_cls, "cbReceiveDataPacket", "(II)V");
+        if (cbReceiveDataPacket == NULL)
+            return;
+    }
+
+    g_env->CallVoidMethod(g_obj, cbReceiveDataPacket, index, numOfPacket);
+}
+
+void SendRawDataCallback(int writtenLen, int totalSize) {
+    static jmethodID cbSendRawData = NULL;
+    if (cbSendRawData == NULL) {
+        cbSendRawData = g_env->GetMethodID(g_cls, "cbSendRawData", "(II)V");
+        if (cbSendRawData == NULL)
+            return;
+    }
+
+    g_env->CallVoidMethod(g_obj, cbSendRawData, writtenLen, totalSize);
+}
+
+void ReceiveRawDataCallback(int readLen, int totalSize) {
+    static jmethodID cbReceiveRawData = NULL;
+    if (cbReceiveRawData == NULL) {
+        cbReceiveRawData = g_env->GetMethodID(g_cls, "cbReceiveRawData", "(II)V");
+        if (cbReceiveRawData == NULL)
+            return;
+    }
+
+    g_env->CallVoidMethod(g_obj, cbReceiveRawData, readLen, totalSize);
+}
+
+
+
+/**
+ * JNI_OnLoad
+ */
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     LOGI("JNI_OnLoad\n");
@@ -258,6 +340,12 @@ JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetWri
 {
     g_obj = obj;
     UF_SetWriteSerialCallback_Android(WriteSerialCallback);
+    UF_SetSendPacketCallback(SendPacketCallback);
+    UF_SetReceivePacketCallback(ReceivePacketCallback);
+    UF_SetSendDataPacketCallback(SendDataPacketCallback);
+    UF_SetReceiveDataPacketCallback(ReceiveDataPacketCallback);
+    UF_SetSendRawDataCallback(SendRawDataCallback);
+    UF_SetReceiveRawDataCallback(ReceiveRawDataCallback);
 }
 
 /*
@@ -384,6 +472,118 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Rec
     return getObjectofRetCode(env, obj, ret);
 }
 
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SendRawData
+ * Signature: ([BII)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SendRawData
+        (JNIEnv *env, jobject obj, jbyteArray _buf, jint _size, jint _timeout) {
+    g_obj = obj;
+    jsize len = env->GetArrayLength(_buf);
+    BYTE *buf = (BYTE *) env->GetByteArrayElements(_buf, 0);
+    int size = (int) _size;
+    int timeout = (int) _timeout;
+    UF_RET_CODE ret = UF_SendRawData(buf, size, timeout);
+    if (ret == UF_RET_SUCCESS) {
+        env->SetByteArrayRegion(_buf, 0, len, reinterpret_cast<const jbyte *>(buf));
+    }
+    env->ReleaseByteArrayElements(_buf, reinterpret_cast<jbyte *>(buf), 0);
+
+    return getObjectofRetCode(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_ReceiveRawData
+ * Signature: ([BIIZ)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ReceiveRawData
+        (JNIEnv *env, jobject obj, jbyteArray _buf, jint _size, jint _timeout,
+         jboolean _checkEndCode) {
+    g_obj = obj;
+    jsize len = env->GetArrayLength(_buf);
+    BYTE *buf = (BYTE *) env->GetByteArrayElements(_buf, 0);
+    int size = (int) _size;
+    int timeout = (int) _timeout;
+    BOOL checkEndCode = (_checkEndCode == true ? 1 : 0);
+    UF_RET_CODE ret = UF_ReceiveRawData(buf, size, timeout, checkEndCode);
+    if (ret == UF_RET_SUCCESS) {
+        env->SetByteArrayRegion(_buf, 0, len, reinterpret_cast<const jbyte *>(buf));
+    }
+    env->ReleaseByteArrayElements(_buf, reinterpret_cast<jbyte *>(buf), 0);
+
+    return getObjectofRetCode(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SendDataPacket
+ * Signature: (B[BII)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SendDataPacket
+        (JNIEnv *env, jobject obj, jbyte _command, jbyteArray _buf, jint _dataSize,
+         jint _dataPacketSize) {
+    g_obj = obj;
+    jsize len = env->GetArrayLength(_buf);
+    BYTE *buf = (BYTE *) env->GetByteArrayElements(_buf, 0);
+    BYTE command = (BYTE) _command;
+    int dataSize = (int) _dataSize;
+    int dataPacketSize = (int) _dataPacketSize;
+    UF_RET_CODE ret = UF_SendDataPacket(command, buf, dataSize, dataPacketSize);
+    if (ret == UF_RET_SUCCESS) {
+        env->SetByteArrayRegion(_buf, 0, len, reinterpret_cast<const jbyte *>(buf));
+    }
+    env->ReleaseByteArrayElements(_buf, reinterpret_cast<jbyte *>(buf), 0);
+
+    return getObjectofRetCode(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_ReceiveDataPacket
+ * Signature: (B[BI)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ReceiveDataPacket
+        (JNIEnv *env, jobject obj, jbyte _command, jbyteArray _buf, jint _dataPacketSize) {
+    g_obj = obj;
+    jsize len = env->GetArrayLength(_buf);
+    BYTE *buf = (BYTE *) env->GetByteArrayElements(_buf, 0);
+    BYTE command = (BYTE) _command;
+    int dataPacketSize = (int) _dataPacketSize;
+    UF_RET_CODE ret = UF_ReceiveDataPacket(command, buf, dataPacketSize);
+    if (ret == UF_RET_SUCCESS) {
+        env->SetByteArrayRegion(_buf, 0, len, reinterpret_cast<const jbyte *>(buf));
+    }
+    env->ReleaseByteArrayElements(_buf, reinterpret_cast<jbyte *>(buf), 0);
+
+    return getObjectofRetCode(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SetDefaultPacketSize
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetDefaultPacketSize
+        (JNIEnv *env, jobject obj, jint _defaultSize) {
+    g_obj = obj;
+    int defaultSize = _defaultSize;
+    UF_SetDefaultPacketSize(defaultSize);
+}
+
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_GetDefaultPacketSize
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetDefaultPacketSize
+        (JNIEnv *env, jobject obj) {
+    g_obj = obj;
+    jint ret = (jint) UF_GetDefaultPacketSize();
+    return ret;
+}
 
 
 /*

@@ -182,6 +182,151 @@ public class SFM_SDK_ANDROID {
         public int callback(byte[] data, int size, int timeout);
     }
 
+    public static interface SendPacketCallback {
+        public void callback(byte[] data);
+    }
+
+    public static interface ReceivePacketCallback {
+        public void callback(byte[] data);
+    }
+
+    public static interface SendDataPacketCallback {
+        public void callback(int index, int numOfPacket);
+    }
+
+    public static interface ReceiveDataPacketCallback {
+        public void callback(int index, int numOfPacket);
+    }
+
+    public static interface SendRawDataCallback {
+        public void callback(int writtenLen, int totalSize);
+    }
+
+    public static interface ReceiveRawDataCallback {
+        public void callback(int readLen, int totalSize);
+    }
+
+
+    /**
+     * Implementations of callback functions from Java
+     */
+
+    private SetupSerialCallback setupSerialCallback = new SetupSerialCallback() {
+        @Override
+        public void callback(int baudrate) {
+            if (usbService != null)
+                usbService.setBuadrate(baudrate);
+        }
+    };
+
+    private ReadSerialCallback readSerialCallback = new ReadSerialCallback() {
+        @Override
+        public int callback(byte[] data, int size, int timeout) {
+
+            int ret = usbService.readSerial(data, timeout);
+            Log.d("[INFO] cbReadSerial", Arrays.toString(data));
+            Log.d("[INFO]", String.format("ret : %d timeout : %d", ret, timeout));
+
+            return ret;
+        }
+    };
+
+    private WriteSerialCallback writeSerialCallback = new WriteSerialCallback() {
+        @Override
+        public int callback(byte[] data, int size, int timeout) {
+            Log.d("[INFO] cbWriteSerial", Arrays.toString(data));
+            int ret = usbService.writeSerial(data, timeout);
+            return ret;
+        }
+    };
+
+    private SendPacketCallback sendPacketCallback = new SendPacketCallback() {
+        @Override
+        public void callback(byte[] data) {
+            Log.d("[INFO] cbSendPacket", Arrays.toString(data));
+        }
+    };
+
+    private ReceivePacketCallback receivePacketCallback = new ReceivePacketCallback() {
+        @Override
+        public void callback(byte[] data) {
+            Log.d("[INFO] cbReceivePacket", Arrays.toString(data));
+        }
+    };
+
+    private SendDataPacketCallback sendDataPacketCallback = new SendDataPacketCallback() {
+        @Override
+        public void callback(int index, int numOfPacket) {
+
+        }
+    };
+
+    private ReceiveDataPacketCallback receiveDataPacketCallback = new ReceiveDataPacketCallback() {
+        @Override
+        public void callback(int index, int numOfPacket) {
+
+        }
+    };
+
+    private SendRawDataCallback sendRawDataCallback = new SendRawDataCallback() {
+        @Override
+        public void callback(int writtenLen, int totalSize) {
+
+        }
+    };
+
+    private ReceiveRawDataCallback receiveRawDataCallback = new ReceiveRawDataCallback() {
+        @Override
+        public void callback(int readLen, int totalSize) {
+
+        }
+    };
+
+
+    /**
+     * Registering functions for callback functions from Java
+     */
+
+    public void UF_SetSetupSerialCallback(SetupSerialCallback callback) {
+        setupSerialCallback = callback;
+        UF_SetSetupSerialCallback_Android();
+    }
+
+
+    public void UF_SetReadSerialCallback(ReadSerialCallback callback) {
+        readSerialCallback = callback;
+        UF_SetReadSerialCallback_Android();
+    }
+
+    public void UF_SetWriteSerialCallback(WriteSerialCallback callback) {
+        writeSerialCallback = callback;
+        UF_SetWriteSerialCallback_Android();
+    }
+
+    public void UF_SetSendPacketCallback(SendPacketCallback callback) {
+        sendPacketCallback = callback;
+    }
+
+    public void UF_SetReceivePacketCallback(ReceivePacketCallback callback) {
+        receivePacketCallback = callback;
+    }
+
+    public void UF_SetSendDataPacketCallback(SendDataPacketCallback callback) {
+        sendDataPacketCallback = callback;
+    }
+
+    public void UF_SetReceiveDataPacketCallback(ReceiveDataPacketCallback callback) {
+        receiveDataPacketCallback = callback;
+    }
+
+    public void UF_SetSendRawDataCallback(SendRawDataCallback callback) {
+        sendRawDataCallback = callback;
+    }
+
+    public void UF_SetReceiveRawDataCallback(ReceiveRawDataCallback callback) {
+        receiveRawDataCallback = callback;
+    }
+
     /**
      * Callback functions from JNI
      */
@@ -213,62 +358,35 @@ public class SFM_SDK_ANDROID {
         return ret;
     }
 
-    /**
-     *  Implementations of callback functions from Java
-     */
-
-    private SetupSerialCallback setupSerialCallback = new SetupSerialCallback() {
-        @Override
-        public void callback(int baudrate) {
-            if(usbService != null)
-                usbService.setBuadrate(baudrate);
-        }
-    };
-
-    private ReadSerialCallback readSerialCallback = new ReadSerialCallback() {
-        @Override
-        public int callback(byte[] data, int size, int timeout) {
-
-            int ret = usbService.readSerial(data, timeout);
-            Log.d("[INFO] cbReadSerial", Arrays.toString(data));
-            Log.d("[INFO]", String.format("ret : %d timeout : %d", ret, timeout));
-
-            return ret;
-        }
-    };
-
-    private WriteSerialCallback writeSerialCallback = new WriteSerialCallback() {
-        @Override
-        public int callback(byte[] data, int size, int timeout) {
-            Log.d("[INFO] cbWriteSerial", Arrays.toString(data));
-            int ret = usbService.writeSerial(data, timeout);
-            return ret;
-        }
-    };
-
-    /**
-     * Registering functions for callback functions from Java
-     */
-
-    public void UF_SetSetupSerialCallback(SetupSerialCallback callback)
-    {
-        setupSerialCallback = callback;
-        UF_SetSetupSerialCallback_Android();
+    public void cbSendPacket(byte[] data) {
+        if (sendPacketCallback != null)
+            sendPacketCallback.callback(data);
     }
 
-
-    public void UF_SetReadSerialCallback(ReadSerialCallback callback)
-    {
-        readSerialCallback = callback;
-        UF_SetReadSerialCallback_Android();
+    public void cbReceivePacket(byte[] data) {
+        if (receivePacketCallback != null)
+            receivePacketCallback.callback(data);
     }
 
-    public void UF_SetWriteSerialCallback(WriteSerialCallback callback)
-    {
-        writeSerialCallback = callback;
-        UF_SetWriteSerialCallback_Android();
+    public void cbSendDataPacket(int index, int numOfPacket) {
+        if (sendDataPacketCallback != null)
+            sendDataPacketCallback.callback(index, numOfPacket);
     }
 
+    public void cbReceiveDataPacket(int index, int numOfPacket) {
+        if (receiveDataPacketCallback != null)
+            receiveDataPacketCallback.callback(index, numOfPacket);
+    }
+
+    public void cbSendRawData(int writtenLen, int totalSize) {
+        if (sendRawDataCallback != null)
+            sendRawDataCallback.callback(writtenLen, totalSize);
+    }
+
+    public void cbReceiveRawData(int readLen, int totalSize) {
+        if (receiveRawDataCallback != null)
+            receiveRawDataCallback.callback(readLen, totalSize);
+    }
 
 
     /**
@@ -307,6 +425,11 @@ public class SFM_SDK_ANDROID {
     public native UF_RET_CODE UF_ReceiveRawData(byte[] buf, int size, int timeout, boolean checkEndCode);
     public native UF_RET_CODE UF_SendDataPacket(byte command, byte[] buf, int dataSize, int dataPacketSize);
     public native UF_RET_CODE UF_ReceiveDataPacket(byte command, byte[] buf, int dataSize);
+
+    public native void UF_SetDefaultPacketSize(int defualtSize);
+
+    public native int UF_GetDefaultPacketSize();
+
 
     public native long UF_GetModuleID();
     public native void UF_InitSysParameter();
