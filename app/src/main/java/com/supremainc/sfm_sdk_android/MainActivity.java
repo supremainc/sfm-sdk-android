@@ -379,6 +379,48 @@ public class MainActivity extends AppCompatActivity {
 //        Log.d("UF_CommandSendData", String.format("%d %d %d", param[0], size[0], flag[0]));
     }
 
+    private void Test_System_Parameter() {
+        UF_RET_CODE ret;
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+        sdk.UF_SetSendRawDataCallback(sendRawDataCallback);
+        sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
+
+        // UF_SetBaudrate
+        ret = sdk.UF_SetBaudrate(115200);
+        Log.d("UF_SetBaudrate", ret.toString());
+
+        // UF_SetAsciiMode
+        sdk.UF_SetAsciiMode(false);
+
+        int[] serialNumber = new int[]{0};
+        sdk.UF_GetSysParameter(UF_SYS_PARAM.UF_SYS_TIMEOUT, serialNumber);
+        Log.d("UF_GetSysParam", String.format("value : %02X", serialNumber[0]));
+
+        sdk.UF_SetSysParameter(UF_SYS_PARAM.UF_SYS_TIMEOUT, serialNumber[0]);
+        Log.d("UF_SetSysParam", String.format("value : %02X", serialNumber[0]));
+
+        UF_SYS_PARAM[] parameters = new UF_SYS_PARAM[]{UF_SYS_PARAM.UF_SYS_AUX_BAUDRATE, UF_SYS_PARAM.UF_SYS_BUILD_NO, UF_SYS_PARAM.UF_SYS_FIRMWARE_VERSION};
+        int[] values = new int[parameters.length];
+        ret = sdk.UF_GetMultiSysParameter(parameters.length, parameters, values);
+        Log.d("UF_GetMultiSysParameter", ret.toString());
+
+        UF_SYS_PARAM[] parameters_set = new UF_SYS_PARAM[]{UF_SYS_PARAM.UF_SYS_FREE_SCAN, UF_SYS_PARAM.UF_SYS_ROTATION};
+        int[] values_set = new int[]{0x30, 0x32};
+        ret = sdk.UF_SetMultiSysParameter(parameters_set.length, parameters_set, values_set);
+        Log.d("UF_SetMultiSysParameter", ret.toString());
+
+        ret = sdk.UF_Save();
+        Log.d("UF_Save", ret.toString());
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -397,7 +439,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (!editText.getText().toString().equals("")) {
 
-                    Test_Generic_Command_Interface();
+                    Test_System_Parameter();
                 }
             }
         });
