@@ -13,6 +13,18 @@ import android.util.Log;
 
 import com.supremainc.sfm_sdk.enumeration.UF_PROTOCOL;
 import com.supremainc.sfm_sdk.enumeration.UF_RET_CODE;
+import com.supremainc.sfm_sdk.enumeration.UF_UPGRADE_OPTION;
+import com.supremainc.sfm_sdk.structure.UFConfigComponentHeader;
+import com.supremainc.sfm_sdk.structure.UFGPIOData;
+import com.supremainc.sfm_sdk.structure.UFGPIOInputData;
+import com.supremainc.sfm_sdk.structure.UFGPIOOutputData;
+import com.supremainc.sfm_sdk.structure.UFGPIOWiegandData;
+import com.supremainc.sfm_sdk.structure.UFImage;
+import com.supremainc.sfm_sdk.structure.UFLogRecord;
+import com.supremainc.sfm_sdk.structure.UFOutputSignal;
+import com.supremainc.sfm_sdk.structure.UFUserInfo;
+import com.supremainc.sfm_sdk.structure.UFUserInfoEx;
+import com.supremainc.sfm_sdk.structure.time_t;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -211,6 +223,33 @@ public class SFM_SDK_ANDROID {
         public boolean callback(byte message);
     }
 
+    public static interface SerialCallback {
+        public void callback(final byte[] comPort, int baudrate);
+    }
+
+    public static interface UserInfoCallback {
+        public void callback(int index, int numOfTemplate);
+    }
+
+    public static interface ScanCallback {
+        public void callback(byte errCode);
+    }
+
+    public static interface IdentifyCallback {
+        public void callback(byte errCode);
+    }
+
+    public static interface VerifyCallback {
+        public void callback(byte errCode);
+    }
+
+    public static interface EnrollCallback {
+        public void callback(byte errCode, UF_ENROLL_MODE enrollMode, int numOfSuccess);
+    }
+
+    public static interface DeleteCallback {
+        public void callback(byte errCode);
+    }
 
     /**
      * Implementations of callback functions from Java
@@ -299,6 +338,55 @@ public class SFM_SDK_ANDROID {
         @Override
         public boolean callback(byte message) {
             return false;
+        }
+    };
+
+    public SerialCallback serialCallback = new SerialCallback() {
+        @Override
+        public void callback(byte[] comPort, int baudrate) {
+
+        }
+    };
+
+    public UserInfoCallback userInfoCallback = new UserInfoCallback() {
+        @Override
+        public void callback(int index, int numOfTemplate) {
+
+        }
+    };
+
+    public ScanCallback scanCallback = new ScanCallback() {
+        @Override
+        public void callback(byte errCode) {
+
+        }
+    };
+
+    public IdentifyCallback identifyCallback = new IdentifyCallback() {
+        @Override
+        public void callback(byte errCode) {
+
+        }
+    };
+
+    public VerifyCallback verifyCallback = new VerifyCallback() {
+        @Override
+        public void callback(byte errCode) {
+
+        }
+    };
+
+    public EnrollCallback enrollCallback = new EnrollCallback() {
+        @Override
+        public void callback(byte errCode, UF_ENROLL_MODE enrollMode, int numOfSuccess) {
+
+        }
+    };
+
+    public DeleteCallback deleteCallback = new DeleteCallback() {
+        @Override
+        public void callback(byte errCode) {
+
         }
     };
 
@@ -472,8 +560,327 @@ public class SFM_SDK_ANDROID {
     public native UF_RET_CODE UF_Cancel(boolean receivePacket);
 
 
+    /**
+     * Module information
+     */
+
+    public native UF_RET_CODE UF_GetModuleInfo(UF_MODULE_TYPE[] type, UF_MODULE_VERSION[] version, UF_MODULE_SENSOR[] sensorType);
+
+    public native byte[] UF_GetModuleString(UF_MODULE_TYPE type, UF_MODULE_VERSION version, UF_MODULE_SENSOR sensorType);
+
+    public native UF_RET_CODE UF_SearchModule(final byte[] port, int[] baudrate, boolean[] asciiMode, UF_PROTOCOL[] protocol, int[] moduleID, SerialCallback callback);
+
+    public native UF_RET_CODE UF_SearchModuleID(int[] moduleID);
+
+    public native UF_RET_CODE UF_SearchModuleIDEx(short[] foundModuleID, int numOfFoundID, short[] moduleID, int[] numOfID);
+
+    public native UF_RET_CODE UF_CalibrateSensor();
+
+    public native UF_RET_CODE UF_Reset();
+
+    public native UF_RET_CODE UF_Lock();
+
+    public native UF_RET_CODE UF_Unlock(final byte[] password);
+
+    public native UF_RET_CODE UF_ChangePassword(final byte[] newPassword, final byte[] oldPassword);
+
+    public native UF_RET_CODE UF_ReadChallengeCode(byte[] challengeCode);
+
+    public native UF_RET_CODE UF_WriteChallengeCode(final byte[] challengeCode);
+
+    public native UF_RET_CODE UF_PowerOff();
+
+    /**
+     * System parameters
+     */
     public native void UF_InitSysParameter();
     public native UF_RET_CODE UF_GetSysParameter(UF_SYS_PARAM parameter, int[] value);
+
+    public native UF_RET_CODE UF_SetSysParameter(UF_SYS_PARAM parameter, int value);
+
+    public native UF_RET_CODE UF_GetMultiSysParameter(int parameterCount, UF_SYS_PARAM[] parameters, int[] values);
+
+    public native UF_RET_CODE UF_SetMultiSysParameter(int parameterCount, UF_SYS_PARAM[] parameters, int[] values);
+
+    public native UF_RET_CODE UF_Save();
+
+
+    /**
+     * Template management
+     */
+    public native UF_RET_CODE UF_GetNumOfTemplate(int[] numOfTemplate);
+
+    public native UF_RET_CODE UF_GetMaxNumOfTemplate(int[] maxNumOfTemplate);
+
+    public native UF_RET_CODE UF_GetAllUserInfo(UFUserInfo[] userInfo, int[] numOfUser, int[] numOfTemplate);
+
+    public native UF_RET_CODE UF_GetAllUserInfoEx(UFUserInfoEx[] userInfo, int[] numOfUser, int[] numOfTemplate);
+
+    public native void UF_SortUserInfo(UFUserInfo[] userInfo, int numOfUser);
+
+    public native void UF_SetUserInfoCallback(UserInfoCallback callback);
+
+    public native UF_RET_CODE UF_SetAdminLevel(int userID, UF_ADMIN_LEVEL adminLevel);
+
+    public native UF_RET_CODE UF_GetAdminLevel(int userID, UF_ADMIN_LEVEL[] adminLevel);
+
+    public native UF_RET_CODE UF_SetSecurityLevel(int userID, UF_USER_SECURITY_LEVEL securityLevel);
+
+    public native UF_RET_CODE UF_GetSecurityLevel(int userID, UF_USER_SECURITY_LEVEL[] securityLevel);
+
+    public native UF_RET_CODE UF_ClearAllAdminLevel();
+
+    public native UF_RET_CODE UF_SaveDB(final byte[] fileName);
+
+    public native UF_RET_CODE UF_LoadDB(final byte[] fileName);
+
+    public native UF_RET_CODE UF_CheckTemplate(int userID, int[] numOfTemplate);
+
+    public native UF_RET_CODE UF_ReadTemplate(int userID, int[] numOfTemplate, byte[] templateData);
+
+    public native UF_RET_CODE UF_ReadOneTemplate(int userID, int subID, byte[] templateData);
+
+    public native void UF_SetScanCallback(ScanCallback callback);
+
+    public native UF_RET_CODE UF_ScanTemplate(byte[] templateData, int[] templateSize, int[] imageQuality);
+
+    public native UF_RET_CODE UF_FixProvisionalTemplate();
+
+    public native UF_RET_CODE UF_SetAuthType(int userID, UF_AUTH_TYPE authType);
+
+    public native UF_RET_CODE UF_GetAuthType(int userID, UF_AUTH_TYPE[] authType);
+
+    public native UF_RET_CODE UF_GetUserIDByAuthType(UF_AUTH_TYPE authType, int[] numOfID, int[] userID);
+
+    public native UF_RET_CODE UF_ResetAllAuthType();
+
+    public native UF_RET_CODE UF_AddBlacklist(int userID, int[] numOfBlacklistedID);
+
+    public native UF_RET_CODE UF_DeleteBlacklist(int userID, int[] numOfBlacklistedID);
+
+    public native UF_RET_CODE UF_GetBlacklist(int[] numOfBlacklistedID, int[] userID);
+
+    public native UF_RET_CODE UF_DeleteAllBlacklist();
+
+    public native UF_RET_CODE UF_SetEntranceLimit(int userID, int entranceLimit);
+
+    public native UF_RET_CODE UF_GetEntranceLimit(int userID, int[] entranceLimit, int[] entranceCount);
+
+    public native UF_RET_CODE UF_ClearAllEntranceLimit();
+
+
+    /**
+     * Image
+     */
+    public native UF_RET_CODE UF_SaveImage(final byte[] fileName, UFImage[] image);
+
+    public native UF_RET_CODE UF_LoadImage(final byte[] fileName, UFImage[] image);
+
+    public native UF_RET_CODE UF_ReadImage(UFImage[] image);
+
+    public native UF_RET_CODE UF_ScanImage(UFImage[] image);
+
+
+    /**
+     * Identify
+     */
+    public native void UF_SetIdentifyCallback(IdentifyCallback callback);
+
+    public native UF_RET_CODE UF_Identify(int[] userID, byte[] subID);
+
+    public native UF_RET_CODE UF_IdentifyTemplate(int templateSize, byte[] templateData, int[] userID, byte[] subID);
+
+    public native UF_RET_CODE UF_IdentifyImage(int imageSize, byte[] imageData, int[] userID, byte[] subID);
+
+    /**
+     * Verify
+     */
+    public native void UF_SetVerifyCallback(VerifyCallback callback);
+
+    public native UF_RET_CODE UF_Verify(int userID, byte[] subID);
+
+    public native UF_RET_CODE UF_VerifyTemplate(int templateSize, byte[] templateData, int userID, byte[] subID);
+
+    public native UF_RET_CODE UF_VerifyHostTemplate(int numOfTemplate, int templateSize, byte[] templateData);
+
+    public native UF_RET_CODE UF_VerifyImage(int imageSize, byte[] imageData, int userID, byte[] subID);
+
+    /**
+     * Enroll
+     */
+    public native void UF_SetEnrollCallback(EnrollCallback callback);
+
+    public native UF_RET_CODE UF_Enroll(int userID, UF_ENROLL_OPTION option, int[] enrollID, int[] imageQuality);
+
+    public native UF_RET_CODE UF_EnrollContinue(int userID, int[] enrollID, int[] imageQuality);
+
+    public native UF_RET_CODE UF_EnrollAfterVerification(int userID, UF_ENROLL_OPTION option, int[] enrollID, int[] imageQuality);
+
+    public native UF_RET_CODE UF_EnrollTemplate(int userID, UF_ENROLL_OPTION option, int templateSize, int[] templateData, int[] enrollID);
+
+    public native UF_RET_CODE UF_EnrollMultipleTemplates(int userID, UF_ENROLL_OPTION option, int numOfTemplate, int templateSize, byte[] templateData, int[] enrollID);
+
+    public native UF_RET_CODE UF_EnrollMultipleTemplatesEx(int userID, UF_ENROLL_OPTION option, int numOfTemplate, int numOfEnroll, int templateSize, byte[] templateData, int[] enrollID);
+
+    public native UF_RET_CODE UF_EnrollImage(int userID, UF_ENROLL_OPTION option, int imageSize, byte[] imageData, int[] enrollID, int[] imageQuality);
+
+    /**
+     * Delete
+     */
+    public native void UF_SetDeleteCallback(DeleteCallback callback);
+
+    public native UF_RET_CODE UF_Delete(int userID);
+
+    public native UF_RET_CODE UF_DeleteOneTemplate(int userID, int subID);
+
+    public native UF_RET_CODE UF_DeleteMultipleTemplates(int startUserID, int lastUserID, int[] deletedUserID);
+
+    public native UF_RET_CODE UF_DeleteAll();
+
+    public native UF_RET_CODE UF_DeleteAllAfterVerification();
+
+
+    /**
+     * IO for SFM3500/SFM5500
+     */
+    public native void UF_InitIO();
+
+    public native UF_RET_CODE UF_SetInputFunction(UF_INPUT_PORT port, UF_INPUT_FUNC inputFunction, int minimumTime);
+
+    public native UF_RET_CODE UF_GetInputFunction(UF_INPUT_PORT port, UF_INPUT_FUNC[] inputFunction, int[] minimumTime);
+
+    public native UF_RET_CODE UF_GetInputStatus(UF_INPUT_PORT port, boolean remainStatus, int[] status);
+
+    public native UF_RET_CODE UF_GetOutputEventList(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT[] events, int[] numOfEvent);
+
+    public native UF_RET_CODE UF_ClearAllOutputEvent(UF_OUTPUT_PORT port);
+
+    public native UF_RET_CODE UF_ClearOutputEvent(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT event);
+
+    public native UF_RET_CODE UF_SetOutputEvent(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT event, UFOutputSignal signal);
+
+    public native UF_RET_CODE UF_GetOutputEvent(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT event, UFOutputSignal[] signal);
+
+    public native UF_RET_CODE UF_SetOutputStatus(UF_OUTPUT_PORT port, boolean status);
+
+    public native UF_RET_CODE UF_SetLegacyWiegandConfig(boolean enableInput, boolean enableOutput, int fcBits, int fcCode);
+
+    public native UF_RET_CODE UF_GetLegacyWiegandConfig(boolean[] enableInput, boolean[] enableOutput, int[] fcBits, int[] fcCode);
+
+    public native UF_RET_CODE UF_MakeIOConfiguration(UFConfigComponentHeader[] configHeader, byte[] configData);
+
+
+    /**
+     * IO for SFM3000/SFM5000/SFM6000
+     */
+    public native UF_RET_CODE UF_GetGPIOConfiguration(UF_GPIO_PORT port, UF_GPIO_MODE[] mode, int[] numOfData, UFGPIOData[] data);
+
+    public native UF_RET_CODE UF_SetInputGPIO(UF_GPIO_PORT port, UFGPIOInputData data);
+
+    public native UF_RET_CODE UF_SetOutputGPIO(UF_GPIO_PORT port, int numOfData, UFGPIOOutputData[] data);
+
+    public native UF_RET_CODE UF_SetBuzzerGPIO(UF_GPIO_PORT port, int numOfData, UFGPIOOutputData[] data);
+
+    public native UF_RET_CODE UF_SetSharedGPIO(UF_GPIO_PORT port, UFGPIOInputData inputData, int numOfOutputData, UFGPIOOutputData[] outputData);
+
+    public native UF_RET_CODE UF_DisableGPIO(UF_GPIO_PORT port);
+
+    public native UF_RET_CODE UF_ClearAllGPIO();
+
+    public native UF_RET_CODE UF_SetDefaultGPIO();
+
+    public native UF_RET_CODE UF_EnableWiegandInput(UFGPIOWiegandData data);
+
+    public native UF_RET_CODE UF_EnableWiegandOutput(UFGPIOWiegandData data);
+
+    public native UF_RET_CODE UF_DisableWiegandInput();
+
+    public native UF_RET_CODE UF_DisableWiegandOutput();
+
+    public native UF_RET_CODE UF_MakeGPIOConfiguration(UFConfigComponentHeader[] configHeader, byte[] configData);
+
+
+    /**
+     * User memory
+     */
+    public native UF_RET_CODE UF_WriteUserMemory(byte[] memory);
+
+    public native UF_RET_CODE UF_ReadUserMemory(byte[] memory);
+
+    /**
+     * Log and time management
+     */
+    // Windows only, linux, mac and android should be implemented.
+    public native UF_RET_CODE UF_SetTime(time_t timeVal);
+
+    public native UF_RET_CODE UF_GetTime(time_t[] timeVal);
+
+    public native UF_RET_CODE UF_GetNumOfLog(int[] numOfLog, int[] numOfTotalLog);
+
+    public native UF_RET_CODE UF_ReadLog(int startIndex, int count, UFLogRecord[] logRecord, int[] readCount);
+
+    public native UF_RET_CODE UF_ReadLatestLog(int count, UFLogRecord[] logRecord, int[] readCount);
+
+    public native UF_RET_CODE UF_DeleteOldestLog(int count, int[] deletedCount);
+
+    public native UF_RET_CODE UF_DeleteAllLog();
+
+    public native UF_RET_CODE UF_ClearLogCache();
+
+    public native UF_RET_CODE UF_ReadLogCache(int dataPacketSize, int[] numOfLog, UFLogRecord[] logRecord);
+
+    public native UF_RET_CODE UF_SetCustomLogField(UF_LOG_SOURCE source, int customField);
+
+    public native UF_RET_CODE UF_GetCustomLogField(UF_LOG_SOURCE source, int[] customField);
+
+
+    /**
+     * Upgrade
+     */
+    public native UF_RET_CODE UF_Upgrade(final byte[] firmwareFilename, int dataPacketSize);
+
+    public native UF_RET_CODE UF_UpgradeEx(final byte[] firmwareFilename, UF_UPGRADE_OPTION option, int dataPacketSize);
+
+    public native UF_RET_CODE UF_DFU_Upgrade();
+
+    /**
+     * File System
+     */
+    public native UF_RET_CODE UF_FormatUserDatabase();
+
+    public native UF_RET_CODE UF_ResetSystemConfiguration();
+
+    /**
+     * Extended Wiegand
+     * Deprecated since version 3.0
+     */
+
+
+    /**
+     * Wiegand command card
+     * Deprecated since version 3.0
+     */
+
+    /**
+     * Smart Card
+     * Deprecated since version 3.0
+     */
+
+
+    /**
+     * Access Control
+     * Deprecated since version 3.0
+     */
+
+    /**
+     * WSQ Decoding
+     */
+    public native UF_RET_CODE UF_WSQ_Decode(byte[][] odata, int[] ow, int[] oh, int[] od, int[] oppi, int[] lossyflag, byte[] idata, final int ilen);
+
+    public native UF_RET_CODE UF_ReadImageEx(UFImage[] image, UF_IMAGE_TYPE type, int wsqBitRate);
+
+    public native UF_RET_CODE UF_ScanImageEx(UFImage[] image, UF_IMAGE_TYPE type, int wsqBitRate);
+
 
     static {
 
