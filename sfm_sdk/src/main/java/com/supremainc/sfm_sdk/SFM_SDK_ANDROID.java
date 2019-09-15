@@ -11,9 +11,12 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.supremainc.sfm_sdk.enumeration.UF_ADMIN_LEVEL;
+import com.supremainc.sfm_sdk.enumeration.UF_AUTH_TYPE;
 import com.supremainc.sfm_sdk.enumeration.UF_PROTOCOL;
 import com.supremainc.sfm_sdk.enumeration.UF_RET_CODE;
 import com.supremainc.sfm_sdk.enumeration.UF_UPGRADE_OPTION;
+import com.supremainc.sfm_sdk.enumeration.UF_USER_SECURITY_LEVEL;
 import com.supremainc.sfm_sdk.structure.UFConfigComponentHeader;
 import com.supremainc.sfm_sdk.structure.UFGPIOData;
 import com.supremainc.sfm_sdk.structure.UFGPIOInputData;
@@ -21,6 +24,7 @@ import com.supremainc.sfm_sdk.structure.UFGPIOOutputData;
 import com.supremainc.sfm_sdk.structure.UFGPIOWiegandData;
 import com.supremainc.sfm_sdk.structure.UFImage;
 import com.supremainc.sfm_sdk.structure.UFLogRecord;
+import com.supremainc.sfm_sdk.structure.UFModuleInfo;
 import com.supremainc.sfm_sdk.structure.UFOutputSignal;
 import com.supremainc.sfm_sdk.structure.UFUserInfo;
 import com.supremainc.sfm_sdk.structure.UFUserInfoEx;
@@ -42,25 +46,26 @@ public class SFM_SDK_ANDROID {
      * Constructor
      */
 
-    public SFM_SDK_ANDROID(AppCompatActivity activity)
-    {
+    public SFM_SDK_ANDROID(AppCompatActivity activity) {
         mActivity = activity;
     }
-    public SFM_SDK_ANDROID(AppCompatActivity activity, MessageHandler handler)
-    {
+
+    public SFM_SDK_ANDROID(AppCompatActivity activity, MessageHandler handler) {
         mActivity = activity;
         mHandler = handler;
     }
-    public SFM_SDK_ANDROID(AppCompatActivity activity, MessageHandler handler, BroadcastReceiver receiver){
+
+    public SFM_SDK_ANDROID(AppCompatActivity activity, MessageHandler handler, BroadcastReceiver receiver) {
         mActivity = activity;
         mHandler = handler;
         mUsbReceiver = receiver;
     }
+
     private final ServiceConnection usbConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder arg1) {
             usbService = ((UsbService.UsbBinder) arg1).getService();
-            if(mHandler != null)
+            if (mHandler != null)
                 usbService.setHandler(mHandler);
         }
 
@@ -93,32 +98,28 @@ public class SFM_SDK_ANDROID {
         filter.addAction(UsbService.ACTION_USB_DISCONNECTED);
         filter.addAction(UsbService.ACTION_USB_NOT_SUPPORTED);
         filter.addAction(UsbService.ACTION_USB_PERMISSION_NOT_GRANTED);
-        if(mUsbReceiver != null)
+        if (mUsbReceiver != null)
             mActivity.registerReceiver(mUsbReceiver, filter);
     }
 
 
-
-    private static String IntArrayToString(int[] arr)
-    {
-        String retval = Arrays.toString(arr).replace(", ","").replace("[","").replace("]","");
+    private static String IntArrayToString(int[] arr) {
+        String retval = Arrays.toString(arr).replace(", ", "").replace("[", "").replace("]", "");
         return retval;
     }
 
     /**
      * Destructor
      */
-    public void finalize()
-    {
+    public void finalize() {
 
     }
 
     /**
      * Overloaded functions
-     * */
+     */
 
-    public String UF_GetSDKVersion()
-    {
+    public String UF_GetSDKVersion() {
         int[] version_major = new int[1];
         int[] version_minor = new int[1];
         int[] version_revision = new int[1];
@@ -148,8 +149,7 @@ public class SFM_SDK_ANDROID {
     }
 
 
-    public void WriteTest(String data)
-    {
+    public void WriteTest(String data) {
         if (usbService != null) { // if UsbService was correctly binded, Send data
             byte[] a = data.getBytes();
             Log.d("[INFO write]", Arrays.toString(a));
@@ -162,16 +162,14 @@ public class SFM_SDK_ANDROID {
         }
     }
 
-    public void resumeService()
-    {
+    public void resumeService() {
         setFilters();  // Start listening notifications from UsbService
         startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
 
     }
 
-    public void pauseService()
-    {
-        if(mUsbReceiver !=null)
+    public void pauseService() {
+        if (mUsbReceiver != null)
             mActivity.unregisterReceiver(mUsbReceiver);
         mActivity.unbindService(usbConnection);
     }
@@ -181,7 +179,7 @@ public class SFM_SDK_ANDROID {
      */
 
 
-    public static interface SetupSerialCallback{
+    public static interface SetupSerialCallback {
         public void callback(int baudrate);
     }
 
@@ -189,7 +187,7 @@ public class SFM_SDK_ANDROID {
         public int callback(byte[] data, int size, int timeout);
     }
 
-    public static interface WriteSerialCallback{
+    public static interface WriteSerialCallback {
         public int callback(byte[] data, int size, int timeout);
     }
 
@@ -437,6 +435,14 @@ public class SFM_SDK_ANDROID {
         msgCallback = callback;
     }
 
+    public void SetUserInfoCallback(UserInfoCallback callback) {
+        userInfoCallback = callback;
+    }
+
+    public void SetScanCallback(ScanCallback callback) {
+        scanCallback = callback;
+    }
+
     /**
      * Callback functions from JNI
      */
@@ -498,6 +504,15 @@ public class SFM_SDK_ANDROID {
             receiveRawDataCallback.callback(readLen, totalSize);
     }
 
+    public void cbUserInfo(int index, int numOfTemplate) {
+        if (userInfoCallback != null)
+            userInfoCallback.callback(index, numOfTemplate);
+    }
+
+    public void cbScan(byte msg) {
+        if (scanCallback != null)
+            scanCallback.callback(msg);
+    }
 
     /**
      * Native Functions
@@ -562,7 +577,7 @@ public class SFM_SDK_ANDROID {
      * Module information
      */
 
-    public native UF_RET_CODE UF_GetModuleInfo(UF_MODULE_INFO info);
+    public native UF_RET_CODE UF_GetModuleInfo(UFModuleInfo info);
 
     public native String UF_GetModuleString(UF_MODULE_TYPE type, UF_MODULE_VERSION version, UF_MODULE_SENSOR sensorType);
 
@@ -633,7 +648,8 @@ public class SFM_SDK_ANDROID {
 
     public native UF_RET_CODE UF_GetAllUserInfoEx(UFUserInfoEx[] userInfo, int[] numOfUser, int[] numOfTemplate);
 
-    public native void UF_SortUserInfo(UFUserInfo[] userInfo, int numOfUser);
+    @Deprecated
+    public native void UF_SortUserInfo(UFUserInfo[] userInfo, int numOfUser); // Unsupported
 
     public native void UF_SetUserInfoCallback(UserInfoCallback callback);
 
@@ -647,9 +663,9 @@ public class SFM_SDK_ANDROID {
 
     public native UF_RET_CODE UF_ClearAllAdminLevel();
 
-    public native UF_RET_CODE UF_SaveDB(final byte[] fileName);
+    public native UF_RET_CODE UF_SaveDB(final String fileName);
 
-    public native UF_RET_CODE UF_LoadDB(final byte[] fileName);
+    public native UF_RET_CODE UF_LoadDB(final String fileName);
 
     public native UF_RET_CODE UF_CheckTemplate(int userID, int[] numOfTemplate);
 

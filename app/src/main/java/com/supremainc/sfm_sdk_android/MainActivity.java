@@ -15,11 +15,16 @@ import android.widget.Toast;
 
 import com.supremainc.sfm_sdk.MessageHandler;
 import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
-import com.supremainc.sfm_sdk.UF_MODULE_INFO;
+import com.supremainc.sfm_sdk.enumeration.UF_ADMIN_LEVEL;
+import com.supremainc.sfm_sdk.enumeration.UF_AUTH_TYPE;
+import com.supremainc.sfm_sdk.enumeration.UF_USER_SECURITY_LEVEL;
+import com.supremainc.sfm_sdk.structure.UFModuleInfo;
 import com.supremainc.sfm_sdk.UF_SYS_PARAM;
 import com.supremainc.sfm_sdk.UsbService;
 import com.supremainc.sfm_sdk.enumeration.UF_PROTOCOL;
 import com.supremainc.sfm_sdk.enumeration.UF_RET_CODE;
+import com.supremainc.sfm_sdk.structure.UFUserInfo;
+import com.supremainc.sfm_sdk.structure.UFUserInfoEx;
 
 import java.util.Arrays;
 //import com.supremainc.sfm_sdk.MessageHandler;
@@ -194,6 +199,27 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    SFM_SDK_ANDROID.UserInfoCallback userInfoCallback = new SFM_SDK_ANDROID.UserInfoCallback() {
+        @Override
+        public void callback(int index, int numOfTemplate) {
+
+
+        }
+    };
+
+    SFM_SDK_ANDROID.ScanCallback scanCallback = new SFM_SDK_ANDROID.ScanCallback() {
+        @Override
+        public void callback(byte errCode) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+
+                    display.append("Scan Success\n");
+                }
+            });
+
+        }
+    };
 
     private void Test_Basic_Packet_Interface() {
         UF_RET_CODE ret;
@@ -439,7 +465,7 @@ public class MainActivity extends AppCompatActivity {
 
         UF_RET_CODE ret = null;
 
-        UF_MODULE_INFO a = new UF_MODULE_INFO();
+        UFModuleInfo a = new UFModuleInfo();
 
 
         Log.d(TAG, String.format("Type : %s, version : %s, sensorType : %s", a.type(), a.version(), a.sensorType()));
@@ -523,6 +549,191 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void Test_Template_Management_Part1() {
+        final String TAG = "TEMPLATE_MANAGEMENT_1";
+
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+        sdk.UF_SetSendRawDataCallback(sendRawDataCallback);
+        sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
+        sdk.UF_SetUserInfoCallback(userInfoCallback);
+        sdk.UF_SetScanCallback(scanCallback);
+
+        UF_RET_CODE ret = null;
+
+        int[] numberOfTemplate = new int[1];
+        ret = sdk.UF_GetNumOfTemplate(numberOfTemplate);
+        Log.d(TAG, "Get Number of Template : " + ret.toString());
+        Log.d(TAG, String.format("Number of Templates  %d", numberOfTemplate[0]));
+
+        int[] maxNumberOfTemplate = new int[1];
+        ret = sdk.UF_GetMaxNumOfTemplate(maxNumberOfTemplate);
+        Log.d(TAG, "Get Max Number of Template : " + ret.toString());
+        Log.d(TAG, String.format("Max Number of Templates  %d", maxNumberOfTemplate[0]));
+
+        UFUserInfo[] userInfo = new UFUserInfo[10];
+        for (int i = 0; i < 10; i++)
+            userInfo[i] = new UFUserInfo();
+
+
+        int[] numOfUser = new int[1];
+        int[] numOfTemplates = new int[1];
+        ret = sdk.UF_GetAllUserInfo(userInfo, numOfUser, numOfTemplates);
+        Log.d(TAG, "Get All User Info : " + ret.toString());
+        Log.d(TAG, String.format("Number of User : %d, Number of Templates : %d", numOfUser[0], numOfTemplates[0]));
+        for (int i = 0; i < numOfUser[0]; i++)
+            Log.d(TAG, String.format("User ID : %d , Num of Template : %d , Admin Level : %X", userInfo[i].userID(), userInfo[i].numOfTemplate(), userInfo[i].adminLevel()));
+
+        numOfUser[0] = 0;
+        numOfTemplates[0] = 0;
+
+        UFUserInfoEx[] userInfoEx = new UFUserInfoEx[10];
+        for (int i = 0; i < 10; i++)
+            userInfoEx[i] = new UFUserInfoEx();
+        ret = sdk.UF_GetAllUserInfoEx(userInfoEx, numOfUser, numOfTemplates);
+        Log.d(TAG, "Get All User Info Ex : " + ret.toString());
+        Log.d(TAG, String.format("Number of User : %d, Number of Templates : %d", numOfUser[0], numOfTemplates[0]));
+        for (int i = 0; i < numOfUser[0]; i++) {
+            for (int j = 0; j < userInfoEx[i].numOfTemplate(); j++) {
+                Log.d(TAG, String.format("User ID : %d , Checksum : %X,  Num of Template : %d , Admin Level : %X", userInfoEx[i].userID(), userInfoEx[i].checkSum()[j], userInfoEx[i].numOfTemplate(), userInfoEx[i].adminLevel()));
+            }
+        }
+        ret = sdk.UF_SetAdminLevel(1, UF_ADMIN_LEVEL.UF_ADMIN_LEVEL_ALL);
+        Log.d(TAG, "Set Admin Level : " + ret.toString());
+
+        UF_ADMIN_LEVEL[] adminLevel = new UF_ADMIN_LEVEL[1];
+        ret = sdk.UF_GetAdminLevel(1, adminLevel);
+        Log.d(TAG, "Get Admin Level : " + ret.toString());
+        Log.d(TAG, "Admin Level : " + adminLevel[0].toString());
+
+        ret = sdk.UF_SetSecurityLevel(1, UF_USER_SECURITY_LEVEL.UF_USER_SECURITY_1_TO_1000);
+        Log.d(TAG, "Set User Security Level : " + ret.toString());
+
+        UF_USER_SECURITY_LEVEL[] userSecurityLevel = new UF_USER_SECURITY_LEVEL[1];
+        ret = sdk.UF_GetSecurityLevel(1, userSecurityLevel);
+        Log.d(TAG, "Get User Security Level : " + ret.toString());
+        Log.d(TAG, "User Security Level : " + userSecurityLevel[0].toString());
+
+        ret = sdk.UF_ClearAllAdminLevel();
+        Log.d(TAG, "Clear All Admin Level : " + ret.toString());
+
+        numOfTemplates[0] = 0;
+        ret = sdk.UF_CheckTemplate(1, numOfTemplates);
+        Log.d(TAG, "Check Template : " + ret.toString());
+        Log.d(TAG, String.format("Num of templates : %d", numOfTemplates[0]));
+
+        byte[] templateData = new byte[384 * numOfTemplates[0]];
+        ret = sdk.UF_ReadTemplate(1, numberOfTemplate, templateData);
+        Log.d(TAG, "Read Template : " + ret.toString());
+
+        String strTemplate = byteArrayToHex(templateData);
+        Log.d(TAG, strTemplate);
+
+        byte[] oneTemplateData = new byte[384];
+        ret = sdk.UF_ReadOneTemplate(1, 0, oneTemplateData);
+        Log.d(TAG, "Read One Template : " + ret.toString());
+
+        String strOneTemplate = byteArrayToHex(oneTemplateData);
+        Log.d(TAG, strOneTemplate);
+
+
+        Arrays.fill(oneTemplateData, (byte) 0);
+        int[] templateSize = new int[1];
+        int[] imageQuality = new int[1];
+        ret = sdk.UF_ScanTemplate(oneTemplateData, templateSize, imageQuality);
+        Log.d(TAG, "Scan Template : " + ret.toString());
+
+        strOneTemplate = byteArrayToHex(oneTemplateData);
+        Log.d(TAG, String.format("Template Size : %d, Image Quality : %d ", templateSize[0], imageQuality[0]) + "TemplateData : " + strOneTemplate);
+
+        ret = sdk.UF_FixProvisionalTemplate();
+        Log.d(TAG, "Fix Provisional Template : " + ret.toString());
+
+    }
+
+    private void Test_Template_Management_Part2() {
+        final String TAG = "TEMPLATE_MANAGEMENT_2";
+
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+        sdk.UF_SetSendRawDataCallback(sendRawDataCallback);
+        sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
+        sdk.UF_SetScanCallback(scanCallback);
+
+        UF_RET_CODE ret = null;
+
+        UF_AUTH_TYPE[] authType = new UF_AUTH_TYPE[1];
+
+        ret = sdk.UF_GetAuthType(1, authType);
+        Log.d(TAG, "Get Auth Type : " + ret.toString());
+
+        if (ret == UF_RET_CODE.UF_RET_SUCCESS)
+            Log.d(TAG, "Auth Type : " + authType[0].toString());
+
+        ret = sdk.UF_SetAuthType(1, UF_AUTH_TYPE.UF_AUTH_FINGERPRINT);
+        Log.d(TAG, "Set Auth Type : " + ret.toString());
+
+        ret = sdk.UF_ResetAllAuthType();
+        Log.d(TAG, "Reset All Auth Type : " + ret.toString());
+
+        ret = sdk.UF_DeleteAllBlacklist();
+        Log.d(TAG, "Delete All Blacklist : " + ret.toString());
+
+        ret = sdk.UF_ClearAllEntranceLimit();
+        Log.d(TAG, "Clear All Entrance Limit : " + ret.toString());
+
+//        final String filename = "/sdcard/templateDB.dat";
+//        ret = sdk.UF_SaveDB(filename);
+//        Log.d(TAG, "Save DB : " + ret.toString());
+//
+//
+//        ret = sdk.UF_DeleteAll();
+//        Log.d(TAG, "Delete All templates : " + ret.toString());
+//
+//        ret = sdk.UF_LoadDB(filename);
+//        Log.d(TAG, "Load DB : " + ret.toString());
+//
+        int[] numOfId = new int[1];
+        int[] userID = new int[1];
+        ret = sdk.UF_GetUserIDByAuthType(UF_AUTH_TYPE.UF_AUTH_FINGERPRINT, numOfId, userID);
+        Log.d(TAG, "Get User ID by Auth Type : " + ret.toString());
+
+        int[] numOfBlacklistedID = new int[1];
+        ret = sdk.UF_AddBlacklist(1, numOfBlacklistedID);
+        Log.d(TAG, "Add Black list : " + ret.toString());
+
+        ret = sdk.UF_DeleteBlacklist(1, numOfBlacklistedID);
+        Log.d(TAG, "Delete Black list : " + ret.toString());
+
+        ret = sdk.UF_GetBlacklist(numOfBlacklistedID, userID);
+        Log.d(TAG, "Get Black list : " + ret.toString());
+
+        ret = sdk.UF_SetEntranceLimit(1, 10);
+        Log.d(TAG, "Set Entrance Limit : " + ret.toString());
+
+        int entranceLimit[] = new int[1];
+        int entranceCount[] = new int[1];
+        ret = sdk.UF_GetEntranceLimit(1, entranceLimit, entranceCount);
+        Log.d(TAG, "Get Entrance Limit : " + ret.toString());
+
+        byte[] subID = new byte[1];
+        ret = sdk.UF_Identify(userID, subID);
+        Log.d(TAG, "Identify : " + ret.toString());
+        Log.d(TAG, String.format("UserID : %d  SubID : %d", userID[0], subID[0]));
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -541,11 +752,12 @@ public class MainActivity extends AppCompatActivity {
 
                 if (!editText.getText().toString().equals("")) {
 
-                    Test_Lock_Unlock_Module();
+                    Test_Template_Management_Part2();
                 }
             }
         });
     }
+
     @Override
     public void onResume() {
         super.onResume();

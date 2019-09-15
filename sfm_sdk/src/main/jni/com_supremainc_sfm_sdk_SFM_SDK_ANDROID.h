@@ -286,7 +286,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Can
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_GetModuleInfo
- * Signature: (Lcom/supremainc/sfm_sdk/UF_MODULE_INFO;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Lcom/supremainc/sfm_sdk/structure/UFModuleInfo;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetModuleInfo
         (JNIEnv *, jobject, jobject);
@@ -486,7 +486,7 @@ JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetUse
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_SetAdminLevel
- * Signature: (ILcom/supremainc/sfm_sdk/UF_ADMIN_LEVEL;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (ILcom/supremainc/sfm_sdk/enumeration/UF_ADMIN_LEVEL;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetAdminLevel
         (JNIEnv *, jobject, jint, jobject);
@@ -494,7 +494,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Set
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_GetAdminLevel
- * Signature: (I[Lcom/supremainc/sfm_sdk/UF_ADMIN_LEVEL;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (I[Lcom/supremainc/sfm_sdk/enumeration/UF_ADMIN_LEVEL;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetAdminLevel
         (JNIEnv *, jobject, jint, jobjectArray);
@@ -502,7 +502,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_SetSecurityLevel
- * Signature: (ILcom/supremainc/sfm_sdk/UF_USER_SECURITY_LEVEL;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (ILcom/supremainc/sfm_sdk/enumeration/UF_USER_SECURITY_LEVEL;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetSecurityLevel
         (JNIEnv *, jobject, jint, jobject);
@@ -510,7 +510,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Set
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_GetSecurityLevel
- * Signature: (I[Lcom/supremainc/sfm_sdk/UF_USER_SECURITY_LEVEL;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (I[Lcom/supremainc/sfm_sdk/enumeration/UF_USER_SECURITY_LEVEL;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetSecurityLevel
         (JNIEnv *, jobject, jint, jobjectArray);
@@ -526,18 +526,18 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Cle
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_SaveDB
- * Signature: ([B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Ljava/lang/String;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SaveDB
-        (JNIEnv *, jobject, jbyteArray);
+        (JNIEnv *, jobject, jstring);
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_LoadDB
- * Signature: ([B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Ljava/lang/String;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1LoadDB
-        (JNIEnv *, jobject, jbyteArray);
+        (JNIEnv *, jobject, jstring);
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
@@ -590,7 +590,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Fix
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_SetAuthType
- * Signature: (ILcom/supremainc/sfm_sdk/UF_AUTH_TYPE;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (ILcom/supremainc/sfm_sdk/enumeration/UF_AUTH_TYPE;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetAuthType
         (JNIEnv *, jobject, jint, jobject);
@@ -598,7 +598,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Set
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_GetAuthType
- * Signature: (I[Lcom/supremainc/sfm_sdk/UF_AUTH_TYPE;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (I[Lcom/supremainc/sfm_sdk/enumeration/UF_AUTH_TYPE;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetAuthType
         (JNIEnv *, jobject, jint, jobjectArray);
@@ -606,7 +606,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_GetUserIDByAuthType
- * Signature: (Lcom/supremainc/sfm_sdk/UF_AUTH_TYPE;[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Lcom/supremainc/sfm_sdk/enumeration/UF_AUTH_TYPE;[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetUserIDByAuthType
         (JNIEnv *, jobject, jobject, jintArray, jintArray);

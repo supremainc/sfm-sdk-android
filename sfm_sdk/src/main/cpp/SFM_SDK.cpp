@@ -33,7 +33,10 @@ JNIEnv *g_env;
 
 
 jmethodID g_msgCallback_method_id;
+jmethodID g_userInfoCallback_method_id;
+
 jobject g_msgCallback;
+jobject g_userInfoCallback;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -70,6 +73,59 @@ jobject jobjUF_PROTOCOL(JNIEnv *env, jobject thiz, UF_PROTOCOL protocol) {
 
     return ret;
 }
+
+jobject jobjUF_ADMIN_LEVEL(JNIEnv *env, jobject thiz, UF_ADMIN_LEVEL adminLevel) {
+
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_ADMIN_LEVEL");
+    if (cls == nullptr) return NULL;
+
+    jmethodID mid = env->GetStaticMethodID(cls, "ToSecurityLevel",
+                                           "(I)Lcom/supremainc/sfm_sdk/enumeration/UF_ADMIN_LEVEL;");
+    if (mid == nullptr) return NULL;
+
+    jobject ret = env->CallStaticObjectMethod(cls, mid, adminLevel);
+    if (ret == nullptr) return NULL;
+
+    env->DeleteLocalRef(cls);
+
+    return ret;
+}
+
+jobject
+jobjUF_USER_SECURITY_LEVEL(JNIEnv *env, jobject thiz, UF_USER_SECURITY_LEVEL securityLevel) {
+
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_USER_SECURITY_LEVEL");
+    if (cls == nullptr) return NULL;
+
+    jmethodID mid = env->GetStaticMethodID(cls, "ToAdminLevel",
+                                           "(I)Lcom/supremainc/sfm_sdk/enumeration/UF_USER_SECURITY_LEVEL;");
+    if (mid == nullptr) return NULL;
+
+    jobject ret = env->CallStaticObjectMethod(cls, mid, securityLevel);
+    if (ret == nullptr) return NULL;
+
+    env->DeleteLocalRef(cls);
+
+    return ret;
+}
+
+jobject jobjUF_AUTH_TYPE(JNIEnv *env, jobject thiz, UF_AUTH_TYPE authType) {
+
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_AUTH_TYPE");
+    if (cls == nullptr) return NULL;
+
+    jmethodID mid = env->GetStaticMethodID(cls, "ToAuthType",
+                                           "(I)Lcom/supremainc/sfm_sdk/enumeration/UF_AUTH_TYPE;");
+    if (mid == nullptr) return NULL;
+
+    jobject ret = env->CallStaticObjectMethod(cls, mid, authType);
+    if (ret == nullptr) return NULL;
+
+    env->DeleteLocalRef(cls);
+
+    return ret;
+}
+
 
 //jint jintUF_PROTOCOL(JNIEnv *env, jobject thiz, jobject protocol){
 //
@@ -247,6 +303,30 @@ BOOL MsgCallback(BYTE msg) {
     return ret;
 }
 
+void UserInfoCallback(int index, int numOfTemplate) {
+    static jmethodID cbUserInfo = NULL;
+    if (cbUserInfo == NULL) {
+        cbUserInfo = g_env->GetMethodID(g_cls, "cbUserInfo", "(II)V");
+        if (cbUserInfo == NULL)
+            return;
+    }
+    g_env->CallVoidMethod(g_obj, cbUserInfo, index, numOfTemplate);
+}
+
+void ScanCallback(BYTE msg) {
+    static jmethodID cbScan = NULL;
+    if (cbScan == NULL) {
+        cbScan = g_env->GetMethodID(g_cls, "cbScan", "(B)V");
+        if (cbScan == NULL)
+            return;
+    }
+
+    LOGE("Scan Success\n");
+
+    g_env->CallVoidMethod(g_obj, cbScan, msg);
+}
+
+
 /**
  * JNI_OnLoad
  */
@@ -394,6 +474,7 @@ Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetWriteSerialCallback_1Andro
     UF_SetReceiveDataPacketCallback(ReceiveDataPacketCallback);
     UF_SetSendRawDataCallback(SendRawDataCallback);
     UF_SetReceiveRawDataCallback(ReceiveRawDataCallback);
+    UF_SetScanCallback(ScanCallback);
 }
 
 /*
@@ -945,13 +1026,13 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Can
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_GetModuleInfo
- * Signature: (Lcom/supremainc/sfm_sdk/UF_MODULE_INFO;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Lcom/supremainc/sfm_sdk/structure/UFModuleInfo;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetModuleInfo
         (JNIEnv *env, jobject obj, jobject _info) {
     g_obj = obj;
 
-    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_MODULE_INFO");
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/structure/UFModuleInfo");
     jmethodID mid = env->GetMethodID(cls, "<init>",
                                      "(Lcom/supremainc/sfm_sdk/UF_MODULE_TYPE;Lcom/supremainc/sfm_sdk/UF_MODULE_VERSION;Lcom/supremainc/sfm_sdk/UF_MODULE_SENSOR;)V");
 
@@ -990,7 +1071,8 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
 
     jobject newObj = env->NewObject(cls, mid, typeObj, versionObj, sensorTypeObj);
 
-    jmethodID mm = env->GetMethodID(cls, "setInfo", "(Lcom/supremainc/sfm_sdk/UF_MODULE_INFO;)V");
+    jmethodID mm = env->GetMethodID(cls, "setInfo",
+                                    "(Lcom/supremainc/sfm_sdk/structure/UFModuleInfo;)V");
 
     env->CallVoidMethod(_info, mm, newObj);
 
@@ -1347,6 +1429,663 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Sav
     return jobjUF_RET_CODE(env, obj, ret);
 }
 
+/**
+ * Template Management
+ */
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_GetNumOfTemplate
+ * Signature: ([I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetNumOfTemplate
+        (JNIEnv *env, jobject obj, jintArray _numberOfTemplate) {
+    g_obj = obj;
+
+    jint *numberOfTemplate = env->GetIntArrayElements(_numberOfTemplate, 0);
+
+    UF_RET_CODE ret = UF_GetNumOfTemplate(reinterpret_cast<UINT32 *>(numberOfTemplate));
+
+    env->ReleaseIntArrayElements(_numberOfTemplate, numberOfTemplate, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_GetMaxNumOfTemplate
+ * Signature: ([I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetMaxNumOfTemplate
+        (JNIEnv *env, jobject obj, jintArray _maxNumOfTemplate) {
+    g_obj = obj;
+
+    jint *maxNumOfTemplate = env->GetIntArrayElements(_maxNumOfTemplate, 0);
+
+    UF_RET_CODE ret = UF_GetMaxNumOfTemplate(reinterpret_cast<UINT32 *>(maxNumOfTemplate));
+
+    env->ReleaseIntArrayElements(_maxNumOfTemplate, maxNumOfTemplate, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_GetAllUserInfo
+ * Signature: ([Lcom/supremainc/sfm_sdk/structure/UFUserInfo;[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetAllUserInfo
+        (JNIEnv *env, jobject obj, jobjectArray _userInfo, jintArray _numOfUser,
+         jintArray _numOfTemplate) {
+    g_obj = obj;
+    int i = 0;
+    if (_userInfo == NULL)
+        return NULL;
+
+    jsize UFUserInfoLen = env->GetArrayLength(_userInfo);
+    UFUserInfo *pUserInfo = new UFUserInfo[UFUserInfoLen];
+    int numOfUser = 0;
+    int numOfTemplate = 0;
+
+    UF_RET_CODE ret = UF_GetAllUserInfo(pUserInfo, reinterpret_cast<UINT32 *>(&numOfUser),
+                                        reinterpret_cast<UINT32 *>(&numOfTemplate));
+
+    if (ret == UF_RET_SUCCESS) {
+        for (i = 0; i < numOfUser; i++) {
+
+            jobject userInfoObj = env->GetObjectArrayElement(_userInfo, i);
+            jclass cls_userInfoObj = env->GetObjectClass(userInfoObj);
+            jfieldID fUserID = env->GetFieldID(cls_userInfoObj, "_userID", "I");
+            jfieldID fNumOfTemplate = env->GetFieldID(cls_userInfoObj, "_numOfTemplate", "B");
+            jfieldID fAdminLevel = env->GetFieldID(cls_userInfoObj, "_adminLevel", "B");
+            jfieldID fReserved = env->GetFieldID(cls_userInfoObj, "_reserved", "[B");
+
+            env->SetIntField(userInfoObj, fUserID, pUserInfo[i].userID);
+            env->SetByteField(userInfoObj, fNumOfTemplate, pUserInfo[i].numOfTemplate);
+            env->SetByteField(userInfoObj, fAdminLevel, pUserInfo[i].adminLevel);
+            LOGI("userID : %d numOfTemplate : %d adminLevel : %d", pUserInfo[i].userID,
+                 pUserInfo[i].numOfTemplate, pUserInfo[i].adminLevel);
+
+            jobject reserved_obj = env->GetObjectField(userInfoObj, fReserved);
+            env->SetByteArrayRegion(static_cast<jbyteArray>(reserved_obj), 0, 2,
+                                    reinterpret_cast<const jbyte *>(pUserInfo[i].reserved));
+            env->DeleteLocalRef(cls_userInfoObj);
+        }
+
+        env->SetIntArrayRegion(_numOfUser, 0, 1, &numOfUser);
+        env->SetIntArrayRegion(_numOfTemplate, 0, 1, &numOfTemplate);
+    }
+
+    delete[] pUserInfo;
+    return jobjUF_RET_CODE(env, obj, ret);
+
+}
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_GetAllUserInfoEx
+ * Signature: ([Lcom/supremainc/sfm_sdk/structure/UFUserInfoEx;[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetAllUserInfoEx
+        (JNIEnv *env, jobject obj, jobjectArray _userInfo, jintArray _numOfUser,
+         jintArray _numOfTemplate) {
+    g_obj = obj;
+    int i = 0;
+    if (_userInfo == NULL)
+        return NULL;
+
+    jsize UFUserInfoLen = env->GetArrayLength(_userInfo);
+    UFUserInfoEx *pUserInfo = new UFUserInfoEx[UFUserInfoLen];
+    int numOfUser = 0;
+    int numOfTemplate = 0;
+
+    UF_RET_CODE ret = UF_GetAllUserInfoEx(pUserInfo, reinterpret_cast<UINT32 *>(&numOfUser),
+                                          reinterpret_cast<UINT32 *>(&numOfTemplate));
+
+    if (ret == UF_RET_SUCCESS) {
+        for (i = 0; i < numOfUser; i++) {
+
+            jobject userInfoObj = env->GetObjectArrayElement(_userInfo, i);
+            jclass cls_userInfoObj = env->GetObjectClass(userInfoObj);
+            jfieldID fUserID = env->GetFieldID(cls_userInfoObj, "_userID", "I");
+            jfieldID fNumOfTemplate = env->GetFieldID(cls_userInfoObj, "_numOfTemplate", "B");
+            jfieldID fAdminLevel = env->GetFieldID(cls_userInfoObj, "_adminLevel", "B");
+            jfieldID fAuthMode = env->GetFieldID(cls_userInfoObj, "_authMode", "B");
+            jfieldID fSecurityLevel = env->GetFieldID(cls_userInfoObj, "_securityLevel", "B");
+
+            jfieldID fChecksum = env->GetFieldID(cls_userInfoObj, "_checkSum", "[I");
+            jfieldID fDuress = env->GetFieldID(cls_userInfoObj, "_duress", "[B");
+
+
+            env->SetIntField(userInfoObj, fUserID, pUserInfo[i].userID);
+            env->SetByteField(userInfoObj, fNumOfTemplate, pUserInfo[i].numOfTemplate);
+            env->SetByteField(userInfoObj, fAdminLevel, pUserInfo[i].adminLevel);
+            env->SetByteField(userInfoObj, fAuthMode, pUserInfo[i].authMode);
+            env->SetByteField(userInfoObj, fSecurityLevel, pUserInfo[i].securityLevel);
+
+            jobject checksumArray = env->GetObjectField(userInfoObj, fChecksum);
+            jobject duressArray = env->GetObjectField(userInfoObj, fDuress);
+            env->SetIntArrayRegion(static_cast<jintArray>(checksumArray), 0, 10,
+                                   reinterpret_cast<const jint *>(pUserInfo[i].checksum));
+
+            env->SetByteArrayRegion(static_cast<jbyteArray>(duressArray), 0, 10,
+                                    reinterpret_cast<const jbyte *>(pUserInfo[i].duress));
+
+            env->DeleteLocalRef(cls_userInfoObj);
+        }
+
+        env->SetIntArrayRegion(_numOfUser, 0, 1, &numOfUser);
+        env->SetIntArrayRegion(_numOfTemplate, 0, 1, &numOfTemplate);
+    }
+
+    delete[] pUserInfo;
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SortUserInfo
+ * Signature: ([Lcom/supremainc/sfm_sdk/structure/UFUserInfo;I)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SortUserInfo
+        (JNIEnv *, jobject, jobjectArray, jint);
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SetUserInfoCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/SFM_SDK_ANDROID/UserInfoCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetUserInfoCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    g_obj = obj;
+
+    UF_SetUserInfoCallback(UserInfoCallback);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SetAdminLevel
+ * Signature: (ILcom/supremainc/sfm_sdk/UF_ADMIN_LEVEL;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetAdminLevel
+        (JNIEnv *env, jobject obj, jint _userID, jobject _adminLevel) {
+    g_obj = obj;
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_ADMIN_LEVEL");
+    if (cls == NULL) return NULL;
+    jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
+    if (mid == NULL) return NULL;
+
+    UINT32 userID = static_cast<UINT32>(_userID);
+    UF_ADMIN_LEVEL adminLevel = (UF_ADMIN_LEVEL) env->CallIntMethod(_adminLevel, mid);
+
+    UF_RET_CODE ret = UF_SetAdminLevel(userID, adminLevel);
+
+    env->DeleteLocalRef(cls);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_GetAdminLevel
+ * Signature: (I[Lcom/supremainc/sfm_sdk/UF_ADMIN_LEVEL;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetAdminLevel
+        (JNIEnv *env, jobject obj, jint _userID, jobjectArray _adminLevel) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    UF_ADMIN_LEVEL adminLevel;
+
+    UF_RET_CODE ret = UF_GetAdminLevel(userID, &adminLevel);
+
+    if (ret == UF_RET_SUCCESS) {
+        env->SetObjectArrayElement(_adminLevel, 0, jobjUF_ADMIN_LEVEL(env, obj, adminLevel));
+    }
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SetSecurityLevel
+ * Signature: (ILcom/supremainc/sfm_sdk/UF_USER_SECURITY_LEVEL;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetSecurityLevel
+        (JNIEnv *env, jobject obj, jint _userID, jobject _securityLevel) {
+    g_obj = obj;
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_USER_SECURITY_LEVEL");
+    if (cls == NULL) return NULL;
+    jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
+    if (mid == NULL) return NULL;
+
+    UINT32 userID = (UINT32) _userID;
+    UF_USER_SECURITY_LEVEL securityLevel = (UF_USER_SECURITY_LEVEL) env->CallIntMethod(
+            _securityLevel, mid);
+
+    UF_RET_CODE ret = UF_SetSecurityLevel(userID, securityLevel);
+
+    env->DeleteLocalRef(cls);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_GetSecurityLevel
+ * Signature: (I[Lcom/supremainc/sfm_sdk/UF_USER_SECURITY_LEVEL;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetSecurityLevel
+        (JNIEnv *env, jobject obj, jint _userID, jobjectArray _securityLevel) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    UF_USER_SECURITY_LEVEL securityLevel;
+
+    UF_RET_CODE ret = UF_GetSecurityLevel(_userID, &securityLevel);
+
+    if (ret == UF_RET_SUCCESS) {
+        env->SetObjectArrayElement(_securityLevel, 0,
+                                   jobjUF_USER_SECURITY_LEVEL(env, obj, securityLevel));
+    }
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_ClearAllAdminLevel
+ * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ClearAllAdminLevel
+        (JNIEnv *env, jobject obj) {
+    g_obj = obj;
+
+    UF_RET_CODE ret = UF_ClearAllAdminLevel();
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SaveDB
+ * Signature: (Ljava/lang/String;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SaveDB
+        (JNIEnv *env, jobject obj, jstring _filename) {
+    g_obj = obj;
+    const char *filename = env->GetStringUTFChars(_filename, 0);
+
+    UF_RET_CODE ret = UF_SaveDB(filename);
+
+    env->ReleaseStringUTFChars(_filename, filename);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_LoadDB
+ * Signature: (Ljava/lang/String;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1LoadDB
+        (JNIEnv *env, jobject obj, jstring _filename) {
+    g_obj = obj;
+    const char *filename = env->GetStringUTFChars(_filename, 0);
+
+    UF_RET_CODE ret = UF_LoadDB(filename);
+
+    env->ReleaseStringUTFChars(_filename, filename);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_CheckTemplate
+ * Signature: (I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1CheckTemplate
+        (JNIEnv *env, jobject obj, jint _userID, jintArray _numOfTemplate) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    UINT32 numOfTemplate = 0;
+    UF_RET_CODE ret = UF_CheckTemplate(userID, &numOfTemplate);
+    if (ret == UF_RET_SUCCESS) {
+        env->SetIntArrayRegion(_numOfTemplate, 0, 1,
+                               reinterpret_cast<const jint *>(&numOfTemplate));
+    }
+
+    return jobjUF_RET_CODE(env, obj, ret);
+
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_ReadTemplate
+ * Signature: (I[I[B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ReadTemplate
+        (JNIEnv *env, jobject obj, jint _userID, jintArray _numOfTemplate,
+         jbyteArray _templateData) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    UINT32 numOfTemplate = 0;
+
+    jbyte *templateData = env->GetByteArrayElements(_templateData, 0);
+
+    UF_RET_CODE ret = UF_ReadTemplate(userID, &numOfTemplate,
+                                      reinterpret_cast<BYTE *>(templateData));
+
+    env->ReleaseByteArrayElements(_templateData, templateData, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_ReadOneTemplate
+ * Signature: (II[B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ReadOneTemplate
+        (JNIEnv *env, jobject obj, jint _userID, jint _subID, jbyteArray _templateData) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    UINT32 subID = (UINT32) _subID;
+
+    jbyte *templateData = env->GetByteArrayElements(_templateData, 0);
+
+    UF_RET_CODE ret = UF_ReadOneTemplate(userID, subID, reinterpret_cast<BYTE *>(templateData));
+
+    env->ReleaseByteArrayElements(_templateData, templateData, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SetScanCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/SFM_SDK_ANDROID/ScanCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetScanCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    UF_SetScanCallback(ScanCallback);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_ScanTemplate
+ * Signature: ([B[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ScanTemplate
+        (JNIEnv *env, jobject obj, jbyteArray _templateData, jintArray _templateSize,
+         jintArray _imageQuality) {
+    g_obj = obj;
+
+    jbyte *templateData = env->GetByteArrayElements(_templateData, 0);
+    jint *templateSize = env->GetIntArrayElements(_templateSize, 0);
+    jint *imageQuality = env->GetIntArrayElements(_imageQuality, 0);
+
+    UF_RET_CODE ret = UF_ScanTemplate(reinterpret_cast<BYTE *>(templateData),
+                                      reinterpret_cast<UINT32 *>(templateSize),
+                                      reinterpret_cast<UINT32 *>(imageQuality));
+
+    env->ReleaseByteArrayElements(_templateData, templateData, 0);
+    env->ReleaseIntArrayElements(_templateSize, templateSize, 0);
+    env->ReleaseIntArrayElements(_imageQuality, imageQuality, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_FixProvisionalTemplate
+ * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1FixProvisionalTemplate
+        (JNIEnv *env, jobject obj) {
+    g_obj = obj;
+    UF_RET_CODE ret = UF_FixProvisionalTemplate();
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SetAuthType
+ * Signature: (ILcom/supremainc/sfm_sdk/UF_AUTH_TYPE;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetAuthType
+        (JNIEnv *env, jobject obj, jint _userID, jobject _authType) {
+    g_obj = obj;
+
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_AUTH_TYPE");
+    jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
+
+    UINT32 userID = (UINT32) _userID;
+    UF_AUTH_TYPE authType = (UF_AUTH_TYPE) (env->CallIntMethod(_authType, mid));
+
+    UF_RET_CODE ret = UF_SetAuthType(userID, authType);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_GetAuthType
+ * Signature: (I[Lcom/supremainc/sfm_sdk/UF_AUTH_TYPE;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetAuthType
+        (JNIEnv *env, jobject obj, jint _userID, jobjectArray _authType) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    UF_AUTH_TYPE authType;
+
+    UF_RET_CODE ret = UF_GetAuthType(userID, &authType);
+
+    if (ret == UF_RET_SUCCESS) {
+        env->SetObjectArrayElement(_authType, 0, jobjUF_AUTH_TYPE(env, obj, authType));
+    }
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_GetUserIDByAuthType
+ * Signature: (Lcom/supremainc/sfm_sdk/UF_AUTH_TYPE;[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetUserIDByAuthType
+        (JNIEnv *env, jobject obj, jobject _authType, jintArray _numOfID, jintArray _userID) {
+    g_obj = obj;
+
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_AUTH_TYPE");
+    jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
+
+    UF_AUTH_TYPE authType = (UF_AUTH_TYPE) env->CallIntMethod(_authType, mid);
+    jint *numOfID = env->GetIntArrayElements(_numOfID, 0);
+    jint *userID = env->GetIntArrayElements(_userID, 0);
+    UF_RET_CODE ret = UF_GetUserIDByAuthType(authType, numOfID, reinterpret_cast<UINT32 *>(userID));
+
+    env->ReleaseIntArrayElements(_numOfID, numOfID, 0);
+    env->ReleaseIntArrayElements(_userID, userID, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_ResetAllAuthType
+ * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ResetAllAuthType
+        (JNIEnv *env, jobject obj) {
+    g_obj = obj;
+    UF_RET_CODE ret = UF_ResetAllAuthType();
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_AddBlacklist
+ * Signature: (I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1AddBlacklist
+        (JNIEnv *env, jobject obj, jint _userID, jintArray _numOfBlacklistedID) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    jint *numOfBlacklistedID = env->GetIntArrayElements(_numOfBlacklistedID, 0);
+
+    UF_RET_CODE ret = UF_AddBlacklist(userID, numOfBlacklistedID);
+
+    env->ReleaseIntArrayElements(_numOfBlacklistedID, numOfBlacklistedID, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_DeleteBlacklist
+ * Signature: (I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DeleteBlacklist
+        (JNIEnv *env, jobject obj, jint _userID, jintArray _numOfBlacklistedID) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    jint *numOfBlacklistedID = env->GetIntArrayElements(_numOfBlacklistedID, 0);
+    UF_RET_CODE ret = UF_DeleteBlacklist(userID, numOfBlacklistedID);
+
+    env->ReleaseIntArrayElements(_numOfBlacklistedID, numOfBlacklistedID, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+
+}
+
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_GetBlacklist
+ * Signature: ([I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetBlacklist
+        (JNIEnv *env, jobject obj, jintArray _numOfBlacklistedID, jintArray _userID) {
+    g_obj = obj;
+
+    jint *numOfBlacklistedID = env->GetIntArrayElements(_numOfBlacklistedID, 0);
+    jint *userID = env->GetIntArrayElements(_userID, 0);
+
+    UF_RET_CODE ret = UF_GetBlacklist(numOfBlacklistedID, reinterpret_cast<UINT32 *>(userID));
+
+    env->ReleaseIntArrayElements(_numOfBlacklistedID, numOfBlacklistedID, 0);
+    env->ReleaseIntArrayElements(_userID, userID, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_DeleteAllBlacklist
+ * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DeleteAllBlacklist
+        (JNIEnv *env, jobject obj) {
+    g_obj = obj;
+
+    UF_RET_CODE ret = UF_ResetAllAuthType();
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SetEntranceLimit
+ * Signature: (II)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetEntranceLimit
+        (JNIEnv *env, jobject obj, jint _userID, jint _entranceLimit) {
+    g_obj = obj;
+
+    UINT32 userID = _userID;
+    int entranceLimit = (int) _entranceLimit;
+
+    UF_RET_CODE ret = UF_SetEntranceLimit(userID, entranceLimit);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_GetEntranceLimit
+ * Signature: (I[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetEntranceLimit
+        (JNIEnv *env, jobject obj, jint _userID, jintArray _entranceLimit,
+         jintArray _entranceCount) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    jint *entranceLimit = env->GetIntArrayElements(_entranceLimit, 0);
+    jint *entranceCount = env->GetIntArrayElements(_entranceCount, 0);
+
+    UF_RET_CODE ret = UF_GetEntranceLimit(userID, entranceLimit, entranceCount);
+
+    env->ReleaseIntArrayElements(_entranceLimit, entranceLimit, 0);
+    env->ReleaseIntArrayElements(_entranceCount, entranceCount, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_ClearAllEntranceLimit
+ * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ClearAllEntranceLimit
+        (JNIEnv *env, jobject obj) {
+    g_obj = obj;
+    UF_RET_CODE ret = UF_ClearAllEntranceLimit();
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_DeleteAll
+ * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DeleteAll
+        (JNIEnv *env, jobject obj) {
+    g_obj = obj;
+
+    UF_RET_CODE ret = UF_DeleteAll();
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_Identify
+ * Signature: ([I[B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Identify
+        (JNIEnv *env, jobject obj, jintArray _userID, jbyteArray _subID) {
+    g_obj = obj;
+
+    jint *userID = env->GetIntArrayElements(_userID, 0);
+    jbyte *subID = env->GetByteArrayElements(_subID, 0);
+
+    UF_RET_CODE ret = UF_Identify(reinterpret_cast<UINT32 *>(userID),
+                                  reinterpret_cast<BYTE *>(subID));
+
+    env->ReleaseIntArrayElements(_userID, userID, 0);
+    env->ReleaseByteArrayElements(_subID, subID, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
 
 
 #ifdef __cplusplus

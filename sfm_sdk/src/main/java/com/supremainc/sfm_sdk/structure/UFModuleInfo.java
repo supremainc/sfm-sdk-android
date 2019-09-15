@@ -1,6 +1,10 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.structure;
 
-public class UF_MODULE_INFO {
+import com.supremainc.sfm_sdk.UF_MODULE_SENSOR;
+import com.supremainc.sfm_sdk.UF_MODULE_TYPE;
+import com.supremainc.sfm_sdk.UF_MODULE_VERSION;
+
+public class UFModuleInfo {
     public UF_MODULE_TYPE _type;
     public UF_MODULE_VERSION _version;
     public UF_MODULE_SENSOR _sensor;
@@ -17,17 +21,17 @@ public class UF_MODULE_INFO {
         return this._sensor;
     }
 
-    public UF_MODULE_INFO(UF_MODULE_TYPE t, UF_MODULE_VERSION v, UF_MODULE_SENSOR s) {
+    public UFModuleInfo(UF_MODULE_TYPE t, UF_MODULE_VERSION v, UF_MODULE_SENSOR s) {
         this._type = t;
         this._version = v;
         this._sensor = s;
     }
 
-    public UF_MODULE_INFO() {
+    public UFModuleInfo() {
 
     }
 
-    public void setInfo(UF_MODULE_INFO info) {
+    public void setInfo(UFModuleInfo info) {
         this._type = info._type;
         this._version = info._version;
         this._sensor = info._sensor;
