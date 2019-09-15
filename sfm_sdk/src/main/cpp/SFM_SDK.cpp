@@ -942,22 +942,109 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Can
 /**
  * Module Information
  */
-
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_GetModuleInfo
- * Signature: ([Lcom/supremainc/sfm_sdk/UF_MODULE_TYPE;[Lcom/supremainc/sfm_sdk/UF_MODULE_VERSION;[Lcom/supremainc/sfm_sdk/UF_MODULE_SENSOR;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Lcom/supremainc/sfm_sdk/UF_MODULE_INFO;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetModuleInfo
-        (JNIEnv *, jobject, jobjectArray, jobjectArray, jobjectArray);
+        (JNIEnv *env, jobject obj, jobject _info) {
+    g_obj = obj;
+
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_MODULE_INFO");
+    jmethodID mid = env->GetMethodID(cls, "<init>",
+                                     "(Lcom/supremainc/sfm_sdk/UF_MODULE_TYPE;Lcom/supremainc/sfm_sdk/UF_MODULE_VERSION;Lcom/supremainc/sfm_sdk/UF_MODULE_SENSOR;)V");
+
+    jclass cls_type = env->FindClass("com/supremainc/sfm_sdk/UF_MODULE_TYPE");
+    if (cls_type == NULL) return NULL;
+
+    jclass cls_version = env->FindClass("com/supremainc/sfm_sdk/UF_MODULE_VERSION");
+    if (cls_version == NULL) return NULL;
+
+    jclass cls_sensorType = env->FindClass("com/supremainc/sfm_sdk/UF_MODULE_SENSOR");
+    if (cls_sensorType == NULL) return NULL;
+
+    jmethodID mid_type = env->GetStaticMethodID(cls_type, "ToObjectType",
+                                                "(I)Lcom/supremainc/sfm_sdk/UF_MODULE_TYPE;");
+    if (mid_type == NULL) return NULL;
+
+    jmethodID mid_version = env->GetStaticMethodID(cls_version, "ToObjectType",
+                                                   "(I)Lcom/supremainc/sfm_sdk/UF_MODULE_VERSION;");
+    if (mid_version == NULL) return NULL;
+
+    jmethodID mid_sensorType = env->GetStaticMethodID(cls_sensorType, "ToObjectType",
+                                                      "(I)Lcom/supremainc/sfm_sdk/UF_MODULE_SENSOR;");
+    if (mid_sensorType == NULL) return NULL;
+
+    int type;
+    int version;
+    int sensorType;
+
+    UF_RET_CODE ret = UF_GetModuleInfo(reinterpret_cast<UF_MODULE_TYPE *>(&type),
+                                       reinterpret_cast<UF_MODULE_VERSION *>(&version),
+                                       reinterpret_cast<UF_MODULE_SENSOR *>(&sensorType));
+
+    jobject typeObj = env->CallStaticObjectMethod(cls_type, mid_type, type);
+    jobject versionObj = env->CallStaticObjectMethod(cls_version, mid_version, version);
+    jobject sensorTypeObj = env->CallStaticObjectMethod(cls_sensorType, mid_sensorType, sensorType);
+
+    jobject newObj = env->NewObject(cls, mid, typeObj, versionObj, sensorTypeObj);
+
+    jmethodID mm = env->GetMethodID(cls, "setInfo", "(Lcom/supremainc/sfm_sdk/UF_MODULE_INFO;)V");
+
+    env->CallVoidMethod(_info, mm, newObj);
+
+    env->DeleteLocalRef(newObj);
+    env->DeleteLocalRef(cls_type);
+    env->DeleteLocalRef(cls_version);
+    env->DeleteLocalRef(cls_sensorType);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_GetModuleString
- * Signature: (Lcom/supremainc/sfm_sdk/UF_MODULE_TYPE;Lcom/supremainc/sfm_sdk/UF_MODULE_VERSION;Lcom/supremainc/sfm_sdk/UF_MODULE_SENSOR;)[B
+ * Signature: (Lcom/supremainc/sfm_sdk/UF_MODULE_TYPE;Lcom/supremainc/sfm_sdk/UF_MODULE_VERSION;Lcom/supremainc/sfm_sdk/UF_MODULE_SENSOR;)Ljava/lang/String;
  */
-JNIEXPORT jbyteArray JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetModuleString
-        (JNIEnv *, jobject, jobject, jobject, jobject);
+JNIEXPORT jstring JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetModuleString
+        (JNIEnv *env, jobject obj, jobject _type, jobject _version, jobject _sensorType) {
+    g_obj = obj;
+
+    jclass cls_type = env->FindClass("com/supremainc/sfm_sdk/UF_MODULE_TYPE");
+    if (cls_type == NULL) return NULL;
+
+    jclass cls_version = env->FindClass("com/supremainc/sfm_sdk/UF_MODULE_VERSION");
+    if (cls_version == NULL) return NULL;
+
+    jclass cls_sensorType = env->FindClass("com/supremainc/sfm_sdk/UF_MODULE_SENSOR");
+    if (cls_sensorType == NULL) return NULL;
+
+    jmethodID mid_type = env->GetMethodID(cls_type, "getValue", "()I");
+    if (mid_type == NULL) return NULL;
+
+    jmethodID mid_version = env->GetMethodID(cls_version, "getValue", "()I");
+    if (mid_version == NULL) return NULL;
+
+    jmethodID mid_sensorType = env->GetMethodID(cls_sensorType, "getValue", "()I");
+    if (mid_sensorType == NULL) return NULL;
+
+    int type = env->CallIntMethod(_type, mid_type);
+    int version = env->CallIntMethod(_version, mid_version);
+    int sensorType = env->CallIntMethod(_sensorType, mid_sensorType);
+
+    char *moduleString = UF_GetModuleString(static_cast<UF_MODULE_TYPE>(type),
+                                            static_cast<UF_MODULE_VERSION>(version),
+                                            static_cast<UF_MODULE_SENSOR>(sensorType));
+
+    if (moduleString == NULL)
+        return NULL;
+
+    return env->NewStringUTF(moduleString);
+
+
+}
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID

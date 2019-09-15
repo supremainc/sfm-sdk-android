@@ -11,6 +11,7 @@ public enum UF_MODULE_TYPE {
     UF_MODULE_5000(7),
     UF_MODULE_5500(8),
     UF_MODULE_6000(9),
+    UF_MODULE_SLIM(10),
     UF_MODULE_UNKNOWN(-1),
     ;
     private int value;
@@ -22,4 +23,21 @@ public enum UF_MODULE_TYPE {
     public int getValue() {
         return this.value;
     }
+
+    private void setValue(int i) {
+        this.value = i;
+    }
+
+    public static UF_MODULE_TYPE ToObjectType(int i) {
+        UF_MODULE_TYPE result = null;
+
+        for (UF_MODULE_TYPE iter : UF_MODULE_TYPE.values()) {
+            if (i == iter.getValue()) {
+                result = iter;
+            }
+        }
+        return result;
+    }
+
+
 }

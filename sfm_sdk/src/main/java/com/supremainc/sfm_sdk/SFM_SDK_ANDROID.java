@@ -38,8 +38,6 @@ public class SFM_SDK_ANDROID {
     private static AppCompatActivity mActivity = null;
     private static BroadcastReceiver mUsbReceiver = null;
 
-
-
     /**
      * Constructor
      */
@@ -564,9 +562,14 @@ public class SFM_SDK_ANDROID {
      * Module information
      */
 
-    public native UF_RET_CODE UF_GetModuleInfo(UF_MODULE_TYPE[] type, UF_MODULE_VERSION[] version, UF_MODULE_SENSOR[] sensorType);
+    public native UF_RET_CODE UF_GetModuleInfo(UF_MODULE_INFO info);
 
-    public native byte[] UF_GetModuleString(UF_MODULE_TYPE type, UF_MODULE_VERSION version, UF_MODULE_SENSOR sensorType);
+    public native String UF_GetModuleString(UF_MODULE_TYPE type, UF_MODULE_VERSION version, UF_MODULE_SENSOR sensorType);
+
+
+    /**
+     * Searching module
+     */
 
     public native UF_RET_CODE UF_SearchModule(final byte[] port, int[] baudrate, boolean[] asciiMode, UF_PROTOCOL[] protocol, int[] moduleID, SerialCallback callback);
 

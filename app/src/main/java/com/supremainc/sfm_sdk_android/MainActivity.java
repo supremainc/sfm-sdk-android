@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.supremainc.sfm_sdk.MessageHandler;
 import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
+import com.supremainc.sfm_sdk.UF_MODULE_INFO;
 import com.supremainc.sfm_sdk.UF_SYS_PARAM;
 import com.supremainc.sfm_sdk.UsbService;
 import com.supremainc.sfm_sdk.enumeration.UF_PROTOCOL;
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
                     sdk.UF_InitSysParameter();
 //
-                    UF_RET_CODE result = sdk.UF_InitCommPort(115200, true);
+                    UF_RET_CODE result = sdk.UF_InitCommPort(115200, false);
 //
 //                    String ret = result.toString();
 //
@@ -421,6 +422,39 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+    private void Test_Module_Information() {
+        final String TAG = "TEST_MODULE_INFORMATION";
+
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+        sdk.UF_SetSendRawDataCallback(sendRawDataCallback);
+        sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
+
+        UF_RET_CODE ret = null;
+
+        UF_MODULE_INFO a = new UF_MODULE_INFO();
+
+
+        Log.d(TAG, String.format("Type : %s, version : %s, sensorType : %s", a.type(), a.version(), a.sensorType()));
+
+        sdk.UF_GetModuleInfo(a);
+
+        Log.d(TAG, String.format("Type : %s, version : %s, sensorType : %s", a.type(), a.version(), a.sensorType()));
+
+        String moduleString = sdk.UF_GetModuleString(a.type(), a.version(), a.sensorType());
+        Log.d(TAG, "Module String : " + moduleString);
+
+
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -439,7 +473,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (!editText.getText().toString().equals("")) {
 
-                    Test_System_Parameter();
+                    Test_Module_Information();
                 }
             }
         });
