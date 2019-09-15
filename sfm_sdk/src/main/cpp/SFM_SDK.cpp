@@ -1101,7 +1101,12 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Res
  * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Lock
-        (JNIEnv *, jobject);
+        (JNIEnv *env, jobject obj) {
+    g_obj = obj;
+    UF_RET_CODE ret = UF_Lock();
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
@@ -1109,7 +1114,20 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Loc
  * Signature: ([B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Unlock
-        (JNIEnv *, jobject, jbyteArray);
+        (JNIEnv *env, jobject obj, jbyteArray _password) {
+    g_obj = obj;
+
+    jbyte *password = env->GetByteArrayElements(_password, 0);
+
+    if (password == NULL)
+        return NULL;
+
+    UF_RET_CODE ret = UF_Unlock(reinterpret_cast<const unsigned char *>(password));
+
+    env->ReleaseByteArrayElements(_password, password, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
@@ -1117,7 +1135,20 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Unl
  * Signature: ([B[B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ChangePassword
-        (JNIEnv *, jobject, jbyteArray, jbyteArray);
+        (JNIEnv *env, jobject obj, jbyteArray _newPassword, jbyteArray _oldPassword) {
+    g_obj = obj;
+
+    jbyte *newPassword = env->GetByteArrayElements(_newPassword, 0);
+    jbyte *oldPassword = env->GetByteArrayElements(_oldPassword, 0);
+
+    UF_RET_CODE ret = UF_ChangePassword(reinterpret_cast<const unsigned char *>(newPassword),
+                                        reinterpret_cast<const unsigned char *>(oldPassword));
+
+    env->ReleaseByteArrayElements(_newPassword, newPassword, 0);
+    env->ReleaseByteArrayElements(_oldPassword, oldPassword, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
@@ -1141,7 +1172,12 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Wri
  * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1PowerOff
-        (JNIEnv *, jobject);
+        (JNIEnv *env, jobject obj) {
+    g_obj = obj;
+    UF_RET_CODE ret = UF_PowerOff();
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID

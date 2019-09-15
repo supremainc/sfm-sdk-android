@@ -476,6 +476,53 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "Reset Module : " + ret.toString());
     }
 
+    private void Test_Lock_Unlock_Module() {
+        final String TAG = "TEST_LOCK_UNLOCK_MODULE";
+
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+        sdk.UF_SetSendRawDataCallback(sendRawDataCallback);
+        sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
+
+        UF_RET_CODE ret = null;
+
+        ret = sdk.UF_Lock();
+        Log.d(TAG, "Lock Module : " + ret.toString());
+
+        byte[] password = new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        ret = sdk.UF_Unlock(password);
+        Log.d(TAG, "Unlock Module : " + ret.toString());
+
+        byte[] newPassword = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+
+        ret = sdk.UF_ChangePassword(newPassword, password);
+        Log.d(TAG, "Change Password : " + ret.toString());
+
+        ret = sdk.UF_Lock();
+        Log.d(TAG, "Lock Module : " + ret.toString());
+
+        ret = sdk.UF_Unlock(password);
+        Log.d(TAG, "[Fail] Unlock Module : " + ret.toString());
+
+        ret = sdk.UF_Unlock(newPassword);
+        Log.d(TAG, "Unlock Module : " + ret.toString());
+
+        // roll back
+        ret = sdk.UF_ChangePassword(password, newPassword);
+        Log.d(TAG, "[Roll back] Change Password : " + ret.toString());
+
+        // Power off
+        ret = sdk.UF_PowerOff();
+        Log.d(TAG, "Power off : " + ret.toString());
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -494,7 +541,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (!editText.getText().toString().equals("")) {
 
-                    Test_Calibrate_and_Reset();
+                    Test_Lock_Unlock_Module();
                 }
             }
         });

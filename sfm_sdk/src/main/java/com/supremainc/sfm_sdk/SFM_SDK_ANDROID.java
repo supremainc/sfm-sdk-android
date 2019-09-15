@@ -586,15 +586,24 @@ public class SFM_SDK_ANDROID {
 
     public native UF_RET_CODE UF_Reset();
 
+    /**
+     * Lock/Unlock Module
+     */
+
     public native UF_RET_CODE UF_Lock();
 
     public native UF_RET_CODE UF_Unlock(final byte[] password);
 
     public native UF_RET_CODE UF_ChangePassword(final byte[] newPassword, final byte[] oldPassword);
 
+
     public native UF_RET_CODE UF_ReadChallengeCode(byte[] challengeCode);
 
     public native UF_RET_CODE UF_WriteChallengeCode(final byte[] challengeCode);
+
+    /**
+     * Power off
+     */
 
     public native UF_RET_CODE UF_PowerOff();
 
