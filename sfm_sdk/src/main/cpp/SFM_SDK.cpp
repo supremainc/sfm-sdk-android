@@ -1076,7 +1076,11 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Sea
  * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1CalibrateSensor
-        (JNIEnv *, jobject);
+        (JNIEnv *env, jobject obj) {
+    g_obj = obj;
+    UF_RET_CODE ret = UF_CalibrateSensor();
+    return jobjUF_RET_CODE(env, obj, ret);
+}
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
@@ -1084,7 +1088,12 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Cal
  * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Reset
-        (JNIEnv *, jobject);
+        (JNIEnv *env, jobject obj) {
+    g_obj = obj;
+    UF_RET_CODE ret = UF_Reset();
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID

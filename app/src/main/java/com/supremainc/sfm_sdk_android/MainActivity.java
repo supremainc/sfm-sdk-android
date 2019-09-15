@@ -451,8 +451,29 @@ public class MainActivity extends AppCompatActivity {
         String moduleString = sdk.UF_GetModuleString(a.type(), a.version(), a.sensorType());
         Log.d(TAG, "Module String : " + moduleString);
 
+    }
 
+    private void Test_Calibrate_and_Reset() {
+        final String TAG = "TEST_CALIBRATE_AND_RESET";
 
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+        sdk.UF_SetSendRawDataCallback(sendRawDataCallback);
+        sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
+
+        UF_RET_CODE ret = null;
+
+        ret = sdk.UF_CalibrateSensor();
+        Log.d(TAG, "Calibrate Sensor : " + ret.toString());
+
+        ret = sdk.UF_Reset();
+        Log.d(TAG, "Reset Module : " + ret.toString());
     }
 
     @Override
@@ -473,7 +494,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (!editText.getText().toString().equals("")) {
 
-                    Test_Module_Information();
+                    Test_Calibrate_and_Reset();
                 }
             }
         });

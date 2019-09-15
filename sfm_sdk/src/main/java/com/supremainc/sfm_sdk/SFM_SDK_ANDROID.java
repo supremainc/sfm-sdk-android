@@ -577,6 +577,11 @@ public class SFM_SDK_ANDROID {
 
     public native UF_RET_CODE UF_SearchModuleIDEx(short[] foundModuleID, int numOfFoundID, short[] moduleID, int[] numOfID);
 
+
+    /**
+     * Calibrate sensor , Reset module
+     */
+
     public native UF_RET_CODE UF_CalibrateSensor();
 
     public native UF_RET_CODE UF_Reset();
