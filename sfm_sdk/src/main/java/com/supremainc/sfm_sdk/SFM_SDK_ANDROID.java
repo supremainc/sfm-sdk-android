@@ -651,6 +651,7 @@ public class SFM_SDK_ANDROID {
     @Deprecated
     public native void UF_SortUserInfo(UFUserInfo[] userInfo, int numOfUser); // Unsupported
 
+    //TODO Callback function should be called in the JNI
     public native void UF_SetUserInfoCallback(UserInfoCallback callback);
 
     public native UF_RET_CODE UF_SetAdminLevel(int userID, UF_ADMIN_LEVEL adminLevel);
@@ -673,6 +674,7 @@ public class SFM_SDK_ANDROID {
 
     public native UF_RET_CODE UF_ReadOneTemplate(int userID, int subID, byte[] templateData);
 
+    //TODO Callback function should be called in the JNI
     public native void UF_SetScanCallback(ScanCallback callback);
 
     public native UF_RET_CODE UF_ScanTemplate(byte[] templateData, int[] templateSize, int[] imageQuality);
@@ -705,9 +707,11 @@ public class SFM_SDK_ANDROID {
     /**
      * Image
      */
-    public native UF_RET_CODE UF_SaveImage(final byte[] fileName, UFImage[] image);
+    //TODO This function should be implemented in the JNI
+    public native UF_RET_CODE UF_SaveImage(final String fileName, UFImage[] image);
 
-    public native UF_RET_CODE UF_LoadImage(final byte[] fileName, UFImage[] image);
+    //TODO This function should be implemented in the JNI
+    public native UF_RET_CODE UF_LoadImage(final String fileName, UFImage[] image);
 
     public native UF_RET_CODE UF_ReadImage(UFImage[] image);
 
@@ -893,6 +897,7 @@ public class SFM_SDK_ANDROID {
      * Wiegand command card
      * Deprecated since version 3.0
      */
+
 
     /**
      * Smart Card

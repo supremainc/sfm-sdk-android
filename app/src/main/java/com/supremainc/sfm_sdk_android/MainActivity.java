@@ -18,6 +18,7 @@ import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
 import com.supremainc.sfm_sdk.enumeration.UF_ADMIN_LEVEL;
 import com.supremainc.sfm_sdk.enumeration.UF_AUTH_TYPE;
 import com.supremainc.sfm_sdk.enumeration.UF_USER_SECURITY_LEVEL;
+import com.supremainc.sfm_sdk.structure.UFImage;
 import com.supremainc.sfm_sdk.structure.UFModuleInfo;
 import com.supremainc.sfm_sdk.UF_SYS_PARAM;
 import com.supremainc.sfm_sdk.UsbService;
@@ -734,6 +735,31 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, String.format("UserID : %d  SubID : %d", userID[0], subID[0]));
     }
 
+    void Test_Image() {
+        final String TAG = "IMAGE";
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+        sdk.UF_SetSendRawDataCallback(sendRawDataCallback);
+        sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
+        sdk.UF_SetScanCallback(scanCallback);
+
+        UF_RET_CODE ret = null;
+
+        UFImage[] image = new UFImage[1];
+        image[0] = new UFImage();
+        ret = sdk.UF_ScanImage(image);
+        Log.d(TAG, "Scan Image : " + ret.toString());
+
+        ret = sdk.UF_ReadImage(image);
+        Log.d(TAG, "Read Image : " + ret.toString());
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -752,7 +778,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (!editText.getText().toString().equals("")) {
 
-                    Test_Template_Management_Part2();
+                    Test_Image();
                 }
             }
         });

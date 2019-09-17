@@ -2052,6 +2052,118 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Cle
     return jobjUF_RET_CODE(env, obj, ret);
 }
 
+/**
+ * Image
+ */
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SaveImage
+ * Signature: (Ljava/lang/String;[Lcom/supremainc/sfm_sdk/structure/UFImage;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SaveImage
+        (JNIEnv *env, jobject obj, jstring _filename, jobjectArray _image) {
+
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_LoadImage
+ * Signature: (Ljava/lang/String;[Lcom/supremainc/sfm_sdk/structure/UFImage;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1LoadImage
+        (JNIEnv *env, jobject obj, jstring _filename, jobjectArray _image) {
+
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_ReadImage
+ * Signature: ([Lcom/supremainc/sfm_sdk/structure/UFImage;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ReadImage
+        (JNIEnv *env, jobject obj, jobjectArray _image) {
+    g_obj = obj;
+
+    UFImage *image = (UFImage *) malloc(UF_IMAGE_HEADER_SIZE * sizeof(int) + UF_MAX_IMAGE_SIZE);
+
+    UF_RET_CODE ret = UF_ReadImage(image);
+
+    if (ret == UF_RET_SUCCESS) {
+        jobject imageObj = env->GetObjectArrayElement(_image, 0);
+        jclass cls_imageObj = env->GetObjectClass(imageObj);
+        jfieldID width = env->GetFieldID(cls_imageObj, "_width", "I");
+        jfieldID height = env->GetFieldID(cls_imageObj, "_height", "I");
+        jfieldID compressed = env->GetFieldID(cls_imageObj, "_compressed", "I");
+        jfieldID encrypted = env->GetFieldID(cls_imageObj, "_encrypted", "I");
+        jfieldID format = env->GetFieldID(cls_imageObj, "_format", "I");
+        jfieldID templateLen = env->GetFieldID(cls_imageObj, "_templateLen", "I");
+        jfieldID buffer = env->GetFieldID(cls_imageObj, "_buffer", "[B");
+
+        env->SetIntField(imageObj, width, image->width);
+        env->SetIntField(imageObj, height, image->height);
+        env->SetIntField(imageObj, compressed, image->compressed);
+        env->SetIntField(imageObj, encrypted, image->encrypted);
+        env->SetIntField(imageObj, format, image->format);
+        env->SetIntField(imageObj, templateLen, image->templateLen);
+
+        jobject imageBuffer = env->GetObjectField(imageObj, buffer);
+
+        env->SetByteArrayRegion(static_cast<jbyteArray>(imageBuffer), 0, image->templateLen,
+                                reinterpret_cast<const jbyte *>(image->buffer));
+
+        env->DeleteLocalRef(cls_imageObj);
+    }
+
+    free(image);
+    return jobjUF_RET_CODE(env, obj, ret);
+
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_ScanImage
+ * Signature: ([Lcom/supremainc/sfm_sdk/structure/UFImage;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ScanImage
+        (JNIEnv *env, jobject obj, jobjectArray _image) {
+    g_obj = obj;
+
+    UFImage *image = (UFImage *) malloc(UF_IMAGE_HEADER_SIZE * sizeof(int) + UF_MAX_IMAGE_SIZE);
+
+    UF_RET_CODE ret = UF_ScanImage(image);
+
+    if (ret == UF_RET_SUCCESS) {
+        jobject imageObj = env->GetObjectArrayElement(_image, 0);
+        jclass cls_imageObj = env->GetObjectClass(imageObj);
+        jfieldID width = env->GetFieldID(cls_imageObj, "_width", "I");
+        jfieldID height = env->GetFieldID(cls_imageObj, "_height", "I");
+        jfieldID compressed = env->GetFieldID(cls_imageObj, "_compressed", "I");
+        jfieldID encrypted = env->GetFieldID(cls_imageObj, "_encrypted", "I");
+        jfieldID format = env->GetFieldID(cls_imageObj, "_format", "I");
+        jfieldID templateLen = env->GetFieldID(cls_imageObj, "_templateLen", "I");
+        jfieldID buffer = env->GetFieldID(cls_imageObj, "_buffer", "[B");
+
+        env->SetIntField(imageObj, width, image->width);
+        env->SetIntField(imageObj, height, image->height);
+        env->SetIntField(imageObj, compressed, image->compressed);
+        env->SetIntField(imageObj, encrypted, image->encrypted);
+        env->SetIntField(imageObj, format, image->format);
+        env->SetIntField(imageObj, templateLen, image->templateLen);
+
+        jobject imageBuffer = env->GetObjectField(imageObj, buffer);
+
+        env->SetByteArrayRegion(static_cast<jbyteArray>(imageBuffer), 0, image->templateLen,
+                                reinterpret_cast<const jbyte *>(image->buffer));
+
+        env->DeleteLocalRef(cls_imageObj);
+    }
+
+    free(image);
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_DeleteAll

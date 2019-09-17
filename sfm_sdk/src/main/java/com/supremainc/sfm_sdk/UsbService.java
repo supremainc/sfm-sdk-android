@@ -60,7 +60,7 @@ public class UsbService extends Service {
 
     private ByteBuffer serialByteBuffer = ByteBuffer.allocate(16*1024);
 
-    private static DebugMessage dlog = new DebugMessage(true);
+    private static DebugMessage dlog = new DebugMessage(false);
 
     /*
      *  Data received from serial port will be received here. Just populate onReceivedData with your code
@@ -229,7 +229,7 @@ public class UsbService extends Service {
 
             do {
                 if(serialByteBuffer.position() == 0 || serialByteBuffer.position() < data.length) {
-                    ret = serialPort.syncRead(tempSerialBuffer, 1);
+                    ret = serialPort.syncRead(tempSerialBuffer, 100);
                     dlog.d(TAG, String.format("[2] pos [%d]  limit [%d]  capacity [%d] ret [%d] data length [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity(), ret, data.length));
 
 
