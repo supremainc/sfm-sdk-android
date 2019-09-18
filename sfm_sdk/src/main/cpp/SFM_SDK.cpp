@@ -2178,6 +2178,20 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Del
     return jobjUF_RET_CODE(env, obj, ret);
 }
 
+/**
+ * Identify
+ */
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_SetIdentifyCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/SFM_SDK_ANDROID/IdentifyCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetIdentifyCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    UF_SetIdentifyCallback(IdentifyCallback);
+}
+
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_Identify
@@ -2197,6 +2211,73 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Ide
     env->ReleaseByteArrayElements(_subID, subID, 0);
 
     return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_IdentifyTemplate
+ * Signature: (I[B[I[B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1IdentifyTemplate
+        (JNIEnv *env, jobject obj, jint _templateSize, jbyteArray _templateData, jintArray _userID,
+         jbyteArray _subID) {
+    g_obj = obj;
+
+    UINT32 templateSize = (UINT32) _templateSize;
+    jbyte *templateData = env->GetByteArrayElements(_templateData, 0);
+    jint *userID = env->GetIntArrayElements(_userID, 0);
+    jbyte *subID = env->GetByteArrayElements(_subID, 0);
+
+    UF_RET_CODE ret = UF_IdentifyTemplate(templateSize, reinterpret_cast<BYTE *>(templateData),
+                                          reinterpret_cast<UINT32 *>(userID),
+                                          reinterpret_cast<BYTE *>(subID));
+
+    env->ReleaseByteArrayElements(_templateData, templateData, 0);
+    env->ReleaseIntArrayElements(_userID, userID, 0);
+    env->ReleaseByteArrayElements(_subID, subID, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_IdentifyImage
+ * Signature: (I[B[I[B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1IdentifyImage
+        (JNIEnv *env, jobject obj, jint _imageSize, jbyteArray _imageData, jintArray _userID,
+         jbyteArray _subID) {
+    g_obj = obj;
+
+    UINT32 imageSize = (UINT32) _imageSize;
+    jbyte *imageData = env->GetByteArrayElements(_imageData, 0);
+    jint *userID = env->GetIntArrayElements(_userID, 0);
+    jbyte *subID = env->GetByteArrayElements(_subID, 0);
+
+    UF_RET_CODE ret = UF_IdentifyImage(imageSize, reinterpret_cast<BYTE *>(imageData),
+                                       reinterpret_cast<UINT32 *>(userID),
+                                       reinterpret_cast<BYTE *>(subID));
+
+    env->ReleaseByteArrayElements(_imageData, imageData, 0);
+    env->ReleaseIntArrayElements(_userID, userID, 0);
+    env->ReleaseByteArrayElements(_subID, subID, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    NDKCallback_Test
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_NDKCallback_1Test
+        (JNIEnv *env, jobject obj) {
+    g_obj = obj;
+    jobjUF_AUTH_TYPE(env, obj, UF_AUTH_FINGERPRINT);
+    jobjUF_RET_CODE(env, obj, UF_RET_SUCCESS);
+    ReadSerialCallback((unsigned char *) "test", 4, 1);
+    LOGI("Test done");
 }
 
 

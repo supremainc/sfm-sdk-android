@@ -443,6 +443,10 @@ public class SFM_SDK_ANDROID {
         scanCallback = callback;
     }
 
+    public void SetIdentifyCallback(IdentifyCallback callback) {
+        identifyCallback = callback;
+    }
+
     /**
      * Callback functions from JNI
      */
@@ -721,6 +725,8 @@ public class SFM_SDK_ANDROID {
     /**
      * Identify
      */
+
+    //TODO Callback function should be called in the JNI
     public native void UF_SetIdentifyCallback(IdentifyCallback callback);
 
     public native UF_RET_CODE UF_Identify(int[] userID, byte[] subID);

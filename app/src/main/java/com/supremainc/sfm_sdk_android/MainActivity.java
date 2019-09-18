@@ -760,6 +760,56 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "Read Image : " + ret.toString());
     }
 
+    void Test_Identify() {
+        final String TAG = "IDENTIFY";
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+        sdk.UF_SetSendRawDataCallback(sendRawDataCallback);
+        sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
+        sdk.UF_SetScanCallback(scanCallback);
+
+        UF_RET_CODE ret = null;
+
+        int[] numOfTemplate = new int[1];
+        byte[] templateData = new byte[3840];
+        ret = sdk.UF_ReadTemplate(1, numOfTemplate, templateData);
+        Log.d(TAG, "Test_Identify: Read Template : " + ret.toString());
+
+        int[] userID = new int[1];
+        byte[] subID = new byte[1];
+        ret = sdk.UF_IdentifyTemplate(384, templateData, userID, subID);
+        Log.d(TAG, "Test_Identify: IdentifyTemplate : " + ret.toString());
+    }
+
+
+    private class SFMTask extends AsyncTask {
+
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            try {
+                Test_Generic_Command_Interface();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+    }
+
+    private void Test_NDK() {
+
+        sdk.NDKCallback_Test();
+    }
+
+    private SFMTask task;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

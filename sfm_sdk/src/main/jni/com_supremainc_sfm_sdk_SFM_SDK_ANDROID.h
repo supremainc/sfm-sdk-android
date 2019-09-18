@@ -1271,6 +1271,14 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Rea
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ScanImageEx
         (JNIEnv *, jobject, jobjectArray, jobject, jint);
 
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    NDKCallback_Test
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_NDKCallback_1Test
+        (JNIEnv *, jobject);
+
 #ifdef __cplusplus
 }
 #endif
