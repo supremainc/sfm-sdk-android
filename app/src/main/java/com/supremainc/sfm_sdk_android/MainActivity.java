@@ -3,6 +3,7 @@ package com.supremainc.sfm_sdk_android;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -15,19 +16,21 @@ import android.widget.Toast;
 
 import com.supremainc.sfm_sdk.MessageHandler;
 import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
+import com.supremainc.sfm_sdk.UF_SYS_PARAM;
+import com.supremainc.sfm_sdk.UsbService;
 import com.supremainc.sfm_sdk.enumeration.UF_ADMIN_LEVEL;
 import com.supremainc.sfm_sdk.enumeration.UF_AUTH_TYPE;
+import com.supremainc.sfm_sdk.enumeration.UF_PROTOCOL;
+import com.supremainc.sfm_sdk.enumeration.UF_RET_CODE;
 import com.supremainc.sfm_sdk.enumeration.UF_USER_SECURITY_LEVEL;
 import com.supremainc.sfm_sdk.structure.UFImage;
 import com.supremainc.sfm_sdk.structure.UFModuleInfo;
-import com.supremainc.sfm_sdk.UF_SYS_PARAM;
-import com.supremainc.sfm_sdk.UsbService;
-import com.supremainc.sfm_sdk.enumeration.UF_PROTOCOL;
-import com.supremainc.sfm_sdk.enumeration.UF_RET_CODE;
 import com.supremainc.sfm_sdk.structure.UFUserInfo;
 import com.supremainc.sfm_sdk.structure.UFUserInfoEx;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 //import com.supremainc.sfm_sdk.MessageHandler;
 //import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
 //import com.supremainc.sfm_sdk.UsbService;
@@ -38,7 +41,6 @@ import java.util.Arrays;
 
 
 public class MainActivity extends AppCompatActivity {
-
 
     private TextView display;
     private EditText editText;
@@ -81,6 +83,8 @@ public class MainActivity extends AppCompatActivity {
 
 //                    sdk.UF_InitCommPort(115200, true);
 
+//                    Test_Identify();
+
                     break;
                 case UsbService.ACTION_USB_PERMISSION_NOT_GRANTED: // USB PERMISSION NOT GRANTED
                     Toast.makeText(context, "USB Permission not granted", Toast.LENGTH_SHORT).show();
@@ -98,11 +102,11 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private final MessageHandler mHandler = new MessageHandler(this)
-    {
+    private final MessageHandler mHandler = new MessageHandler(this) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+
                 case UsbService.MESSAGE_FROM_SERIAL_PORT:
                     String data = "[RECV] " + (String) msg.obj + "\n";
                     display.append(data);
@@ -124,9 +128,16 @@ public class MainActivity extends AppCompatActivity {
 
     String byteArrayToHex(byte[] a) {
         StringBuilder sb = new StringBuilder();
-        for(final byte b: a)
-            sb.append(String.format("%02X ", b&0xff));
+        for (final byte b : a)
+            sb.append(String.format("%02X ", b & 0xff));
         return sb.toString();
+    }
+
+    String getCurrentTime() {
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSS");
+        Date time = new Date();
+
+        return format.format(time);
     }
 
     SFM_SDK_ANDROID.SendPacketCallback sendPacketCallback = new SFM_SDK_ANDROID.SendPacketCallback() {
@@ -135,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
             display.post(new Runnable() {
                 @Override
                 public void run() {
-                    final String str = "[SEND]" + byteArrayToHex(data) + "\n";
+                    final String str = getCurrentTime() + " - [SEND] " + byteArrayToHex(data) + "\n";
                     display.append(str);
                 }
             });
@@ -148,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
             display.post(new Runnable() {
                 @Override
                 public void run() {
-                    final String str = "[RECV]" + byteArrayToHex(data) + "\n";
+                    final String str = getCurrentTime() + " - [RECV] " + byteArrayToHex(data) + "\n";
                     display.append(str);
                 }
             });
@@ -828,7 +839,16 @@ public class MainActivity extends AppCompatActivity {
 
                 if (!editText.getText().toString().equals("")) {
 
-                    Test_Image();
+//                    task = new SFMTask();
+//                    task.execute();
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Test_Identify();
+                        }
+                    }).start();
+
                 }
             }
         });
@@ -846,5 +866,4 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         sdk.pauseService();
     }
-
 }

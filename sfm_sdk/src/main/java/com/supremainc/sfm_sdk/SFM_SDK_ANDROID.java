@@ -174,6 +174,7 @@ public class SFM_SDK_ANDROID {
         mActivity.unbindService(usbConnection);
     }
 
+
     /**
      * Interfaces for callback functions from Java
      */
@@ -853,9 +854,10 @@ public class SFM_SDK_ANDROID {
     /**
      * Log and time management
      */
-    // Windows only, linux, mac and android should be implemented.
+    //TODO Windows only, linux, mac and android should be implemented.
     public native UF_RET_CODE UF_SetTime(time_t timeVal);
 
+    //TODO Windows only, linux, mac and android should be implemented.
     public native UF_RET_CODE UF_GetTime(time_t[] timeVal);
 
     public native UF_RET_CODE UF_GetNumOfLog(int[] numOfLog, int[] numOfTotalLog);
@@ -924,6 +926,9 @@ public class SFM_SDK_ANDROID {
     public native UF_RET_CODE UF_ReadImageEx(UFImage[] image, UF_IMAGE_TYPE type, int wsqBitRate);
 
     public native UF_RET_CODE UF_ScanImageEx(UFImage[] image, UF_IMAGE_TYPE type, int wsqBitRate);
+
+
+    public native void NDKCallback_Test();
 
 
     static {

@@ -30,13 +30,18 @@ extern "C"
 jobject g_obj;
 jclass g_cls;
 JNIEnv *g_env;
+JavaVM *g_vm;
 
-
-jmethodID g_msgCallback_method_id;
-jmethodID g_userInfoCallback_method_id;
 
 jobject g_msgCallback;
+jmethodID g_msgCallback_method_id;
+
 jobject g_userInfoCallback;
+jmethodID g_userInfoCallback_method_id;
+
+jobject g_identifCallback;
+jmethodID g_identifyCallback_method_id;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -153,16 +158,16 @@ jobject jobjUF_AUTH_TYPE(JNIEnv *env, jobject thiz, UF_AUTH_TYPE authType) {
  */
 
 
-jbyteArray as_byte_array(unsigned char *buf, int len) {
-    jbyteArray array = g_env->NewByteArray(len);
-    g_env->SetByteArrayRegion(array, 0, len, reinterpret_cast<jbyte *>(buf));
+jbyteArray as_byte_array(JNIEnv *env, unsigned char *buf, int len) {
+    jbyteArray array = env->NewByteArray(len);
+    env->SetByteArrayRegion(array, 0, len, reinterpret_cast<jbyte *>(buf));
     return array;
 }
 
-unsigned char *as_unsigned_char_array(jbyteArray array) {
-    int len = g_env->GetArrayLength(array);
+unsigned char *as_unsigned_char_array(JNIEnv *env, jbyteArray array) {
+    int len = env->GetArrayLength(array);
     unsigned char *buf = new unsigned char[len];
-    g_env->GetByteArrayRegion(array, 0, len, reinterpret_cast<jbyte *>(buf));
+    env->GetByteArrayRegion(array, 0, len, reinterpret_cast<jbyte *>(buf));
     return buf;
 }
 
@@ -171,35 +176,41 @@ unsigned char *as_unsigned_char_array(jbyteArray array) {
  */
 
 void SetupSerialCallback(int baudrate) {
-
     static jmethodID cbSetupSerial = NULL;
 
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
     if (cbSetupSerial == NULL) {
-        cbSetupSerial = g_env->GetMethodID(g_cls, "cbSetupSerial", "(I)V");
+        cbSetupSerial = env->GetMethodID(g_cls, "cbSetupSerial", "(I)V");
         if (cbSetupSerial == NULL)
             return;
     }
 
-    g_env->CallVoidMethod(g_obj, cbSetupSerial, baudrate);
+    env->CallVoidMethod(g_obj, cbSetupSerial, baudrate);
 }
 
 
 int ReadSerialCallback(unsigned char *data, int size, int timeout) {
     static jmethodID cbReadSerial = NULL;
 
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
+
     if (cbReadSerial == NULL) {
-        cbReadSerial = g_env->GetMethodID(g_cls, "cbReadSerial", "([BI)I");
+        cbReadSerial = env->GetMethodID(g_cls, "cbReadSerial", "([BI)I");
         if (cbReadSerial == NULL)
             return -1;
     }
 
-    jbyteArray _data = g_env->NewByteArray(size);
-    int ret = (int) g_env->CallIntMethod(g_obj, cbReadSerial, _data, timeout);
+    jbyteArray _data = env->NewByteArray(size);
+    int ret = (int) env->CallIntMethod(g_obj, cbReadSerial, _data, timeout);
 
     if (ret > 0) {
-        unsigned char *buf = (unsigned char *) g_env->GetByteArrayElements(_data, 0);
+        unsigned char *buf = (unsigned char *) env->GetByteArrayElements(_data, 0);
         memcpy(data, buf, ret);
-        g_env->ReleaseByteArrayElements(_data, (jbyte *) buf, 0);
+        env->ReleaseByteArrayElements(_data, (jbyte *) buf, 0);
     }
 
     return ret;
@@ -209,15 +220,18 @@ int WriteSerialCallback(unsigned char *data, int size, int timeout) {
 
     static jmethodID cbWriteSerial = NULL;
 
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
     if (cbWriteSerial == NULL) {
-        cbWriteSerial = g_env->GetMethodID(g_cls, "cbWriteSerial", "([BI)I");
+        cbWriteSerial = env->GetMethodID(g_cls, "cbWriteSerial", "([BI)I");
         if (cbWriteSerial == NULL)
             return -1;
     }
 
-    jbyteArray _data = as_byte_array(data, size);
+    jbyteArray _data = as_byte_array(env, data, size);
 
-    int ret = (int) g_env->CallIntMethod(g_obj, cbWriteSerial, _data, timeout);
+    int ret = (int) env->CallIntMethod(g_obj, cbWriteSerial, _data, timeout);
 
     return ret;
 }
@@ -225,105 +239,150 @@ int WriteSerialCallback(unsigned char *data, int size, int timeout) {
 void SendPacketCallback(unsigned char *data) {
     static jmethodID cbSendPacket = NULL;
 
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
     if (cbSendPacket == NULL) {
-        cbSendPacket = g_env->GetMethodID(g_cls, "cbSendPacket", "([B)V");
+        cbSendPacket = env->GetMethodID(g_cls, "cbSendPacket", "([B)V");
         if (cbSendPacket == NULL)
             return;
     }
 
-    jbyteArray _data = as_byte_array(data, UF_PACKET_LEN);
-    g_env->CallVoidMethod(g_obj, cbSendPacket, _data);
+    jbyteArray _data = as_byte_array(env, data, UF_PACKET_LEN);
+    env->CallVoidMethod(g_obj, cbSendPacket, _data);
 }
 
 
 void ReceivePacketCallback(unsigned char *data) {
     static jmethodID cbReceivePacket = NULL;
+
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
     if (cbReceivePacket == NULL) {
-        cbReceivePacket = g_env->GetMethodID(g_cls, "cbReceivePacket", "([B)V");
+        cbReceivePacket = env->GetMethodID(g_cls, "cbReceivePacket", "([B)V");
         if (cbReceivePacket == NULL)
             return;
     }
 
-    jbyteArray _data = as_byte_array(data, UF_PACKET_LEN);
-    g_env->CallVoidMethod(g_obj, cbReceivePacket, _data);
+    jbyteArray _data = as_byte_array(env, data, UF_PACKET_LEN);
+    env->CallVoidMethod(g_obj, cbReceivePacket, _data);
 }
 
 void SendDataPacketCallback(int index, int numOfPacket) {
     static jmethodID cbSendDataPacket = NULL;
+
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
+
     if (cbSendDataPacket == NULL) {
-        cbSendDataPacket = g_env->GetMethodID(g_cls, "cbSendDataPacket", "(II)V");
+        cbSendDataPacket = env->GetMethodID(g_cls, "cbSendDataPacket", "(II)V");
         if (cbSendDataPacket == NULL)
             return;
     }
 
-    g_env->CallVoidMethod(g_obj, cbSendDataPacket, index, numOfPacket);
+    env->CallVoidMethod(g_obj, cbSendDataPacket, index, numOfPacket);
 }
 
 void ReceiveDataPacketCallback(int index, int numOfPacket) {
     static jmethodID cbReceiveDataPacket = NULL;
+
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
     if (cbReceiveDataPacket == NULL) {
-        cbReceiveDataPacket = g_env->GetMethodID(g_cls, "cbReceiveDataPacket", "(II)V");
+        cbReceiveDataPacket = env->GetMethodID(g_cls, "cbReceiveDataPacket", "(II)V");
         if (cbReceiveDataPacket == NULL)
             return;
     }
 
-    g_env->CallVoidMethod(g_obj, cbReceiveDataPacket, index, numOfPacket);
+    env->CallVoidMethod(g_obj, cbReceiveDataPacket, index, numOfPacket);
 }
 
 void SendRawDataCallback(int writtenLen, int totalSize) {
     static jmethodID cbSendRawData = NULL;
+
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
     if (cbSendRawData == NULL) {
-        cbSendRawData = g_env->GetMethodID(g_cls, "cbSendRawData", "(II)V");
+        cbSendRawData = env->GetMethodID(g_cls, "cbSendRawData", "(II)V");
         if (cbSendRawData == NULL)
             return;
     }
 
-    g_env->CallVoidMethod(g_obj, cbSendRawData, writtenLen, totalSize);
+    env->CallVoidMethod(g_obj, cbSendRawData, writtenLen, totalSize);
 }
 
 void ReceiveRawDataCallback(int readLen, int totalSize) {
     static jmethodID cbReceiveRawData = NULL;
+
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
     if (cbReceiveRawData == NULL) {
-        cbReceiveRawData = g_env->GetMethodID(g_cls, "cbReceiveRawData", "(II)V");
+        cbReceiveRawData = env->GetMethodID(g_cls, "cbReceiveRawData", "(II)V");
         if (cbReceiveRawData == NULL)
             return;
     }
 
-    g_env->CallVoidMethod(g_obj, cbReceiveRawData, readLen, totalSize);
+    env->CallVoidMethod(g_obj, cbReceiveRawData, readLen, totalSize);
 }
 
 BOOL MsgCallback(BYTE msg) {
 
-    g_env->ExceptionClear();
-    BOOL ret = (g_env->CallBooleanMethod(g_msgCallback, g_msgCallback_method_id, msg) == true ? 1
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
+    env->ExceptionClear();
+    BOOL ret = (env->CallBooleanMethod(g_msgCallback, g_msgCallback_method_id, msg) == true ? 1
                                                                                               : 0);
-    if (g_env->ExceptionOccurred())
-        g_env->ExceptionClear();
+    if (env->ExceptionOccurred())
+        env->ExceptionClear();
 
     return ret;
 }
 
 void UserInfoCallback(int index, int numOfTemplate) {
     static jmethodID cbUserInfo = NULL;
+
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
     if (cbUserInfo == NULL) {
-        cbUserInfo = g_env->GetMethodID(g_cls, "cbUserInfo", "(II)V");
+        cbUserInfo = env->GetMethodID(g_cls, "cbUserInfo", "(II)V");
         if (cbUserInfo == NULL)
             return;
     }
-    g_env->CallVoidMethod(g_obj, cbUserInfo, index, numOfTemplate);
+    env->CallVoidMethod(g_obj, cbUserInfo, index, numOfTemplate);
 }
 
 void ScanCallback(BYTE msg) {
     static jmethodID cbScan = NULL;
+
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
     if (cbScan == NULL) {
-        cbScan = g_env->GetMethodID(g_cls, "cbScan", "(B)V");
+        cbScan = env->GetMethodID(g_cls, "cbScan", "(B)V");
         if (cbScan == NULL)
             return;
     }
 
     LOGE("Scan Success\n");
 
-    g_env->CallVoidMethod(g_obj, cbScan, msg);
+    env->CallVoidMethod(g_obj, cbScan, msg);
+}
+
+void IdentifyCallback(BYTE msg) {
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
+    env->ExceptionClear();
+    env->CallVoidMethod(g_identifCallback, g_identifyCallback_method_id, msg);
+    if (env->ExceptionOccurred())
+        env->ExceptionClear();
 }
 
 
@@ -333,6 +392,8 @@ void ScanCallback(BYTE msg) {
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     LOGI("JNI_OnLoad\n");
+
+    g_vm = vm;
 //    JNIEnv *env;
     if (vm->GetEnv(reinterpret_cast<void **>(&g_env), JNI_VERSION_1_6) != JNI_OK) {
         return JNI_ERR;
