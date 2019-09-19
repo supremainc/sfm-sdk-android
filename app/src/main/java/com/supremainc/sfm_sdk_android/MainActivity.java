@@ -3,6 +3,7 @@ package com.supremainc.sfm_sdk_android;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Message;
@@ -11,11 +12,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.supremainc.sfm_sdk.MessageHandler;
 import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
+import com.supremainc.sfm_sdk.UF_IMAGE_TYPE;
 import com.supremainc.sfm_sdk.UF_SYS_PARAM;
 import com.supremainc.sfm_sdk.UsbService;
 import com.supremainc.sfm_sdk.enumeration.UF_ADMIN_LEVEL;
@@ -44,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView display;
     private EditText editText;
+    private ImageView imageView;
 
     private SFM_SDK_ANDROID sdk;
 
@@ -147,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     final String str = getCurrentTime() + " - [SEND] " + byteArrayToHex(data) + "\n";
-                    display.append(str);
+//                    display.append(str);
                 }
             });
         }
@@ -160,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     final String str = getCurrentTime() + " - [RECV] " + byteArrayToHex(data) + "\n";
-                    display.append(str);
+//                    display.append(str);
                 }
             });
         }
@@ -764,11 +768,23 @@ public class MainActivity extends AppCompatActivity {
 
         UFImage[] image = new UFImage[1];
         image[0] = new UFImage();
+
+        sdk.UF_SetSysParameter(UF_SYS_PARAM.UF_SYS_IMAGE_FORMAT, UF_IMAGE_TYPE.UF_4BIT_GRAY_IMAGE.getValue());
         ret = sdk.UF_ScanImage(image);
         Log.d(TAG, "Scan Image : " + ret.toString());
 
-        ret = sdk.UF_ReadImage(image);
-        Log.d(TAG, "Read Image : " + ret.toString());
+//        ret = sdk.UF_ReadImage(image);
+//        Log.d(TAG, "Read Image : " + ret.toString());
+
+        Bitmap bmp = image[0].getBitmap();
+
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                imageView.setImageBitmap(bmp);
+            }
+        });
     }
 
     void Test_Identify() {
@@ -804,7 +820,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Object doInBackground(Object[] objects) {
             try {
-                Test_Generic_Command_Interface();
+                Test_Image();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -828,6 +844,7 @@ public class MainActivity extends AppCompatActivity {
 
         display = (TextView) findViewById(R.id.textView1);
         editText = (EditText) findViewById(R.id.editText1);
+        imageView = (ImageView) findViewById(R.id.imageView);
         sdk = new SFM_SDK_ANDROID(this, mHandler, mUsbReceiver);
         Button sendButton = (Button) findViewById(R.id.buttonSend);
 
@@ -839,15 +856,15 @@ public class MainActivity extends AppCompatActivity {
 
                 if (!editText.getText().toString().equals("")) {
 
-//                    task = new SFMTask();
-//                    task.execute();
+                    task = new SFMTask();
+                    task.execute();
 
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Test_Identify();
-                        }
-                    }).start();
+//                    new Thread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Test_Image();
+//                        }
+//                    }).start();
 
                 }
             }

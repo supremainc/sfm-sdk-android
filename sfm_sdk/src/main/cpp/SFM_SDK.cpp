@@ -2158,6 +2158,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Rea
         jfieldID compressed = env->GetFieldID(cls_imageObj, "_compressed", "I");
         jfieldID encrypted = env->GetFieldID(cls_imageObj, "_encrypted", "I");
         jfieldID format = env->GetFieldID(cls_imageObj, "_format", "I");
+        jfieldID imgLen = env->GetFieldID(cls_imageObj, "_imgLen", "I");
         jfieldID templateLen = env->GetFieldID(cls_imageObj, "_templateLen", "I");
         jfieldID buffer = env->GetFieldID(cls_imageObj, "_buffer", "[B");
 
@@ -2165,12 +2166,13 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Rea
         env->SetIntField(imageObj, height, image->height);
         env->SetIntField(imageObj, compressed, image->compressed);
         env->SetIntField(imageObj, encrypted, image->encrypted);
+        env->SetIntField(imageObj, imgLen, image->imgLen);
         env->SetIntField(imageObj, format, image->format);
         env->SetIntField(imageObj, templateLen, image->templateLen);
 
         jobject imageBuffer = env->GetObjectField(imageObj, buffer);
 
-        env->SetByteArrayRegion(static_cast<jbyteArray>(imageBuffer), 0, image->templateLen,
+        env->SetByteArrayRegion(static_cast<jbyteArray>(imageBuffer), 0, image->imgLen,
                                 reinterpret_cast<const jbyte *>(image->buffer));
 
         env->DeleteLocalRef(cls_imageObj);
@@ -2202,6 +2204,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Sca
         jfieldID compressed = env->GetFieldID(cls_imageObj, "_compressed", "I");
         jfieldID encrypted = env->GetFieldID(cls_imageObj, "_encrypted", "I");
         jfieldID format = env->GetFieldID(cls_imageObj, "_format", "I");
+        jfieldID imgLen = env->GetFieldID(cls_imageObj, "_imgLen", "I");
         jfieldID templateLen = env->GetFieldID(cls_imageObj, "_templateLen", "I");
         jfieldID buffer = env->GetFieldID(cls_imageObj, "_buffer", "[B");
 
@@ -2210,11 +2213,12 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Sca
         env->SetIntField(imageObj, compressed, image->compressed);
         env->SetIntField(imageObj, encrypted, image->encrypted);
         env->SetIntField(imageObj, format, image->format);
+        env->SetIntField(imageObj, imgLen, image->imgLen);
         env->SetIntField(imageObj, templateLen, image->templateLen);
 
         jobject imageBuffer = env->GetObjectField(imageObj, buffer);
 
-        env->SetByteArrayRegion(static_cast<jbyteArray>(imageBuffer), 0, image->templateLen,
+        env->SetByteArrayRegion(static_cast<jbyteArray>(imageBuffer), 0, image->imgLen,
                                 reinterpret_cast<const jbyte *>(image->buffer));
 
         env->DeleteLocalRef(cls_imageObj);
@@ -2250,6 +2254,8 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Del
  */
 JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetIdentifyCallback
         (JNIEnv *env, jobject obj, jobject _callback) {
+
+
     UF_SetIdentifyCallback(IdentifyCallback);
 }
 
