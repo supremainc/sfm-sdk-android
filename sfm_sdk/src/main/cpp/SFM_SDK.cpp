@@ -2157,21 +2157,93 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Cle
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_SaveImage
- * Signature: (Ljava/lang/String;[Lcom/supremainc/sfm_sdk/structure/UFImage;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Ljava/lang/String;Lcom/supremainc/sfm_sdk/structure/UFImage;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SaveImage
-        (JNIEnv *env, jobject obj, jstring _filename, jobjectArray _image) {
+        (JNIEnv *env, jobject obj, jstring _filename, jobject _image) {
+    g_obj = obj;
 
+    const char *filename = env->GetStringUTFChars(_filename, 0);
+    LOGI("filename : %s \n", filename);
+    UFImage *image = (UFImage *) malloc(UF_IMAGE_HEADER_SIZE * sizeof(int) + UF_MAX_IMAGE_SIZE);
+
+    jclass cls_imageObj = env->GetObjectClass(_image);
+    jfieldID width = env->GetFieldID(cls_imageObj, "_width", "I");
+    jfieldID height = env->GetFieldID(cls_imageObj, "_height", "I");
+    jfieldID compressed = env->GetFieldID(cls_imageObj, "_compressed", "I");
+    jfieldID encrypted = env->GetFieldID(cls_imageObj, "_encrypted", "I");
+    jfieldID format = env->GetFieldID(cls_imageObj, "_format", "I");
+    jfieldID imgLen = env->GetFieldID(cls_imageObj, "_imgLen", "I");
+    jfieldID templateLen = env->GetFieldID(cls_imageObj, "_templateLen", "I");
+    jfieldID buffer = env->GetFieldID(cls_imageObj, "_buffer", "[B");
+
+    image->width = env->GetIntField(_image, width);
+    image->height = env->GetIntField(_image, height);
+    image->compressed = env->GetIntField(_image, compressed);
+    image->encrypted = env->GetIntField(_image, encrypted);
+    image->format = env->GetIntField(_image, format);
+    image->imgLen = env->GetIntField(_image, imgLen);
+    image->templateLen = env->GetIntField(_image, templateLen);
+
+    jobject imageBuffer = env->GetObjectField(_image, buffer);
+    jbyte *data = env->GetByteArrayElements(static_cast<jbyteArray>(imageBuffer), 0);
+    memcpy(image->buffer, data, image->imgLen);
+
+    UF_RET_CODE ret = UF_SaveImage(filename, image);
+
+    env->ReleaseStringUTFChars(_filename, filename);
+    env->ReleaseByteArrayElements(static_cast<jbyteArray>(imageBuffer), data, 0);
+    env->DeleteLocalRef(cls_imageObj);
+
+    free(image);
+    return jobjUF_RET_CODE(env, obj, ret);
 }
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_LoadImage
- * Signature: (Ljava/lang/String;[Lcom/supremainc/sfm_sdk/structure/UFImage;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Ljava/lang/String;Lcom/supremainc/sfm_sdk/structure/UFImage;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1LoadImage
-        (JNIEnv *env, jobject obj, jstring _filename, jobjectArray _image) {
+        (JNIEnv *env, jobject obj, jstring _filename, jobject _image) {
+    g_obj = obj;
 
+    const char *filename = env->GetStringUTFChars(_filename, 0);
+    LOGI("filename : %s \n", filename);
+    UFImage *image = (UFImage *) malloc(UF_IMAGE_HEADER_SIZE * sizeof(int) + UF_MAX_IMAGE_SIZE);
+
+    jclass cls_imageObj = env->GetObjectClass(_image);
+    jfieldID width = env->GetFieldID(cls_imageObj, "_width", "I");
+    jfieldID height = env->GetFieldID(cls_imageObj, "_height", "I");
+    jfieldID compressed = env->GetFieldID(cls_imageObj, "_compressed", "I");
+    jfieldID encrypted = env->GetFieldID(cls_imageObj, "_encrypted", "I");
+    jfieldID format = env->GetFieldID(cls_imageObj, "_format", "I");
+    jfieldID imgLen = env->GetFieldID(cls_imageObj, "_imgLen", "I");
+    jfieldID templateLen = env->GetFieldID(cls_imageObj, "_templateLen", "I");
+    jfieldID buffer = env->GetFieldID(cls_imageObj, "_buffer", "[B");
+
+    UF_RET_CODE ret = UF_LoadImage(filename, image);
+
+    if (ret == UF_RET_SUCCESS) {
+        env->SetIntField(_image, width, image->width);
+        env->SetIntField(_image, height, image->height);
+        env->SetIntField(_image, compressed, image->compressed);
+        env->SetIntField(_image, encrypted, image->encrypted);
+        env->SetIntField(_image, format, image->format);
+        env->SetIntField(_image, imgLen, image->imgLen);
+        env->SetIntField(_image, templateLen, image->templateLen);
+
+        jobject imageBuffer = env->GetObjectField(_image, buffer);
+        env->SetByteArrayRegion(static_cast<jbyteArray>(imageBuffer), 0, image->imgLen,
+                                reinterpret_cast<const jbyte *>(image->buffer));
+
+        env->ReleaseStringUTFChars(_filename, filename);
+        env->DeleteLocalRef(cls_imageObj);
+    }
+
+    free(image);
+
+    return jobjUF_RET_CODE(env, obj, ret);
 }
 
 /*

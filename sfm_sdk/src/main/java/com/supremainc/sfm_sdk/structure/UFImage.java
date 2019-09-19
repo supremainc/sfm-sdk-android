@@ -11,8 +11,8 @@ public class UFImage {
     private static final int IMAGE_FORMAT_GRAY = 0;
     private static final int IMAGE_FORMAT_BINARY = 1;
     private static final int IMAGE_FORMAT_4BIT_GRAY = 2;
-    final int UF_IMAGE_HEADER_SIZE = 7;
-    final int UF_MAX_IMAGE_SIZE = (640 * 480);
+    private final int UF_IMAGE_HEADER_SIZE = 7;
+    private final int UF_MAX_IMAGE_SIZE = (640 * 480);
     private int _width;
     private int _height;
     private int _compressed;
@@ -20,7 +20,7 @@ public class UFImage {
     private int _format;
     private int _imgLen;
     private int _templateLen;
-    byte[] _buffer = new byte[UF_MAX_IMAGE_SIZE];
+    private byte[] _buffer = new byte[UF_MAX_IMAGE_SIZE];
     private Bitmap _bitmap;
 
     public int width() {
@@ -130,5 +130,4 @@ public class UFImage {
 
         return this._bitmap;
     }
-
 }

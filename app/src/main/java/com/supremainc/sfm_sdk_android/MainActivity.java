@@ -786,11 +786,18 @@ public class MainActivity extends AppCompatActivity {
         ret = sdk.UF_ScanImage(image);
         Log.d(TAG, "Scan Image : " + ret.toString());
 
-        ret = sdk.UF_ReadImage(image);
-        Log.d(TAG, "Read Image : " + ret.toString());
+//        ret = sdk.UF_ReadImage(image);
+//        Log.d(TAG, "Read Image : " + ret.toString());
 
-        Bitmap bmp = image.getBitmap();
+//        Bitmap bmp = image.getBitmap();
 
+        ret = sdk.UF_SaveImage("/sdcard/fpimage.bmp", image);
+        Log.d(TAG, "Save Image : " + ret.toString());
+
+        UFImage loadedImage = new UFImage();
+        ret = sdk.UF_LoadImage("/sdcard/fpimage.bmp", loadedImage);
+        Log.d(TAG, "Load Image : " + ret.toString());
+        Bitmap bmp = loadedImage.getBitmap();
 
         runOnUiThread(new Runnable() {
             @Override

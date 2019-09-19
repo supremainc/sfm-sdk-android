@@ -600,74 +600,44 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * Template management
      */
     public native UF_RET_CODE UF_GetNumOfTemplate(int[] numOfTemplate);
-
     public native UF_RET_CODE UF_GetMaxNumOfTemplate(int[] maxNumOfTemplate);
-
     public native UF_RET_CODE UF_GetAllUserInfo(UFUserInfo[] userInfo, int[] numOfUser, int[] numOfTemplate);
-
     public native UF_RET_CODE UF_GetAllUserInfoEx(UFUserInfoEx[] userInfo, int[] numOfUser, int[] numOfTemplate);
 
     @Deprecated
     public native void UF_SortUserInfo(UFUserInfo[] userInfo, int numOfUser); // Unsupported
-
     public native UF_RET_CODE UF_SetAdminLevel(int userID, UF_ADMIN_LEVEL adminLevel);
-
     public native UF_RET_CODE UF_GetAdminLevel(int userID, UF_ADMIN_LEVEL[] adminLevel);
-
     public native UF_RET_CODE UF_SetSecurityLevel(int userID, UF_USER_SECURITY_LEVEL securityLevel);
-
     public native UF_RET_CODE UF_GetSecurityLevel(int userID, UF_USER_SECURITY_LEVEL[] securityLevel);
-
     public native UF_RET_CODE UF_ClearAllAdminLevel();
-
     public native UF_RET_CODE UF_SaveDB(final String fileName);
-
     public native UF_RET_CODE UF_LoadDB(final String fileName);
-
     public native UF_RET_CODE UF_CheckTemplate(int userID, int[] numOfTemplate);
-
     public native UF_RET_CODE UF_ReadTemplate(int userID, int[] numOfTemplate, byte[] templateData);
-
     public native UF_RET_CODE UF_ReadOneTemplate(int userID, int subID, byte[] templateData);
-
     public native UF_RET_CODE UF_ScanTemplate(byte[] templateData, int[] templateSize, int[] imageQuality);
-
     public native UF_RET_CODE UF_FixProvisionalTemplate();
-
     public native UF_RET_CODE UF_SetAuthType(int userID, UF_AUTH_TYPE authType);
-
     public native UF_RET_CODE UF_GetAuthType(int userID, UF_AUTH_TYPE[] authType);
-
     public native UF_RET_CODE UF_GetUserIDByAuthType(UF_AUTH_TYPE authType, int[] numOfID, int[] userID);
-
     public native UF_RET_CODE UF_ResetAllAuthType();
-
     public native UF_RET_CODE UF_AddBlacklist(int userID, int[] numOfBlacklistedID);
-
     public native UF_RET_CODE UF_DeleteBlacklist(int userID, int[] numOfBlacklistedID);
-
     public native UF_RET_CODE UF_GetBlacklist(int[] numOfBlacklistedID, int[] userID);
-
     public native UF_RET_CODE UF_DeleteAllBlacklist();
-
     public native UF_RET_CODE UF_SetEntranceLimit(int userID, int entranceLimit);
-
     public native UF_RET_CODE UF_GetEntranceLimit(int userID, int[] entranceLimit, int[] entranceCount);
-
     public native UF_RET_CODE UF_ClearAllEntranceLimit();
-
 
     /**
      * Image
      */
-    //TODO This function should be implemented in the JNI
-    public native UF_RET_CODE UF_SaveImage(final String fileName, UFImage[] image);
 
-    //TODO This function should be implemented in the JNI
-    public native UF_RET_CODE UF_LoadImage(final String fileName, UFImage[] image);
+    public native UF_RET_CODE UF_SaveImage(final String fileName, UFImage image);
 
+    public native UF_RET_CODE UF_LoadImage(final String fileName, UFImage image);
     public native UF_RET_CODE UF_ReadImage(UFImage image);
-
     public native UF_RET_CODE UF_ScanImage(UFImage image);
 
 
