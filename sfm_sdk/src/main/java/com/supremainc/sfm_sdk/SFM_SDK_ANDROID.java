@@ -666,9 +666,9 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
     //TODO This function should be implemented in the JNI
     public native UF_RET_CODE UF_LoadImage(final String fileName, UFImage[] image);
 
-    public native UF_RET_CODE UF_ReadImage(UFImage[] image);
+    public native UF_RET_CODE UF_ReadImage(UFImage image);
 
-    public native UF_RET_CODE UF_ScanImage(UFImage[] image);
+    public native UF_RET_CODE UF_ScanImage(UFImage image);
 
 
     /**

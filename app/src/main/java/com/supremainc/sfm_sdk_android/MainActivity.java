@@ -780,18 +780,16 @@ public class MainActivity extends AppCompatActivity {
 //        Log.d("UF_CommandEx", String.format("%X %X %X", param[0], size[0], flag[0]));
 
 
-
-        UFImage[] image = new UFImage[1];
-        image[0] = new UFImage();
+        UFImage image = new UFImage();
 
         sdk.UF_SetSysParameter(UF_SYS_PARAM.UF_SYS_IMAGE_FORMAT, UF_IMAGE_TYPE.UF_4BIT_GRAY_IMAGE.getValue());
         ret = sdk.UF_ScanImage(image);
         Log.d(TAG, "Scan Image : " + ret.toString());
 
-//        ret = sdk.UF_ReadImage(image);
-//        Log.d(TAG, "Read Image : " + ret.toString());
+        ret = sdk.UF_ReadImage(image);
+        Log.d(TAG, "Read Image : " + ret.toString());
 
-        Bitmap bmp = image[0].getBitmap();
+        Bitmap bmp = image.getBitmap();
 
 
         runOnUiThread(new Runnable() {
