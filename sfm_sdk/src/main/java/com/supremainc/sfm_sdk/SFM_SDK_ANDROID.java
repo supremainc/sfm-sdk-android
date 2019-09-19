@@ -34,7 +34,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Set;
 
-public class SFM_SDK_ANDROID {
+public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
 
 
     private UsbService usbService = null;
@@ -175,83 +175,17 @@ public class SFM_SDK_ANDROID {
     }
 
 
-    /**
-     * Interfaces for callback functions from Java
-     */
-
-
-    public static interface SetupSerialCallback {
-        public void callback(int baudrate);
+    //region Utility functions
+    String byteArrayToHex(byte[] a) {
+        StringBuilder sb = new StringBuilder();
+        for (final byte b : a)
+            sb.append(String.format("%02X ", b & 0xff));
+        return sb.toString();
     }
+    //endregion
 
-    public static interface ReadSerialCallback {
-        public int callback(byte[] data, int size, int timeout);
-    }
 
-    public static interface WriteSerialCallback {
-        public int callback(byte[] data, int size, int timeout);
-    }
-
-    public static interface SendPacketCallback {
-        public void callback(byte[] data);
-    }
-
-    public static interface ReceivePacketCallback {
-        public void callback(byte[] data);
-    }
-
-    public static interface SendDataPacketCallback {
-        public void callback(int index, int numOfPacket);
-    }
-
-    public static interface ReceiveDataPacketCallback {
-        public void callback(int index, int numOfPacket);
-    }
-
-    public static interface SendRawDataCallback {
-        public void callback(int writtenLen, int totalSize);
-    }
-
-    public static interface ReceiveRawDataCallback {
-        public void callback(int readLen, int totalSize);
-    }
-
-    public static interface MsgCallback {
-        public boolean callback(byte message);
-    }
-
-    public static interface SerialCallback {
-        public void callback(final byte[] comPort, int baudrate);
-    }
-
-    public static interface UserInfoCallback {
-        public void callback(int index, int numOfTemplate);
-    }
-
-    public static interface ScanCallback {
-        public void callback(byte errCode);
-    }
-
-    public static interface IdentifyCallback {
-        public void callback(byte errCode);
-    }
-
-    public static interface VerifyCallback {
-        public void callback(byte errCode);
-    }
-
-    public static interface EnrollCallback {
-        public void callback(byte errCode, UF_ENROLL_MODE enrollMode, int numOfSuccess);
-    }
-
-    public static interface DeleteCallback {
-        public void callback(byte errCode);
-    }
-
-    /**
-     * Implementations of callback functions from Java
-     */
-
+    //region Implementations of callback functions from Java (16 functions )
     private SetupSerialCallback setupSerialCallback = new SetupSerialCallback() {
         @Override
         public void callback(int baudrate) {
@@ -259,14 +193,6 @@ public class SFM_SDK_ANDROID {
                 usbService.setBuadrate(baudrate);
         }
     };
-
-
-    String byteArrayToHex(byte[] a) {
-        StringBuilder sb = new StringBuilder();
-        for (final byte b : a)
-            sb.append(String.format("%02X ", b & 0xff));
-        return sb.toString();
-    }
 
     private ReadSerialCallback readSerialCallback = new ReadSerialCallback() {
         @Override
@@ -331,56 +257,42 @@ public class SFM_SDK_ANDROID {
         }
     };
 
-    public MsgCallback msgCallback = new MsgCallback() {
-        @Override
-        public boolean callback(byte message) {
-            return false;
-        }
-    };
-
-    public SerialCallback serialCallback = new SerialCallback() {
-        @Override
-        public void callback(byte[] comPort, int baudrate) {
-
-        }
-    };
-
-    public UserInfoCallback userInfoCallback = new UserInfoCallback() {
+    private UserInfoCallback userInfoCallback = new UserInfoCallback() {
         @Override
         public void callback(int index, int numOfTemplate) {
 
         }
     };
 
-    public ScanCallback scanCallback = new ScanCallback() {
+    private ScanCallback scanCallback = new ScanCallback() {
         @Override
         public void callback(byte errCode) {
 
         }
     };
 
-    public IdentifyCallback identifyCallback = new IdentifyCallback() {
+    private IdentifyCallback identifyCallback = new IdentifyCallback() {
         @Override
         public void callback(byte errCode) {
 
         }
     };
 
-    public VerifyCallback verifyCallback = new VerifyCallback() {
+    private VerifyCallback verifyCallback = new VerifyCallback() {
         @Override
         public void callback(byte errCode) {
 
         }
     };
 
-    public EnrollCallback enrollCallback = new EnrollCallback() {
+    private EnrollCallback enrollCallback = new EnrollCallback() {
         @Override
         public void callback(byte errCode, UF_ENROLL_MODE enrollMode, int numOfSuccess) {
 
         }
     };
 
-    public DeleteCallback deleteCallback = new DeleteCallback() {
+    private DeleteCallback deleteCallback = new DeleteCallback() {
         @Override
         public void callback(byte errCode) {
 
@@ -388,24 +300,37 @@ public class SFM_SDK_ANDROID {
     };
 
 
-    /**
-     * Registering functions for callback functions from Java
-     */
+    // This callback is passed by the native function parameter
+    private MsgCallback msgCallback = new MsgCallback() {
+        @Override
+        public boolean callback(byte message) {
+            return false;
+        }
+    };
+
+    // This callback is passed by the native function parameter
+    private SearchModuleCallback searchModuleCallback = new SearchModuleCallback() {
+        @Override
+        public void callback(String comPort, int baudrate) {
+
+        }
+    };
+
+    //endregion
+
+
+    //region Registering functions for callback functions from Java (15 functions to set callback)
 
     public void UF_SetSetupSerialCallback(SetupSerialCallback callback) {
         setupSerialCallback = callback;
-        UF_SetSetupSerialCallback_Android();
     }
-
 
     public void UF_SetReadSerialCallback(ReadSerialCallback callback) {
         readSerialCallback = callback;
-        UF_SetReadSerialCallback_Android();
     }
 
     public void UF_SetWriteSerialCallback(WriteSerialCallback callback) {
         writeSerialCallback = callback;
-        UF_SetWriteSerialCallback_Android();
     }
 
     public void UF_SetSendPacketCallback(SendPacketCallback callback) {
@@ -432,33 +357,40 @@ public class SFM_SDK_ANDROID {
         receiveRawDataCallback = callback;
     }
 
-    private void SetCommandExCallback(MsgCallback callback) {
-        msgCallback = callback;
-    }
-
-    public void SetUserInfoCallback(UserInfoCallback callback) {
+    public void UF_SetUserInfoCallback(UserInfoCallback callback) {
         userInfoCallback = callback;
     }
 
-    public void SetScanCallback(ScanCallback callback) {
+    public void UF_SetScanCallback(ScanCallback callback) {
         scanCallback = callback;
     }
 
-    public void SetIdentifyCallback(IdentifyCallback callback) {
+    public void UF_SetIdentifyCallback(IdentifyCallback callback) {
         identifyCallback = callback;
     }
 
-    /**
-     * Callback functions from JNI
-     */
+    public void UF_SetVerifyCallback(VerifyCallback callback) {
+        verifyCallback = callback;
+    }
 
-    public void cbSetupSerial(int baudrate)
+    public void UF_SetEnrollCallback(EnrollCallback callback) {
+        enrollCallback = callback;
+    }
+
+    public void UF_SetDeleteCallback(DeleteCallback callback) {
+        deleteCallback = callback;
+    }
+    //endregion
+
+
+    //region Callback functions calling from JNI
+    private void cbSetupSerial(int baudrate)
     {
         if(setupSerialCallback != null)
             setupSerialCallback.callback(baudrate);
     }
 
-    public int cbReadSerial(byte[] data, int timeout) throws UnsupportedEncodingException {
+    private int cbReadSerial(byte[] data, int timeout) throws UnsupportedEncodingException {
 
         int ret = 0;
         if(readSerialCallback != null)
@@ -468,7 +400,7 @@ public class SFM_SDK_ANDROID {
         return ret;
     }
 
-    public int cbWriteSerial(byte[] data, int timeout) throws UnsupportedEncodingException {
+    private int cbWriteSerial(byte[] data, int timeout) throws UnsupportedEncodingException {
 
         int ret = 0;
 
@@ -479,45 +411,67 @@ public class SFM_SDK_ANDROID {
         return ret;
     }
 
-    public void cbSendPacket(byte[] data) {
+    private void cbSendPacket(byte[] data) {
         if (sendPacketCallback != null)
             sendPacketCallback.callback(data);
     }
 
-    public void cbReceivePacket(byte[] data) {
+    private void cbReceivePacket(byte[] data) {
         if (receivePacketCallback != null)
             receivePacketCallback.callback(data);
     }
 
-    public void cbSendDataPacket(int index, int numOfPacket) {
+    private void cbSendDataPacket(int index, int numOfPacket) {
         if (sendDataPacketCallback != null)
             sendDataPacketCallback.callback(index, numOfPacket);
     }
 
-    public void cbReceiveDataPacket(int index, int numOfPacket) {
+    private void cbReceiveDataPacket(int index, int numOfPacket) {
         if (receiveDataPacketCallback != null)
             receiveDataPacketCallback.callback(index, numOfPacket);
     }
 
-    public void cbSendRawData(int writtenLen, int totalSize) {
+    private void cbSendRawData(int writtenLen, int totalSize) {
         if (sendRawDataCallback != null)
             sendRawDataCallback.callback(writtenLen, totalSize);
     }
 
-    public void cbReceiveRawData(int readLen, int totalSize) {
+    private void cbReceiveRawData(int readLen, int totalSize) {
         if (receiveRawDataCallback != null)
             receiveRawDataCallback.callback(readLen, totalSize);
     }
 
-    public void cbUserInfo(int index, int numOfTemplate) {
+    private void cbUserInfo(int index, int numOfTemplate) {
         if (userInfoCallback != null)
             userInfoCallback.callback(index, numOfTemplate);
     }
 
-    public void cbScan(byte msg) {
+    private void cbScan(byte errCode) {
         if (scanCallback != null)
-            scanCallback.callback(msg);
+            scanCallback.callback(errCode);
     }
+
+    private void cbIdentify(byte errCode) {
+        if (identifyCallback != null)
+            identifyCallback.callback(errCode);
+    }
+
+    private void cbVerify(byte errCode) {
+        if (verifyCallback != null)
+            verifyCallback.callback(errCode);
+    }
+
+    private void cbEnroll(byte errCode, UF_ENROLL_MODE enrollMode, int numOfSuccess) {
+        if (enrollCallback != null)
+            enrollCallback.callback(errCode, enrollMode, numOfSuccess);
+    }
+
+    private void cbDelete(byte errCode) {
+        if (deleteCallback != null)
+            deleteCallback.callback(errCode);
+    }
+    //endregion
+
 
     /**
      * Native Functions
@@ -591,7 +545,7 @@ public class SFM_SDK_ANDROID {
      * Searching module
      */
 
-    public native UF_RET_CODE UF_SearchModule(final byte[] port, int[] baudrate, boolean[] asciiMode, UF_PROTOCOL[] protocol, int[] moduleID, SerialCallback callback);
+    public native UF_RET_CODE UF_SearchModule(final byte[] port, int[] baudrate, boolean[] asciiMode, UF_PROTOCOL[] protocol, int[] moduleID, SearchModuleCallback callback);
 
     public native UF_RET_CODE UF_SearchModuleID(int[] moduleID);
 
@@ -656,9 +610,6 @@ public class SFM_SDK_ANDROID {
     @Deprecated
     public native void UF_SortUserInfo(UFUserInfo[] userInfo, int numOfUser); // Unsupported
 
-    //TODO Callback function should be called in the JNI
-    public native void UF_SetUserInfoCallback(UserInfoCallback callback);
-
     public native UF_RET_CODE UF_SetAdminLevel(int userID, UF_ADMIN_LEVEL adminLevel);
 
     public native UF_RET_CODE UF_GetAdminLevel(int userID, UF_ADMIN_LEVEL[] adminLevel);
@@ -678,9 +629,6 @@ public class SFM_SDK_ANDROID {
     public native UF_RET_CODE UF_ReadTemplate(int userID, int[] numOfTemplate, byte[] templateData);
 
     public native UF_RET_CODE UF_ReadOneTemplate(int userID, int subID, byte[] templateData);
-
-    //TODO Callback function should be called in the JNI
-    public native void UF_SetScanCallback(ScanCallback callback);
 
     public native UF_RET_CODE UF_ScanTemplate(byte[] templateData, int[] templateSize, int[] imageQuality);
 
@@ -727,9 +675,6 @@ public class SFM_SDK_ANDROID {
      * Identify
      */
 
-    //TODO Callback function should be called in the JNI
-    public native void UF_SetIdentifyCallback(IdentifyCallback callback);
-
     public native UF_RET_CODE UF_Identify(int[] userID, byte[] subID);
 
     public native UF_RET_CODE UF_IdentifyTemplate(int templateSize, byte[] templateData, int[] userID, byte[] subID);
@@ -739,7 +684,6 @@ public class SFM_SDK_ANDROID {
     /**
      * Verify
      */
-    public native void UF_SetVerifyCallback(VerifyCallback callback);
 
     public native UF_RET_CODE UF_Verify(int userID, byte[] subID);
 
@@ -752,7 +696,6 @@ public class SFM_SDK_ANDROID {
     /**
      * Enroll
      */
-    public native void UF_SetEnrollCallback(EnrollCallback callback);
 
     public native UF_RET_CODE UF_Enroll(int userID, UF_ENROLL_OPTION option, int[] enrollID, int[] imageQuality);
 
@@ -771,7 +714,6 @@ public class SFM_SDK_ANDROID {
     /**
      * Delete
      */
-    public native void UF_SetDeleteCallback(DeleteCallback callback);
 
     public native UF_RET_CODE UF_Delete(int userID);
 
@@ -927,15 +869,14 @@ public class SFM_SDK_ANDROID {
 
     public native UF_RET_CODE UF_ScanImageEx(UFImage[] image, UF_IMAGE_TYPE type, int wsqBitRate);
 
+    public static native void InitCallbackFunctions();
 
     public native void NDKCallback_Test();
-
 
     static {
 
         System.loadLibrary("native-lib");
+        InitCallbackFunctions();
     }
-
-
 
 }

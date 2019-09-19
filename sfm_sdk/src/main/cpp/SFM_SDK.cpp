@@ -36,11 +36,8 @@ JavaVM *g_vm;
 jobject g_msgCallback;
 jmethodID g_msgCallback_method_id;
 
-jobject g_userInfoCallback;
-jmethodID g_userInfoCallback_method_id;
-
-jobject g_identifCallback;
-jmethodID g_identifyCallback_method_id;
+jobject g_searchModuleCallback;
+jmethodID g_searchModuleCallback_method_id;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -132,25 +129,6 @@ jobject jobjUF_AUTH_TYPE(JNIEnv *env, jobject thiz, UF_AUTH_TYPE authType) {
 }
 
 
-//jint jintUF_PROTOCOL(JNIEnv *env, jobject thiz, jobject protocol){
-//
-//    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_PROTOCOL");
-//    if (cls == nullptr) return NULL;
-//
-//    jfieldID fid = env->GetFieldID(cls, "getValue", "()I");
-//
-//    jmethodID mid = env->Getfield(cls, "getValue",
-//                                           "()I");
-//    if (mid == nullptr) return NULL;
-//
-//    jint ret = (jint)(env->CallIntMethod(cls, mid, protocol));
-//
-//    env->DeleteLocalRef(cls);
-//
-//    return ret;
-//}
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -175,6 +153,7 @@ unsigned char *as_unsigned_char_array(JNIEnv *env, jbyteArray array) {
  * Callback functions
  */
 
+
 void SetupSerialCallback(int baudrate) {
     static jmethodID cbSetupSerial = NULL;
 
@@ -191,7 +170,7 @@ void SetupSerialCallback(int baudrate) {
 }
 
 
-int ReadSerialCallback(unsigned char *data, int size, int timeout) {
+static int ReadSerialCallback(unsigned char *data, int size, int timeout) {
     static jmethodID cbReadSerial = NULL;
 
     JNIEnv *env;
@@ -216,7 +195,7 @@ int ReadSerialCallback(unsigned char *data, int size, int timeout) {
     return ret;
 }
 
-int WriteSerialCallback(unsigned char *data, int size, int timeout) {
+static int WriteSerialCallback(unsigned char *data, int size, int timeout) {
 
     static jmethodID cbWriteSerial = NULL;
 
@@ -330,20 +309,6 @@ void ReceiveRawDataCallback(int readLen, int totalSize) {
     env->CallVoidMethod(g_obj, cbReceiveRawData, readLen, totalSize);
 }
 
-BOOL MsgCallback(BYTE msg) {
-
-    JNIEnv *env;
-    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
-
-    env->ExceptionClear();
-    BOOL ret = (env->CallBooleanMethod(g_msgCallback, g_msgCallback_method_id, msg) == true ? 1
-                                                                                              : 0);
-    if (env->ExceptionOccurred())
-        env->ExceptionClear();
-
-    return ret;
-}
-
 void UserInfoCallback(int index, int numOfTemplate) {
     static jmethodID cbUserInfo = NULL;
 
@@ -358,7 +323,7 @@ void UserInfoCallback(int index, int numOfTemplate) {
     env->CallVoidMethod(g_obj, cbUserInfo, index, numOfTemplate);
 }
 
-void ScanCallback(BYTE msg) {
+void ScanCallback(BYTE errCode) {
     static jmethodID cbScan = NULL;
 
     JNIEnv *env;
@@ -372,23 +337,139 @@ void ScanCallback(BYTE msg) {
 
     LOGE("Scan Success\n");
 
-    env->CallVoidMethod(g_obj, cbScan, msg);
+    env->CallVoidMethod(g_obj, cbScan, errCode);
 }
 
-void IdentifyCallback(BYTE msg) {
+void IdentifyCallback(BYTE errCode) {
+    static jmethodID cbIdentify = NULL;
+
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
+    if (cbIdentify == NULL) {
+        cbIdentify = env->GetMethodID(g_cls, "cbIdentify", "(B)V");
+        if (cbIdentify == NULL)
+            return;
+    }
+    env->CallVoidMethod(g_obj, cbIdentify, errCode);
+}
+
+void VerifyCallback(BYTE errCode) {
+    static jmethodID cbVerify = NULL;
+
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
+    if (cbVerify == NULL) {
+        cbVerify = env->GetMethodID(g_cls, "cbVerify", "(B)V");
+        if (cbVerify == NULL)
+            return;
+    }
+    env->CallVoidMethod(g_obj, cbVerify, errCode);
+}
+
+void EnrollCallback(BYTE errCode, UF_ENROLL_MODE _enrollMode, int numOfSuccess) {
+    static jmethodID cbEnroll = NULL;
+
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
+    if (cbEnroll == NULL) {
+        cbEnroll = env->GetMethodID(g_cls, "cbEnroll",
+                                    "(BLcom/supremainc/sfm_sdk/UF_ENROLL_MODE;I)V");
+        if (cbEnroll == NULL)
+            return;
+    }
+
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_ENROLL_MODE");
+    jmethodID mid = env->GetMethodID(cls, "ToEnrollMode",
+                                     "(I)Lcom/supremainc/sfm_sdk/UF_ENROLL_MODE;");
+
+    jobject enrollMode = env->NewObject(cls, mid, _enrollMode);
+
+    env->CallVoidMethod(g_obj, cbEnroll, errCode, enrollMode, numOfSuccess);
+
+    env->DeleteLocalRef(cls);
+}
+
+void DeleteCallback(BYTE errCode) {
+    static jmethodID cbDelete = NULL;
+
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
+    if (cbDelete == NULL) {
+        cbDelete = env->GetMethodID(g_cls, "cbEnroll",
+                                    "(BLcom/supremainc/sfm_sdk/UF_ENROLL_MODE;I)V");
+        if (cbDelete == NULL)
+            return;
+    }
+    env->CallVoidMethod(g_obj, cbDelete, errCode);
+}
+
+
+BOOL MsgCallback(BYTE msg) {
+
     JNIEnv *env;
     g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
 
     env->ExceptionClear();
-    env->CallVoidMethod(g_identifCallback, g_identifyCallback_method_id, msg);
+    BOOL ret = (env->CallBooleanMethod(g_msgCallback, g_msgCallback_method_id, msg) == true ? 1
+                                                                                            : 0);
     if (env->ExceptionOccurred())
         env->ExceptionClear();
+
+    return ret;
+}
+
+void SearchModuleCallback(const char *_comPort, int baudrate) {
+    JNIEnv *env;
+    g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+
+    env->ExceptionClear();
+
+    jstring comPort = env->NewStringUTF(_comPort);
+
+    env->CallBooleanMethod(g_searchModuleCallback, g_searchModuleCallback_method_id, comPort,
+                           baudrate);
+    env->ReleaseStringUTFChars(comPort, _comPort);
+
+    if (env->ExceptionOccurred())
+        env->ExceptionClear();
+}
+
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    InitCallbackFunctions
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_InitCallbackFunctions
+        (JNIEnv *env, jclass obj) {
+    g_obj = obj;
+
+    UF_SetSetupSerialCallback_Android(SetupSerialCallback);
+    UF_SetWriteSerialCallback_Android(WriteSerialCallback);
+    UF_SetReadSerialCallback_Android(ReadSerialCallback);
+    UF_SetSendPacketCallback(SendPacketCallback);
+    UF_SetReceivePacketCallback(ReceivePacketCallback);
+    UF_SetSendDataPacketCallback(SendDataPacketCallback);
+    UF_SetReceiveDataPacketCallback(ReceiveDataPacketCallback);
+    UF_SetSendRawDataCallback(SendRawDataCallback);
+    UF_SetReceiveRawDataCallback(ReceiveRawDataCallback);
+    UF_SetUserInfoCallback(UserInfoCallback);
+    UF_SetScanCallback(ScanCallback);
+    UF_SetIdentifyCallback(IdentifyCallback);
+    UF_SetVerifyCallback(VerifyCallback);
+    UF_SetEnrollCallback(EnrollCallback);
+    UF_SetDeleteCallback(DeleteCallback);
 }
 
 
 /**
  * JNI_OnLoad
  */
+
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     LOGI("JNI_OnLoad\n");
@@ -492,50 +573,6 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Clo
     g_obj = obj;
     UF_RET_CODE ret = UF_CloseCommPort();
     return jobjUF_RET_CODE(env, obj, ret);
-}
-
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetSetupSerialCallback_Android
- * Signature: ()V
- */
-JNIEXPORT void JNICALL
-Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetSetupSerialCallback_1Android
-        (JNIEnv *env, jobject obj) {
-    g_obj = obj;
-    UF_SetSetupSerialCallback_Android(SetupSerialCallback);
-}
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetReadSerialCallback_Android
- * Signature: ()V
- */
-JNIEXPORT void JNICALL
-Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetReadSerialCallback_1Android
-        (JNIEnv *env, jobject obj) {
-    g_obj = obj;
-    UF_SetReadSerialCallback_Android(ReadSerialCallback);
-}
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetWriteSerialCallback_Android
- * Signature: ()V
- */
-JNIEXPORT void JNICALL
-Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetWriteSerialCallback_1Android
-        (JNIEnv *env, jobject obj) {
-    g_obj = obj;
-    UF_SetWriteSerialCallback_Android(WriteSerialCallback);
-    UF_SetSendPacketCallback(SendPacketCallback);
-    UF_SetReceivePacketCallback(ReceivePacketCallback);
-    UF_SetSendDataPacketCallback(SendDataPacketCallback);
-    UF_SetReceiveDataPacketCallback(ReceiveDataPacketCallback);
-    UF_SetSendRawDataCallback(SendRawDataCallback);
-    UF_SetReceiveRawDataCallback(ReceiveRawDataCallback);
-    UF_SetScanCallback(ScanCallback);
 }
 
 /*
@@ -944,7 +981,6 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Com
     jint *pParam = env->GetIntArrayElements(_param, 0);
     jint *pSize = env->GetIntArrayElements(_size, 0);
     jbyte *pFlag = env->GetByteArrayElements(_flag, 0);
-    BOOL (*msgCallback)(BYTE) = NULL;
 
     jclass objclass = env->GetObjectClass(_callback);
     jmethodID method = env->GetMethodID(objclass, "callback", "(B)Z");
@@ -1030,7 +1066,6 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Com
     jsize len = env->GetArrayLength(_data);
     jbyte *pData = env->GetByteArrayElements(_data, 0);
     UINT32 dataSize = (UINT32) _datasize;
-    BOOL (*msgCallback)(BYTE) = NULL;
     BOOL waitUserInput = (BOOL) (_waitUserInput == true ? 1 : 0);
 
     UINT32 param;
@@ -1872,6 +1907,8 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Rea
  */
 JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetScanCallback
         (JNIEnv *env, jobject obj, jobject _callback) {
+
+    g_obj = obj;
     UF_SetScanCallback(ScanCallback);
 }
 
@@ -2255,6 +2292,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Del
 JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetIdentifyCallback
         (JNIEnv *env, jobject obj, jobject _callback) {
 
+    g_obj = obj;
 
     UF_SetIdentifyCallback(IdentifyCallback);
 }

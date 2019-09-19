@@ -229,8 +229,8 @@ public class MainActivity extends AppCompatActivity {
             display.post(new Runnable() {
                 @Override
                 public void run() {
-
-                    display.append("Scan Success\n");
+                    final String str = "Scan Success\n";
+                    display.append(str);
                 }
             });
 
@@ -688,6 +688,7 @@ public class MainActivity extends AppCompatActivity {
         sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
         sdk.UF_SetScanCallback(scanCallback);
 
+
         UF_RET_CODE ret = null;
 
         UF_AUTH_TYPE[] authType = new UF_AUTH_TYPE[1];
@@ -766,6 +767,20 @@ public class MainActivity extends AppCompatActivity {
 
         UF_RET_CODE ret = null;
 
+        // UF_Command
+        int[] param = new int[]{0};
+        int[] size = new int[]{0};
+        byte[] flag = new byte[]{(byte) 0x79};
+
+//        ret = sdk.UF_Command((byte)0x04, param, size, flag);
+//        Log.d("UF_Command", ret.toString());
+
+//        ret = sdk.UF_CommandEx((byte) 0x05, param, size, flag, msgCallback);
+//        Log.d("UF_CommandEx", ret.toString());
+//        Log.d("UF_CommandEx", String.format("%X %X %X", param[0], size[0], flag[0]));
+
+
+
         UFImage[] image = new UFImage[1];
         image[0] = new UFImage();
 
@@ -836,7 +851,6 @@ public class MainActivity extends AppCompatActivity {
 
     private SFMTask task;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -846,6 +860,7 @@ public class MainActivity extends AppCompatActivity {
         editText = (EditText) findViewById(R.id.editText1);
         imageView = (ImageView) findViewById(R.id.imageView);
         sdk = new SFM_SDK_ANDROID(this, mHandler, mUsbReceiver);
+
         Button sendButton = (Button) findViewById(R.id.buttonSend);
 
 
