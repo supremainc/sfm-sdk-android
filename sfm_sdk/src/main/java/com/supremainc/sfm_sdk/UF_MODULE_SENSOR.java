@@ -10,6 +10,7 @@ public enum UF_MODULE_SENSOR {
     UF_SENSOR_TS(6),
     UF_SENSOR_OL(7),
     UF_SENSOR_OH(8),
+    UF_SENSOR_SLIM(9),
     UF_SENSOR_UNKNOWN(-1),
     ;
     private int value;
@@ -21,4 +22,16 @@ public enum UF_MODULE_SENSOR {
     public int getValue() {
         return this.value;
     }
+
+    public static UF_MODULE_SENSOR ToObjectType(int i) {
+        UF_MODULE_SENSOR result = null;
+
+        for (UF_MODULE_SENSOR iter : UF_MODULE_SENSOR.values()) {
+            if (i == iter.getValue()) {
+                result = iter;
+            }
+        }
+        return result;
+    }
+
 }

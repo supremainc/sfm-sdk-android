@@ -13,7 +13,14 @@ public enum UF_MODULE_VERSION {
     UF_VERSION_1_9(9),
     UF_VERSION_2_0(20),
     UF_VERSION_2_1(21),
+    UF_VERSION_2_2(22),
+    UF_VERSION_2_3(23),
+    UF_VERSION_2_4(24),
     UF_VERSION_3_0(30),
+    UF_VERSION_3_1(30),
+    UF_VERSION_3_2(30),
+    UF_VERSION_3_3(30),
+    UF_VERSION_3_4(34),
     UF_VERSION_UNKNOWN(-1),
     ;
     private int value;
@@ -25,4 +32,16 @@ public enum UF_MODULE_VERSION {
     public int getValue() {
         return this.value;
     }
+
+    public static UF_MODULE_VERSION ToObjectType(int i) {
+        UF_MODULE_VERSION result = null;
+
+        for (UF_MODULE_VERSION iter : UF_MODULE_VERSION.values()) {
+            if (i == iter.getValue()) {
+                result = iter;
+            }
+        }
+        return result;
+    }
+
 }

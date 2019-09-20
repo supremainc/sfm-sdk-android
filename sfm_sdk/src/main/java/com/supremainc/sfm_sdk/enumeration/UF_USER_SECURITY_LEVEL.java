@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.enumeration;
 
 public enum UF_USER_SECURITY_LEVEL {
     UF_USER_SECURITY_DEFAULT(0),
@@ -22,5 +22,16 @@ public enum UF_USER_SECURITY_LEVEL {
 
     public int getValue() {
         return this.value;
+    }
+
+    public static UF_USER_SECURITY_LEVEL ToAdminLevel(int i) {
+        UF_USER_SECURITY_LEVEL userSecurityLevel = null;
+
+        for (UF_USER_SECURITY_LEVEL iter : UF_USER_SECURITY_LEVEL.values()) {
+            if (i == iter.getValue()) {
+                userSecurityLevel = iter;
+            }
+        }
+        return userSecurityLevel;
     }
 }

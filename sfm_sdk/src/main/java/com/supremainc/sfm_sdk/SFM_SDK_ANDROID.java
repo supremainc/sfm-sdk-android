@@ -11,26 +11,22 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.supremainc.sfm_sdk.enumeration.UF_ADMIN_LEVEL;
+import com.supremainc.sfm_sdk.enumeration.UF_AUTH_TYPE;
 import com.supremainc.sfm_sdk.enumeration.UF_PROTOCOL;
 import com.supremainc.sfm_sdk.enumeration.UF_RET_CODE;
 import com.supremainc.sfm_sdk.enumeration.UF_UPGRADE_OPTION;
-import com.supremainc.sfm_sdk.structure.UFConfigComponentHeader;
-import com.supremainc.sfm_sdk.structure.UFGPIOData;
-import com.supremainc.sfm_sdk.structure.UFGPIOInputData;
-import com.supremainc.sfm_sdk.structure.UFGPIOOutputData;
-import com.supremainc.sfm_sdk.structure.UFGPIOWiegandData;
+import com.supremainc.sfm_sdk.enumeration.UF_USER_SECURITY_LEVEL;
 import com.supremainc.sfm_sdk.structure.UFImage;
-import com.supremainc.sfm_sdk.structure.UFLogRecord;
-import com.supremainc.sfm_sdk.structure.UFOutputSignal;
+import com.supremainc.sfm_sdk.structure.UFModuleInfo;
 import com.supremainc.sfm_sdk.structure.UFUserInfo;
 import com.supremainc.sfm_sdk.structure.UFUserInfoEx;
-import com.supremainc.sfm_sdk.structure.time_t;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Set;
 
-public class SFM_SDK_ANDROID {
+public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
 
 
     private UsbService usbService = null;
@@ -38,31 +34,30 @@ public class SFM_SDK_ANDROID {
     private static AppCompatActivity mActivity = null;
     private static BroadcastReceiver mUsbReceiver = null;
 
-
-
     /**
      * Constructor
      */
 
-    public SFM_SDK_ANDROID(AppCompatActivity activity)
-    {
+    public SFM_SDK_ANDROID(AppCompatActivity activity) {
         mActivity = activity;
     }
-    public SFM_SDK_ANDROID(AppCompatActivity activity, MessageHandler handler)
-    {
+
+    public SFM_SDK_ANDROID(AppCompatActivity activity, MessageHandler handler) {
         mActivity = activity;
         mHandler = handler;
     }
-    public SFM_SDK_ANDROID(AppCompatActivity activity, MessageHandler handler, BroadcastReceiver receiver){
+
+    public SFM_SDK_ANDROID(AppCompatActivity activity, MessageHandler handler, BroadcastReceiver receiver) {
         mActivity = activity;
         mHandler = handler;
         mUsbReceiver = receiver;
     }
+
     private final ServiceConnection usbConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder arg1) {
             usbService = ((UsbService.UsbBinder) arg1).getService();
-            if(mHandler != null)
+            if (mHandler != null)
                 usbService.setHandler(mHandler);
         }
 
@@ -95,32 +90,28 @@ public class SFM_SDK_ANDROID {
         filter.addAction(UsbService.ACTION_USB_DISCONNECTED);
         filter.addAction(UsbService.ACTION_USB_NOT_SUPPORTED);
         filter.addAction(UsbService.ACTION_USB_PERMISSION_NOT_GRANTED);
-        if(mUsbReceiver != null)
+        if (mUsbReceiver != null)
             mActivity.registerReceiver(mUsbReceiver, filter);
     }
 
 
-
-    private static String IntArrayToString(int[] arr)
-    {
-        String retval = Arrays.toString(arr).replace(", ","").replace("[","").replace("]","");
+    private static String IntArrayToString(int[] arr) {
+        String retval = Arrays.toString(arr).replace(", ", "").replace("[", "").replace("]", "");
         return retval;
     }
 
     /**
      * Destructor
      */
-    public void finalize()
-    {
+    public void finalize() {
 
     }
 
     /**
      * Overloaded functions
-     * */
+     */
 
-    public String UF_GetSDKVersion()
-    {
+    public String UF_GetSDKVersion() {
         int[] version_major = new int[1];
         int[] version_minor = new int[1];
         int[] version_revision = new int[1];
@@ -150,8 +141,7 @@ public class SFM_SDK_ANDROID {
     }
 
 
-    public void WriteTest(String data)
-    {
+    public void WriteTest(String data) {
         if (usbService != null) { // if UsbService was correctly binded, Send data
             byte[] a = data.getBytes();
             Log.d("[INFO write]", Arrays.toString(a));
@@ -164,97 +154,30 @@ public class SFM_SDK_ANDROID {
         }
     }
 
-    public void resumeService()
-    {
+    public void resumeService() {
         setFilters();  // Start listening notifications from UsbService
         startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
 
     }
 
-    public void pauseService()
-    {
-        if(mUsbReceiver !=null)
+    public void pauseService() {
+        if (mUsbReceiver != null)
             mActivity.unregisterReceiver(mUsbReceiver);
         mActivity.unbindService(usbConnection);
     }
 
-    /**
-     * Interfaces for callback functions from Java
-     */
 
-
-    public static interface SetupSerialCallback{
-        public void callback(int baudrate);
+    //region Utility functions
+    String byteArrayToHex(byte[] a) {
+        StringBuilder sb = new StringBuilder();
+        for (final byte b : a)
+            sb.append(String.format("%02X ", b & 0xff));
+        return sb.toString();
     }
+    //endregion
 
-    public static interface ReadSerialCallback {
-        public int callback(byte[] data, int size, int timeout);
-    }
 
-    public static interface WriteSerialCallback{
-        public int callback(byte[] data, int size, int timeout);
-    }
-
-    public static interface SendPacketCallback {
-        public void callback(byte[] data);
-    }
-
-    public static interface ReceivePacketCallback {
-        public void callback(byte[] data);
-    }
-
-    public static interface SendDataPacketCallback {
-        public void callback(int index, int numOfPacket);
-    }
-
-    public static interface ReceiveDataPacketCallback {
-        public void callback(int index, int numOfPacket);
-    }
-
-    public static interface SendRawDataCallback {
-        public void callback(int writtenLen, int totalSize);
-    }
-
-    public static interface ReceiveRawDataCallback {
-        public void callback(int readLen, int totalSize);
-    }
-
-    public static interface MsgCallback {
-        public boolean callback(byte message);
-    }
-
-    public static interface SerialCallback {
-        public void callback(final byte[] comPort, int baudrate);
-    }
-
-    public static interface UserInfoCallback {
-        public void callback(int index, int numOfTemplate);
-    }
-
-    public static interface ScanCallback {
-        public void callback(byte errCode);
-    }
-
-    public static interface IdentifyCallback {
-        public void callback(byte errCode);
-    }
-
-    public static interface VerifyCallback {
-        public void callback(byte errCode);
-    }
-
-    public static interface EnrollCallback {
-        public void callback(byte errCode, UF_ENROLL_MODE enrollMode, int numOfSuccess);
-    }
-
-    public static interface DeleteCallback {
-        public void callback(byte errCode);
-    }
-
-    /**
-     * Implementations of callback functions from Java
-     */
-
+    //region Implementations of callback functions from Java (16 functions )
     private SetupSerialCallback setupSerialCallback = new SetupSerialCallback() {
         @Override
         public void callback(int baudrate) {
@@ -263,21 +186,13 @@ public class SFM_SDK_ANDROID {
         }
     };
 
-
-    String byteArrayToHex(byte[] a) {
-        StringBuilder sb = new StringBuilder();
-        for (final byte b : a)
-            sb.append(String.format("%02X ", b & 0xff));
-        return sb.toString();
-    }
-
     private ReadSerialCallback readSerialCallback = new ReadSerialCallback() {
         @Override
         public int callback(byte[] data, int size, int timeout) {
 
             int ret = usbService.readSerial(data, timeout);
-            Log.d("[INFO] cbReadSerial", byteArrayToHex(data));
-            Log.d("[INFO]", String.format("ret : %d timeout : %d", ret, timeout));
+//            Log.d("[INFO] cbReadSerial", byteArrayToHex(data));
+//            Log.d("[INFO]", String.format("ret : %d timeout : %d", ret, timeout));
 
             return ret;
         }
@@ -286,7 +201,7 @@ public class SFM_SDK_ANDROID {
     private WriteSerialCallback writeSerialCallback = new WriteSerialCallback() {
         @Override
         public int callback(byte[] data, int size, int timeout) {
-            Log.d("[INFO] cbWriteSerial", Arrays.toString(data));
+//            Log.d("[INFO] cbWriteSerial", Arrays.toString(data));
             int ret = usbService.writeSerial(data, timeout);
             return ret;
         }
@@ -334,56 +249,42 @@ public class SFM_SDK_ANDROID {
         }
     };
 
-    public MsgCallback msgCallback = new MsgCallback() {
-        @Override
-        public boolean callback(byte message) {
-            return false;
-        }
-    };
-
-    public SerialCallback serialCallback = new SerialCallback() {
-        @Override
-        public void callback(byte[] comPort, int baudrate) {
-
-        }
-    };
-
-    public UserInfoCallback userInfoCallback = new UserInfoCallback() {
+    private UserInfoCallback userInfoCallback = new UserInfoCallback() {
         @Override
         public void callback(int index, int numOfTemplate) {
 
         }
     };
 
-    public ScanCallback scanCallback = new ScanCallback() {
+    private ScanCallback scanCallback = new ScanCallback() {
         @Override
         public void callback(byte errCode) {
 
         }
     };
 
-    public IdentifyCallback identifyCallback = new IdentifyCallback() {
+    private IdentifyCallback identifyCallback = new IdentifyCallback() {
         @Override
         public void callback(byte errCode) {
 
         }
     };
 
-    public VerifyCallback verifyCallback = new VerifyCallback() {
+    private VerifyCallback verifyCallback = new VerifyCallback() {
         @Override
         public void callback(byte errCode) {
 
         }
     };
 
-    public EnrollCallback enrollCallback = new EnrollCallback() {
+    private EnrollCallback enrollCallback = new EnrollCallback() {
         @Override
         public void callback(byte errCode, UF_ENROLL_MODE enrollMode, int numOfSuccess) {
 
         }
     };
 
-    public DeleteCallback deleteCallback = new DeleteCallback() {
+    private DeleteCallback deleteCallback = new DeleteCallback() {
         @Override
         public void callback(byte errCode) {
 
@@ -391,24 +292,37 @@ public class SFM_SDK_ANDROID {
     };
 
 
-    /**
-     * Registering functions for callback functions from Java
-     */
+    // This callback is passed by the native function parameter
+    private MsgCallback msgCallback = new MsgCallback() {
+        @Override
+        public boolean callback(byte message) {
+            return false;
+        }
+    };
+
+    // This callback is passed by the native function parameter
+    private SearchModuleCallback searchModuleCallback = new SearchModuleCallback() {
+        @Override
+        public void callback(String comPort, int baudrate) {
+
+        }
+    };
+
+    //endregion
+
+
+    //region Registering functions for callback functions from Java (15 functions to set callback)
 
     public void UF_SetSetupSerialCallback(SetupSerialCallback callback) {
         setupSerialCallback = callback;
-        UF_SetSetupSerialCallback_Android();
     }
-
 
     public void UF_SetReadSerialCallback(ReadSerialCallback callback) {
         readSerialCallback = callback;
-        UF_SetReadSerialCallback_Android();
     }
 
     public void UF_SetWriteSerialCallback(WriteSerialCallback callback) {
         writeSerialCallback = callback;
-        UF_SetWriteSerialCallback_Android();
     }
 
     public void UF_SetSendPacketCallback(SendPacketCallback callback) {
@@ -435,109 +349,164 @@ public class SFM_SDK_ANDROID {
         receiveRawDataCallback = callback;
     }
 
-    private void SetCommandExCallback(MsgCallback callback) {
-        msgCallback = callback;
+    public void UF_SetUserInfoCallback(UserInfoCallback callback) {
+        userInfoCallback = callback;
     }
 
-    /**
-     * Callback functions from JNI
-     */
+    public void UF_SetScanCallback(ScanCallback callback) {
+        scanCallback = callback;
+    }
 
-    public void cbSetupSerial(int baudrate)
-    {
-        if(setupSerialCallback != null)
+    public void UF_SetIdentifyCallback(IdentifyCallback callback) {
+        identifyCallback = callback;
+    }
+
+    public void UF_SetVerifyCallback(VerifyCallback callback) {
+        verifyCallback = callback;
+    }
+
+    public void UF_SetEnrollCallback(EnrollCallback callback) {
+        enrollCallback = callback;
+    }
+
+    public void UF_SetDeleteCallback(DeleteCallback callback) {
+        deleteCallback = callback;
+    }
+    //endregion
+
+
+    //region Callback functions calling from JNI
+    private void cbSetupSerial(int baudrate) {
+        if (setupSerialCallback != null)
             setupSerialCallback.callback(baudrate);
     }
 
-    public int cbReadSerial(byte[] data, int timeout) throws UnsupportedEncodingException {
+    private int cbReadSerial(byte[] data, int timeout) throws UnsupportedEncodingException {
 
         int ret = 0;
-        if(readSerialCallback != null)
-        {
+        if (readSerialCallback != null) {
             ret = readSerialCallback.callback(data, data.length, timeout);
         }
         return ret;
     }
 
-    public int cbWriteSerial(byte[] data, int timeout) throws UnsupportedEncodingException {
+    private int cbWriteSerial(byte[] data, int timeout) throws UnsupportedEncodingException {
 
         int ret = 0;
 
-        if(writeSerialCallback != null)
-        {
+        if (writeSerialCallback != null) {
             ret = writeSerialCallback.callback(data, data.length, timeout);
         }
         return ret;
     }
 
-    public void cbSendPacket(byte[] data) {
+    private void cbSendPacket(byte[] data) {
         if (sendPacketCallback != null)
             sendPacketCallback.callback(data);
     }
 
-    public void cbReceivePacket(byte[] data) {
+    private void cbReceivePacket(byte[] data) {
         if (receivePacketCallback != null)
             receivePacketCallback.callback(data);
     }
 
-    public void cbSendDataPacket(int index, int numOfPacket) {
+    private void cbSendDataPacket(int index, int numOfPacket) {
         if (sendDataPacketCallback != null)
             sendDataPacketCallback.callback(index, numOfPacket);
     }
 
-    public void cbReceiveDataPacket(int index, int numOfPacket) {
+    private void cbReceiveDataPacket(int index, int numOfPacket) {
         if (receiveDataPacketCallback != null)
             receiveDataPacketCallback.callback(index, numOfPacket);
     }
 
-    public void cbSendRawData(int writtenLen, int totalSize) {
+    private void cbSendRawData(int writtenLen, int totalSize) {
         if (sendRawDataCallback != null)
             sendRawDataCallback.callback(writtenLen, totalSize);
     }
 
-    public void cbReceiveRawData(int readLen, int totalSize) {
+    private void cbReceiveRawData(int readLen, int totalSize) {
         if (receiveRawDataCallback != null)
             receiveRawDataCallback.callback(readLen, totalSize);
     }
+
+    private void cbUserInfo(int index, int numOfTemplate) {
+        if (userInfoCallback != null)
+            userInfoCallback.callback(index, numOfTemplate);
+    }
+
+    private void cbScan(byte errCode) {
+        if (scanCallback != null)
+            scanCallback.callback(errCode);
+    }
+
+    private void cbIdentify(byte errCode) {
+        if (identifyCallback != null)
+            identifyCallback.callback(errCode);
+    }
+
+    private void cbVerify(byte errCode) {
+        if (verifyCallback != null)
+            verifyCallback.callback(errCode);
+    }
+
+    private void cbEnroll(byte errCode, UF_ENROLL_MODE enrollMode, int numOfSuccess) {
+        if (enrollCallback != null)
+            enrollCallback.callback(errCode, enrollMode, numOfSuccess);
+    }
+
+    private void cbDelete(byte errCode) {
+        if (deleteCallback != null)
+            deleteCallback.callback(errCode);
+    }
+    //endregion
 
 
     /**
      * Native Functions
      */
     public native String stringFromJNI();
+
     public native void UF_GetSDKVersion(int[] major, int[] minor, int[] revision);
 
     /**
      * Initialize serial communication
      */
     public native UF_RET_CODE UF_InitCommPort(String commPort, int baudrate, boolean asciiMode);
+
     public native UF_RET_CODE UF_CloseCommPort();
 
-    // Deprecated
+    // UNSUPPORTED
     // public native UF_RET_CODE UF_InitSocket(String inetAddr, int port, boolean asciiMode);
     // public native UF_RET_CODE UF_CloseSocket();
 
+    public native void UF_Reconnect();
 
-    public native void UF_SetSetupSerialCallback_Android();
-    public native void UF_SetReadSerialCallback_Android();
-    public native void UF_SetWriteSerialCallback_Android();
-
-    public native void UF_Reconnect(); // OK
     public native UF_RET_CODE UF_SetBaudrate(int baudrate);
+
     public native void UF_SetAsciiMode(boolean asciiMode);
 
     /**
      * Basic packet interface
      */
     public native UF_RET_CODE UF_SendPacket(byte command, int param, int size, byte flag, int timeout);
+
     public native UF_RET_CODE UF_SendNetworkPacket(byte command, short terminalID, int param, int size, byte flag, int timeout);
+
     public native UF_RET_CODE UF_ReceivePakcet(byte[] packet, int timeout);
+
     public native UF_RET_CODE UF_ReceiveNetworkPakcet(byte[] packet, int timeout);
+
     public native UF_RET_CODE UF_SendRawData(byte[] buf, int size, int timeout);
+
     public native UF_RET_CODE UF_ReceiveRawData(byte[] buf, int size, int timeout, boolean checkEndCode);
+
     public native UF_RET_CODE UF_SendDataPacket(byte command, byte[] buf, int dataSize, int dataPacketSize);
+
     public native UF_RET_CODE UF_ReceiveDataPacket(byte command, byte[] buf, int dataSize);
+
     public native void UF_SetDefaultPacketSize(int defualtSize);
+
     public native int UF_GetDefaultPacketSize();
 
     /**
@@ -545,18 +514,31 @@ public class SFM_SDK_ANDROID {
      */
 
     public native void UF_SetProtocol(UF_PROTOCOL protocol, int moduleID);
+
     public native UF_PROTOCOL UF_GetProtocol();
+
     public native int UF_GetModuleID();
+
     public native void UF_SetGenericCommandTimeout(int timeout);
+
     public native void UF_SetInputCommandTimeout(int timeout);
+
     public native int UF_GetGenericCommandTimeout();
+
     public native int UF_GetInputCommandTimeout();
+
     public native void UF_SetNetWorkDelay(int delay);
+
     public native int UF_GetNetworkDelay();
+
     public native UF_RET_CODE UF_Command(byte command, int[] param, int[] size, byte[] flag);
+
     public native UF_RET_CODE UF_CommandEx(byte command, int[] param, int[] size, byte[] flag, MsgCallback callback);
+
     public native UF_RET_CODE UF_CommandSendData(byte command, int[] param, int[] size, byte[] flag, byte[] data, int dataSize);
+
     public native UF_RET_CODE UF_CommandSendDataEx(byte command, int[] param, int[] size, byte[] flag, byte[] data, int dataSize, MsgCallback callback, boolean waitUserInput);
+
     public native UF_RET_CODE UF_Cancel(boolean receivePacket);
 
 
@@ -564,19 +546,33 @@ public class SFM_SDK_ANDROID {
      * Module information
      */
 
-    public native UF_RET_CODE UF_GetModuleInfo(UF_MODULE_TYPE[] type, UF_MODULE_VERSION[] version, UF_MODULE_SENSOR[] sensorType);
+    public native UF_RET_CODE UF_GetModuleInfo(UFModuleInfo info);
 
-    public native byte[] UF_GetModuleString(UF_MODULE_TYPE type, UF_MODULE_VERSION version, UF_MODULE_SENSOR sensorType);
+    public native String UF_GetModuleString(UF_MODULE_TYPE type, UF_MODULE_VERSION version, UF_MODULE_SENSOR sensorType);
 
-    public native UF_RET_CODE UF_SearchModule(final byte[] port, int[] baudrate, boolean[] asciiMode, UF_PROTOCOL[] protocol, int[] moduleID, SerialCallback callback);
+
+    /**
+     * Searching module
+     */
+
+    public native UF_RET_CODE UF_SearchModule(final byte[] port, int[] baudrate, boolean[] asciiMode, UF_PROTOCOL[] protocol, int[] moduleID, SearchModuleCallback callback);
 
     public native UF_RET_CODE UF_SearchModuleID(int[] moduleID);
 
     public native UF_RET_CODE UF_SearchModuleIDEx(short[] foundModuleID, int numOfFoundID, short[] moduleID, int[] numOfID);
 
+
+    /**
+     * Calibrate sensor , Reset module
+     */
+
     public native UF_RET_CODE UF_CalibrateSensor();
 
     public native UF_RET_CODE UF_Reset();
+
+    /**
+     * Lock/Unlock Module
+     */
 
     public native UF_RET_CODE UF_Lock();
 
@@ -584,9 +580,14 @@ public class SFM_SDK_ANDROID {
 
     public native UF_RET_CODE UF_ChangePassword(final byte[] newPassword, final byte[] oldPassword);
 
+
     public native UF_RET_CODE UF_ReadChallengeCode(byte[] challengeCode);
 
     public native UF_RET_CODE UF_WriteChallengeCode(final byte[] challengeCode);
+
+    /**
+     * Power off
+     */
 
     public native UF_RET_CODE UF_PowerOff();
 
@@ -594,6 +595,7 @@ public class SFM_SDK_ANDROID {
      * System parameters
      */
     public native void UF_InitSysParameter();
+
     public native UF_RET_CODE UF_GetSysParameter(UF_SYS_PARAM parameter, int[] value);
 
     public native UF_RET_CODE UF_SetSysParameter(UF_SYS_PARAM parameter, int value);
@@ -616,9 +618,8 @@ public class SFM_SDK_ANDROID {
 
     public native UF_RET_CODE UF_GetAllUserInfoEx(UFUserInfoEx[] userInfo, int[] numOfUser, int[] numOfTemplate);
 
-    public native void UF_SortUserInfo(UFUserInfo[] userInfo, int numOfUser);
-
-    public native void UF_SetUserInfoCallback(UserInfoCallback callback);
+    // UNSUPPORTED
+    // public native void UF_SortUserInfo(UFUserInfo[] userInfo, int numOfUser);
 
     public native UF_RET_CODE UF_SetAdminLevel(int userID, UF_ADMIN_LEVEL adminLevel);
 
@@ -630,17 +631,15 @@ public class SFM_SDK_ANDROID {
 
     public native UF_RET_CODE UF_ClearAllAdminLevel();
 
-    public native UF_RET_CODE UF_SaveDB(final byte[] fileName);
+    public native UF_RET_CODE UF_SaveDB(final String fileName);
 
-    public native UF_RET_CODE UF_LoadDB(final byte[] fileName);
+    public native UF_RET_CODE UF_LoadDB(final String fileName);
 
     public native UF_RET_CODE UF_CheckTemplate(int userID, int[] numOfTemplate);
 
     public native UF_RET_CODE UF_ReadTemplate(int userID, int[] numOfTemplate, byte[] templateData);
 
     public native UF_RET_CODE UF_ReadOneTemplate(int userID, int subID, byte[] templateData);
-
-    public native void UF_SetScanCallback(ScanCallback callback);
 
     public native UF_RET_CODE UF_ScanTemplate(byte[] templateData, int[] templateSize, int[] imageQuality);
 
@@ -668,23 +667,22 @@ public class SFM_SDK_ANDROID {
 
     public native UF_RET_CODE UF_ClearAllEntranceLimit();
 
-
     /**
      * Image
      */
-    public native UF_RET_CODE UF_SaveImage(final byte[] fileName, UFImage[] image);
 
-    public native UF_RET_CODE UF_LoadImage(final byte[] fileName, UFImage[] image);
+    public native UF_RET_CODE UF_SaveImage(final String fileName, UFImage image);
 
-    public native UF_RET_CODE UF_ReadImage(UFImage[] image);
+    public native UF_RET_CODE UF_LoadImage(final String fileName, UFImage image);
 
-    public native UF_RET_CODE UF_ScanImage(UFImage[] image);
+    public native UF_RET_CODE UF_ReadImage(UFImage image);
+
+    public native UF_RET_CODE UF_ScanImage(UFImage image);
 
 
     /**
      * Identify
      */
-    public native void UF_SetIdentifyCallback(IdentifyCallback callback);
 
     public native UF_RET_CODE UF_Identify(int[] userID, byte[] subID);
 
@@ -695,7 +693,6 @@ public class SFM_SDK_ANDROID {
     /**
      * Verify
      */
-    public native void UF_SetVerifyCallback(VerifyCallback callback);
 
     public native UF_RET_CODE UF_Verify(int userID, byte[] subID);
 
@@ -708,7 +705,6 @@ public class SFM_SDK_ANDROID {
     /**
      * Enroll
      */
-    public native void UF_SetEnrollCallback(EnrollCallback callback);
 
     public native UF_RET_CODE UF_Enroll(int userID, UF_ENROLL_OPTION option, int[] enrollID, int[] imageQuality);
 
@@ -716,7 +712,7 @@ public class SFM_SDK_ANDROID {
 
     public native UF_RET_CODE UF_EnrollAfterVerification(int userID, UF_ENROLL_OPTION option, int[] enrollID, int[] imageQuality);
 
-    public native UF_RET_CODE UF_EnrollTemplate(int userID, UF_ENROLL_OPTION option, int templateSize, int[] templateData, int[] enrollID);
+    public native UF_RET_CODE UF_EnrollTemplate(int userID, UF_ENROLL_OPTION option, int templateSize, byte[] templateData, int[] enrollID);
 
     public native UF_RET_CODE UF_EnrollMultipleTemplates(int userID, UF_ENROLL_OPTION option, int numOfTemplate, int templateSize, byte[] templateData, int[] enrollID);
 
@@ -727,7 +723,6 @@ public class SFM_SDK_ANDROID {
     /**
      * Delete
      */
-    public native void UF_SetDeleteCallback(DeleteCallback callback);
 
     public native UF_RET_CODE UF_Delete(int userID);
 
@@ -740,99 +735,71 @@ public class SFM_SDK_ANDROID {
     public native UF_RET_CODE UF_DeleteAllAfterVerification();
 
 
-    /**
-     * IO for SFM3500/SFM5500
-     */
-    public native void UF_InitIO();
-
-    public native UF_RET_CODE UF_SetInputFunction(UF_INPUT_PORT port, UF_INPUT_FUNC inputFunction, int minimumTime);
-
-    public native UF_RET_CODE UF_GetInputFunction(UF_INPUT_PORT port, UF_INPUT_FUNC[] inputFunction, int[] minimumTime);
-
-    public native UF_RET_CODE UF_GetInputStatus(UF_INPUT_PORT port, boolean remainStatus, int[] status);
-
-    public native UF_RET_CODE UF_GetOutputEventList(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT[] events, int[] numOfEvent);
-
-    public native UF_RET_CODE UF_ClearAllOutputEvent(UF_OUTPUT_PORT port);
-
-    public native UF_RET_CODE UF_ClearOutputEvent(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT event);
-
-    public native UF_RET_CODE UF_SetOutputEvent(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT event, UFOutputSignal signal);
-
-    public native UF_RET_CODE UF_GetOutputEvent(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT event, UFOutputSignal[] signal);
-
-    public native UF_RET_CODE UF_SetOutputStatus(UF_OUTPUT_PORT port, boolean status);
-
-    public native UF_RET_CODE UF_SetLegacyWiegandConfig(boolean enableInput, boolean enableOutput, int fcBits, int fcCode);
-
-    public native UF_RET_CODE UF_GetLegacyWiegandConfig(boolean[] enableInput, boolean[] enableOutput, int[] fcBits, int[] fcCode);
-
-    public native UF_RET_CODE UF_MakeIOConfiguration(UFConfigComponentHeader[] configHeader, byte[] configData);
-
-
-    /**
-     * IO for SFM3000/SFM5000/SFM6000
-     */
-    public native UF_RET_CODE UF_GetGPIOConfiguration(UF_GPIO_PORT port, UF_GPIO_MODE[] mode, int[] numOfData, UFGPIOData[] data);
-
-    public native UF_RET_CODE UF_SetInputGPIO(UF_GPIO_PORT port, UFGPIOInputData data);
-
-    public native UF_RET_CODE UF_SetOutputGPIO(UF_GPIO_PORT port, int numOfData, UFGPIOOutputData[] data);
-
-    public native UF_RET_CODE UF_SetBuzzerGPIO(UF_GPIO_PORT port, int numOfData, UFGPIOOutputData[] data);
-
-    public native UF_RET_CODE UF_SetSharedGPIO(UF_GPIO_PORT port, UFGPIOInputData inputData, int numOfOutputData, UFGPIOOutputData[] outputData);
-
-    public native UF_RET_CODE UF_DisableGPIO(UF_GPIO_PORT port);
-
-    public native UF_RET_CODE UF_ClearAllGPIO();
-
-    public native UF_RET_CODE UF_SetDefaultGPIO();
-
-    public native UF_RET_CODE UF_EnableWiegandInput(UFGPIOWiegandData data);
-
-    public native UF_RET_CODE UF_EnableWiegandOutput(UFGPIOWiegandData data);
-
-    public native UF_RET_CODE UF_DisableWiegandInput();
-
-    public native UF_RET_CODE UF_DisableWiegandOutput();
-
-    public native UF_RET_CODE UF_MakeGPIOConfiguration(UFConfigComponentHeader[] configHeader, byte[] configData);
-
-
-    /**
-     * User memory
-     */
-    public native UF_RET_CODE UF_WriteUserMemory(byte[] memory);
-
-    public native UF_RET_CODE UF_ReadUserMemory(byte[] memory);
-
-    /**
-     * Log and time management
-     */
-    // Windows only, linux, mac and android should be implemented.
-    public native UF_RET_CODE UF_SetTime(time_t timeVal);
-
-    public native UF_RET_CODE UF_GetTime(time_t[] timeVal);
-
-    public native UF_RET_CODE UF_GetNumOfLog(int[] numOfLog, int[] numOfTotalLog);
-
-    public native UF_RET_CODE UF_ReadLog(int startIndex, int count, UFLogRecord[] logRecord, int[] readCount);
-
-    public native UF_RET_CODE UF_ReadLatestLog(int count, UFLogRecord[] logRecord, int[] readCount);
-
-    public native UF_RET_CODE UF_DeleteOldestLog(int count, int[] deletedCount);
-
-    public native UF_RET_CODE UF_DeleteAllLog();
-
-    public native UF_RET_CODE UF_ClearLogCache();
-
-    public native UF_RET_CODE UF_ReadLogCache(int dataPacketSize, int[] numOfLog, UFLogRecord[] logRecord);
-
-    public native UF_RET_CODE UF_SetCustomLogField(UF_LOG_SOURCE source, int customField);
-
-    public native UF_RET_CODE UF_GetCustomLogField(UF_LOG_SOURCE source, int[] customField);
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// UNSUPPORTED
+//
+//    /**
+//     * IO for SFM3500/SFM5500
+//     */
+//
+//
+//    public native void UF_InitIO();
+//    public native UF_RET_CODE UF_SetInputFunction(UF_INPUT_PORT port, UF_INPUT_FUNC inputFunction, int minimumTime);
+//    public native UF_RET_CODE UF_GetInputFunction(UF_INPUT_PORT port, UF_INPUT_FUNC[] inputFunction, int[] minimumTime);
+//    public native UF_RET_CODE UF_GetInputStatus(UF_INPUT_PORT port, boolean remainStatus, int[] status);
+//    public native UF_RET_CODE UF_GetOutputEventList(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT[] events, int[] numOfEvent);
+//    public native UF_RET_CODE UF_ClearAllOutputEvent(UF_OUTPUT_PORT port);
+//    public native UF_RET_CODE UF_ClearOutputEvent(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT event);
+//    public native UF_RET_CODE UF_SetOutputEvent(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT event, UFOutputSignal signal);
+//    public native UF_RET_CODE UF_GetOutputEvent(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT event, UFOutputSignal[] signal);
+//    public native UF_RET_CODE UF_SetOutputStatus(UF_OUTPUT_PORT port, boolean status);
+//    public native UF_RET_CODE UF_SetLegacyWiegandConfig(boolean enableInput, boolean enableOutput, int fcBits, int fcCode);
+//    public native UF_RET_CODE UF_GetLegacyWiegandConfig(boolean[] enableInput, boolean[] enableOutput, int[] fcBits, int[] fcCode);
+//    public native UF_RET_CODE UF_MakeIOConfiguration(UFConfigComponentHeader[] configHeader, byte[] configData);
+//
+//    /**
+//     * IO for SFM3000/SFM5000/SFM6000
+//     */
+//    public native UF_RET_CODE UF_GetGPIOConfiguration(UF_GPIO_PORT port, UF_GPIO_MODE[] mode, int[] numOfData, UFGPIOData[] data);
+//    public native UF_RET_CODE UF_SetInputGPIO(UF_GPIO_PORT port, UFGPIOInputData data);
+//    public native UF_RET_CODE UF_SetOutputGPIO(UF_GPIO_PORT port, int numOfData, UFGPIOOutputData[] data);
+//    public native UF_RET_CODE UF_SetBuzzerGPIO(UF_GPIO_PORT port, int numOfData, UFGPIOOutputData[] data);
+//    public native UF_RET_CODE UF_SetSharedGPIO(UF_GPIO_PORT port, UFGPIOInputData inputData, int numOfOutputData, UFGPIOOutputData[] outputData);
+//    public native UF_RET_CODE UF_DisableGPIO(UF_GPIO_PORT port);
+//    public native UF_RET_CODE UF_ClearAllGPIO();
+//    public native UF_RET_CODE UF_SetDefaultGPIO();
+//    public native UF_RET_CODE UF_EnableWiegandInput(UFGPIOWiegandData data);
+//    public native UF_RET_CODE UF_EnableWiegandOutput(UFGPIOWiegandData data);
+//    public native UF_RET_CODE UF_DisableWiegandInput();
+//    public native UF_RET_CODE UF_DisableWiegandOutput();
+//    public native UF_RET_CODE UF_MakeGPIOConfiguration(UFConfigComponentHeader[] configHeader, byte[] configData);
+//
+//    /**
+//     * User memory
+//     */
+//    public native UF_RET_CODE UF_WriteUserMemory(byte[] memory);
+//    public native UF_RET_CODE UF_ReadUserMemory(byte[] memory);
+//
+//    /**
+//     * Log and time management
+//     */
+//    //TODO Windows only, linux, mac and android should be implemented.
+//    public native UF_RET_CODE UF_SetTime(time_t timeVal);
+//
+//    //TODO Windows only, linux, mac and android should be implemented.
+//    public native UF_RET_CODE UF_GetTime(time_t[] timeVal);
+//    public native UF_RET_CODE UF_GetNumOfLog(int[] numOfLog, int[] numOfTotalLog);
+//    public native UF_RET_CODE UF_ReadLog(int startIndex, int count, UFLogRecord[] logRecord, int[] readCount);
+//    public native UF_RET_CODE UF_ReadLatestLog(int count, UFLogRecord[] logRecord, int[] readCount);
+//    public native UF_RET_CODE UF_DeleteOldestLog(int count, int[] deletedCount);
+//    public native UF_RET_CODE UF_DeleteAllLog();
+//    public native UF_RET_CODE UF_ClearLogCache();
+//    public native UF_RET_CODE UF_ReadLogCache(int dataPacketSize, int[] numOfLog, UFLogRecord[] logRecord);
+//    public native UF_RET_CODE UF_SetCustomLogField(UF_LOG_SOURCE source, int customField);
+//    public native UF_RET_CODE UF_GetCustomLogField(UF_LOG_SOURCE source, int[] customField);
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Upgrade
@@ -861,6 +828,7 @@ public class SFM_SDK_ANDROID {
      * Deprecated since version 3.0
      */
 
+
     /**
      * Smart Card
      * Deprecated since version 3.0
@@ -881,12 +849,17 @@ public class SFM_SDK_ANDROID {
 
     public native UF_RET_CODE UF_ScanImageEx(UFImage[] image, UF_IMAGE_TYPE type, int wsqBitRate);
 
+    /**
+     * Test
+     */
+    public static native void InitCallbackFunctions();
+
+    public native void NDKCallback_Test();
 
     static {
 
         System.loadLibrary("native-lib");
+        InitCallbackFunctions();
     }
-
-
 
 }

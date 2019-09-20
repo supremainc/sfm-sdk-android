@@ -16,4 +16,16 @@ public enum UF_ENROLL_MODE {
     public int getValue() {
         return this.value;
     }
+
+    public static UF_ENROLL_MODE ToEnrollMode(int i) {
+        UF_ENROLL_MODE enrollMode = null;
+
+        for (UF_ENROLL_MODE iter : UF_ENROLL_MODE.values()) {
+            if (i == iter.getValue()) {
+                enrollMode = iter;
+            }
+        }
+        return enrollMode;
+    }
+
 }
