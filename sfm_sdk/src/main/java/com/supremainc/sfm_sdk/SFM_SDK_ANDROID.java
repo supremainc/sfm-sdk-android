@@ -17,18 +17,10 @@ import com.supremainc.sfm_sdk.enumeration.UF_PROTOCOL;
 import com.supremainc.sfm_sdk.enumeration.UF_RET_CODE;
 import com.supremainc.sfm_sdk.enumeration.UF_UPGRADE_OPTION;
 import com.supremainc.sfm_sdk.enumeration.UF_USER_SECURITY_LEVEL;
-import com.supremainc.sfm_sdk.structure.UFConfigComponentHeader;
-import com.supremainc.sfm_sdk.structure.UFGPIOData;
-import com.supremainc.sfm_sdk.structure.UFGPIOInputData;
-import com.supremainc.sfm_sdk.structure.UFGPIOOutputData;
-import com.supremainc.sfm_sdk.structure.UFGPIOWiegandData;
 import com.supremainc.sfm_sdk.structure.UFImage;
-import com.supremainc.sfm_sdk.structure.UFLogRecord;
 import com.supremainc.sfm_sdk.structure.UFModuleInfo;
-import com.supremainc.sfm_sdk.structure.UFOutputSignal;
 import com.supremainc.sfm_sdk.structure.UFUserInfo;
 import com.supremainc.sfm_sdk.structure.UFUserInfoEx;
-import com.supremainc.sfm_sdk.structure.time_t;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -384,17 +376,15 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
 
 
     //region Callback functions calling from JNI
-    private void cbSetupSerial(int baudrate)
-    {
-        if(setupSerialCallback != null)
+    private void cbSetupSerial(int baudrate) {
+        if (setupSerialCallback != null)
             setupSerialCallback.callback(baudrate);
     }
 
     private int cbReadSerial(byte[] data, int timeout) throws UnsupportedEncodingException {
 
         int ret = 0;
-        if(readSerialCallback != null)
-        {
+        if (readSerialCallback != null) {
             ret = readSerialCallback.callback(data, data.length, timeout);
         }
         return ret;
@@ -404,8 +394,7 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
 
         int ret = 0;
 
-        if(writeSerialCallback != null)
-        {
+        if (writeSerialCallback != null) {
             ret = writeSerialCallback.callback(data, data.length, timeout);
         }
         return ret;
@@ -477,36 +466,47 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * Native Functions
      */
     public native String stringFromJNI();
+
     public native void UF_GetSDKVersion(int[] major, int[] minor, int[] revision);
 
     /**
      * Initialize serial communication
      */
     public native UF_RET_CODE UF_InitCommPort(String commPort, int baudrate, boolean asciiMode);
+
     public native UF_RET_CODE UF_CloseCommPort();
 
-    @Deprecated
-    public native UF_RET_CODE UF_InitSocket(String inetAddr, int port, boolean asciiMode);
+    // UNSUPPORTED
+    // public native UF_RET_CODE UF_InitSocket(String inetAddr, int port, boolean asciiMode);
+    // public native UF_RET_CODE UF_CloseSocket();
 
-    @Deprecated
-    public native UF_RET_CODE UF_CloseSocket();
+    public native void UF_Reconnect();
 
-    public native void UF_Reconnect(); // OK
     public native UF_RET_CODE UF_SetBaudrate(int baudrate);
+
     public native void UF_SetAsciiMode(boolean asciiMode);
 
     /**
      * Basic packet interface
      */
     public native UF_RET_CODE UF_SendPacket(byte command, int param, int size, byte flag, int timeout);
+
     public native UF_RET_CODE UF_SendNetworkPacket(byte command, short terminalID, int param, int size, byte flag, int timeout);
+
     public native UF_RET_CODE UF_ReceivePakcet(byte[] packet, int timeout);
+
     public native UF_RET_CODE UF_ReceiveNetworkPakcet(byte[] packet, int timeout);
+
     public native UF_RET_CODE UF_SendRawData(byte[] buf, int size, int timeout);
+
     public native UF_RET_CODE UF_ReceiveRawData(byte[] buf, int size, int timeout, boolean checkEndCode);
+
     public native UF_RET_CODE UF_SendDataPacket(byte command, byte[] buf, int dataSize, int dataPacketSize);
+
     public native UF_RET_CODE UF_ReceiveDataPacket(byte command, byte[] buf, int dataSize);
+
     public native void UF_SetDefaultPacketSize(int defualtSize);
+
     public native int UF_GetDefaultPacketSize();
 
     /**
@@ -514,18 +514,31 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      */
 
     public native void UF_SetProtocol(UF_PROTOCOL protocol, int moduleID);
+
     public native UF_PROTOCOL UF_GetProtocol();
+
     public native int UF_GetModuleID();
+
     public native void UF_SetGenericCommandTimeout(int timeout);
+
     public native void UF_SetInputCommandTimeout(int timeout);
+
     public native int UF_GetGenericCommandTimeout();
+
     public native int UF_GetInputCommandTimeout();
+
     public native void UF_SetNetWorkDelay(int delay);
+
     public native int UF_GetNetworkDelay();
+
     public native UF_RET_CODE UF_Command(byte command, int[] param, int[] size, byte[] flag);
+
     public native UF_RET_CODE UF_CommandEx(byte command, int[] param, int[] size, byte[] flag, MsgCallback callback);
+
     public native UF_RET_CODE UF_CommandSendData(byte command, int[] param, int[] size, byte[] flag, byte[] data, int dataSize);
+
     public native UF_RET_CODE UF_CommandSendDataEx(byte command, int[] param, int[] size, byte[] flag, byte[] data, int dataSize, MsgCallback callback, boolean waitUserInput);
+
     public native UF_RET_CODE UF_Cancel(boolean receivePacket);
 
 
@@ -543,7 +556,9 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      */
 
     public native UF_RET_CODE UF_SearchModule(final byte[] port, int[] baudrate, boolean[] asciiMode, UF_PROTOCOL[] protocol, int[] moduleID, SearchModuleCallback callback);
+
     public native UF_RET_CODE UF_SearchModuleID(int[] moduleID);
+
     public native UF_RET_CODE UF_SearchModuleIDEx(short[] foundModuleID, int numOfFoundID, short[] moduleID, int[] numOfID);
 
 
@@ -552,6 +567,7 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      */
 
     public native UF_RET_CODE UF_CalibrateSensor();
+
     public native UF_RET_CODE UF_Reset();
 
     /**
@@ -559,11 +575,14 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      */
 
     public native UF_RET_CODE UF_Lock();
+
     public native UF_RET_CODE UF_Unlock(final byte[] password);
+
     public native UF_RET_CODE UF_ChangePassword(final byte[] newPassword, final byte[] oldPassword);
 
 
     public native UF_RET_CODE UF_ReadChallengeCode(byte[] challengeCode);
+
     public native UF_RET_CODE UF_WriteChallengeCode(final byte[] challengeCode);
 
     /**
@@ -576,10 +595,15 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * System parameters
      */
     public native void UF_InitSysParameter();
+
     public native UF_RET_CODE UF_GetSysParameter(UF_SYS_PARAM parameter, int[] value);
+
     public native UF_RET_CODE UF_SetSysParameter(UF_SYS_PARAM parameter, int value);
+
     public native UF_RET_CODE UF_GetMultiSysParameter(int parameterCount, UF_SYS_PARAM[] parameters, int[] values);
+
     public native UF_RET_CODE UF_SetMultiSysParameter(int parameterCount, UF_SYS_PARAM[] parameters, int[] values);
+
     public native UF_RET_CODE UF_Save();
 
 
@@ -587,34 +611,60 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * Template management
      */
     public native UF_RET_CODE UF_GetNumOfTemplate(int[] numOfTemplate);
+
     public native UF_RET_CODE UF_GetMaxNumOfTemplate(int[] maxNumOfTemplate);
+
     public native UF_RET_CODE UF_GetAllUserInfo(UFUserInfo[] userInfo, int[] numOfUser, int[] numOfTemplate);
+
     public native UF_RET_CODE UF_GetAllUserInfoEx(UFUserInfoEx[] userInfo, int[] numOfUser, int[] numOfTemplate);
 
-    @Deprecated
-    public native void UF_SortUserInfo(UFUserInfo[] userInfo, int numOfUser); // Unsupported
+    // UNSUPPORTED
+    // public native void UF_SortUserInfo(UFUserInfo[] userInfo, int numOfUser);
+
     public native UF_RET_CODE UF_SetAdminLevel(int userID, UF_ADMIN_LEVEL adminLevel);
+
     public native UF_RET_CODE UF_GetAdminLevel(int userID, UF_ADMIN_LEVEL[] adminLevel);
+
     public native UF_RET_CODE UF_SetSecurityLevel(int userID, UF_USER_SECURITY_LEVEL securityLevel);
+
     public native UF_RET_CODE UF_GetSecurityLevel(int userID, UF_USER_SECURITY_LEVEL[] securityLevel);
+
     public native UF_RET_CODE UF_ClearAllAdminLevel();
+
     public native UF_RET_CODE UF_SaveDB(final String fileName);
+
     public native UF_RET_CODE UF_LoadDB(final String fileName);
+
     public native UF_RET_CODE UF_CheckTemplate(int userID, int[] numOfTemplate);
+
     public native UF_RET_CODE UF_ReadTemplate(int userID, int[] numOfTemplate, byte[] templateData);
+
     public native UF_RET_CODE UF_ReadOneTemplate(int userID, int subID, byte[] templateData);
+
     public native UF_RET_CODE UF_ScanTemplate(byte[] templateData, int[] templateSize, int[] imageQuality);
+
     public native UF_RET_CODE UF_FixProvisionalTemplate();
+
     public native UF_RET_CODE UF_SetAuthType(int userID, UF_AUTH_TYPE authType);
+
     public native UF_RET_CODE UF_GetAuthType(int userID, UF_AUTH_TYPE[] authType);
+
     public native UF_RET_CODE UF_GetUserIDByAuthType(UF_AUTH_TYPE authType, int[] numOfID, int[] userID);
+
     public native UF_RET_CODE UF_ResetAllAuthType();
+
     public native UF_RET_CODE UF_AddBlacklist(int userID, int[] numOfBlacklistedID);
+
     public native UF_RET_CODE UF_DeleteBlacklist(int userID, int[] numOfBlacklistedID);
+
     public native UF_RET_CODE UF_GetBlacklist(int[] numOfBlacklistedID, int[] userID);
+
     public native UF_RET_CODE UF_DeleteAllBlacklist();
+
     public native UF_RET_CODE UF_SetEntranceLimit(int userID, int entranceLimit);
+
     public native UF_RET_CODE UF_GetEntranceLimit(int userID, int[] entranceLimit, int[] entranceCount);
+
     public native UF_RET_CODE UF_ClearAllEntranceLimit();
 
     /**
@@ -622,8 +672,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      */
 
     public native UF_RET_CODE UF_SaveImage(final String fileName, UFImage image);
+
     public native UF_RET_CODE UF_LoadImage(final String fileName, UFImage image);
+
     public native UF_RET_CODE UF_ReadImage(UFImage image);
+
     public native UF_RET_CODE UF_ScanImage(UFImage image);
 
 
@@ -632,7 +685,9 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      */
 
     public native UF_RET_CODE UF_Identify(int[] userID, byte[] subID);
+
     public native UF_RET_CODE UF_IdentifyTemplate(int templateSize, byte[] templateData, int[] userID, byte[] subID);
+
     public native UF_RET_CODE UF_IdentifyImage(int imageSize, byte[] imageData, int[] userID, byte[] subID);
 
     /**
@@ -640,8 +695,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      */
 
     public native UF_RET_CODE UF_Verify(int userID, byte[] subID);
+
     public native UF_RET_CODE UF_VerifyTemplate(int templateSize, byte[] templateData, int userID, byte[] subID);
+
     public native UF_RET_CODE UF_VerifyHostTemplate(int numOfTemplate, int templateSize, byte[] templateData);
+
     public native UF_RET_CODE UF_VerifyImage(int imageSize, byte[] imageData, int userID, byte[] subID);
 
     /**
@@ -649,12 +707,17 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      */
 
     public native UF_RET_CODE UF_Enroll(int userID, UF_ENROLL_OPTION option, int[] enrollID, int[] imageQuality);
+
     public native UF_RET_CODE UF_EnrollContinue(int userID, int[] enrollID, int[] imageQuality);
+
     public native UF_RET_CODE UF_EnrollAfterVerification(int userID, UF_ENROLL_OPTION option, int[] enrollID, int[] imageQuality);
 
     public native UF_RET_CODE UF_EnrollTemplate(int userID, UF_ENROLL_OPTION option, int templateSize, byte[] templateData, int[] enrollID);
+
     public native UF_RET_CODE UF_EnrollMultipleTemplates(int userID, UF_ENROLL_OPTION option, int numOfTemplate, int templateSize, byte[] templateData, int[] enrollID);
+
     public native UF_RET_CODE UF_EnrollMultipleTemplatesEx(int userID, UF_ENROLL_OPTION option, int numOfTemplate, int numOfEnroll, int templateSize, byte[] templateData, int[] enrollID);
+
     public native UF_RET_CODE UF_EnrollImage(int userID, UF_ENROLL_OPTION option, int imageSize, byte[] imageData, int[] enrollID, int[] imageQuality);
 
     /**
@@ -662,82 +725,96 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      */
 
     public native UF_RET_CODE UF_Delete(int userID);
+
     public native UF_RET_CODE UF_DeleteOneTemplate(int userID, int subID);
+
     public native UF_RET_CODE UF_DeleteMultipleTemplates(int startUserID, int lastUserID, int[] deletedUserID);
+
     public native UF_RET_CODE UF_DeleteAll();
+
     public native UF_RET_CODE UF_DeleteAllAfterVerification();
 
 
-    /**
-     * IO for SFM3500/SFM5500
-     */
-    public native void UF_InitIO();
-    public native UF_RET_CODE UF_SetInputFunction(UF_INPUT_PORT port, UF_INPUT_FUNC inputFunction, int minimumTime);
-    public native UF_RET_CODE UF_GetInputFunction(UF_INPUT_PORT port, UF_INPUT_FUNC[] inputFunction, int[] minimumTime);
-    public native UF_RET_CODE UF_GetInputStatus(UF_INPUT_PORT port, boolean remainStatus, int[] status);
-    public native UF_RET_CODE UF_GetOutputEventList(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT[] events, int[] numOfEvent);
-    public native UF_RET_CODE UF_ClearAllOutputEvent(UF_OUTPUT_PORT port);
-    public native UF_RET_CODE UF_ClearOutputEvent(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT event);
-    public native UF_RET_CODE UF_SetOutputEvent(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT event, UFOutputSignal signal);
-    public native UF_RET_CODE UF_GetOutputEvent(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT event, UFOutputSignal[] signal);
-    public native UF_RET_CODE UF_SetOutputStatus(UF_OUTPUT_PORT port, boolean status);
-    public native UF_RET_CODE UF_SetLegacyWiegandConfig(boolean enableInput, boolean enableOutput, int fcBits, int fcCode);
-    public native UF_RET_CODE UF_GetLegacyWiegandConfig(boolean[] enableInput, boolean[] enableOutput, int[] fcBits, int[] fcCode);
-    public native UF_RET_CODE UF_MakeIOConfiguration(UFConfigComponentHeader[] configHeader, byte[] configData);
-
-    /**
-     * IO for SFM3000/SFM5000/SFM6000
-     */
-    public native UF_RET_CODE UF_GetGPIOConfiguration(UF_GPIO_PORT port, UF_GPIO_MODE[] mode, int[] numOfData, UFGPIOData[] data);
-    public native UF_RET_CODE UF_SetInputGPIO(UF_GPIO_PORT port, UFGPIOInputData data);
-    public native UF_RET_CODE UF_SetOutputGPIO(UF_GPIO_PORT port, int numOfData, UFGPIOOutputData[] data);
-    public native UF_RET_CODE UF_SetBuzzerGPIO(UF_GPIO_PORT port, int numOfData, UFGPIOOutputData[] data);
-    public native UF_RET_CODE UF_SetSharedGPIO(UF_GPIO_PORT port, UFGPIOInputData inputData, int numOfOutputData, UFGPIOOutputData[] outputData);
-    public native UF_RET_CODE UF_DisableGPIO(UF_GPIO_PORT port);
-    public native UF_RET_CODE UF_ClearAllGPIO();
-    public native UF_RET_CODE UF_SetDefaultGPIO();
-    public native UF_RET_CODE UF_EnableWiegandInput(UFGPIOWiegandData data);
-    public native UF_RET_CODE UF_EnableWiegandOutput(UFGPIOWiegandData data);
-    public native UF_RET_CODE UF_DisableWiegandInput();
-    public native UF_RET_CODE UF_DisableWiegandOutput();
-    public native UF_RET_CODE UF_MakeGPIOConfiguration(UFConfigComponentHeader[] configHeader, byte[] configData);
-
-    /**
-     * User memory
-     */
-    public native UF_RET_CODE UF_WriteUserMemory(byte[] memory);
-    public native UF_RET_CODE UF_ReadUserMemory(byte[] memory);
-
-    /**
-     * Log and time management
-     */
-    //TODO Windows only, linux, mac and android should be implemented.
-    public native UF_RET_CODE UF_SetTime(time_t timeVal);
-
-    //TODO Windows only, linux, mac and android should be implemented.
-    public native UF_RET_CODE UF_GetTime(time_t[] timeVal);
-    public native UF_RET_CODE UF_GetNumOfLog(int[] numOfLog, int[] numOfTotalLog);
-    public native UF_RET_CODE UF_ReadLog(int startIndex, int count, UFLogRecord[] logRecord, int[] readCount);
-    public native UF_RET_CODE UF_ReadLatestLog(int count, UFLogRecord[] logRecord, int[] readCount);
-    public native UF_RET_CODE UF_DeleteOldestLog(int count, int[] deletedCount);
-    public native UF_RET_CODE UF_DeleteAllLog();
-    public native UF_RET_CODE UF_ClearLogCache();
-    public native UF_RET_CODE UF_ReadLogCache(int dataPacketSize, int[] numOfLog, UFLogRecord[] logRecord);
-    public native UF_RET_CODE UF_SetCustomLogField(UF_LOG_SOURCE source, int customField);
-    public native UF_RET_CODE UF_GetCustomLogField(UF_LOG_SOURCE source, int[] customField);
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// UNSUPPORTED
+//
+//    /**
+//     * IO for SFM3500/SFM5500
+//     */
+//
+//
+//    public native void UF_InitIO();
+//    public native UF_RET_CODE UF_SetInputFunction(UF_INPUT_PORT port, UF_INPUT_FUNC inputFunction, int minimumTime);
+//    public native UF_RET_CODE UF_GetInputFunction(UF_INPUT_PORT port, UF_INPUT_FUNC[] inputFunction, int[] minimumTime);
+//    public native UF_RET_CODE UF_GetInputStatus(UF_INPUT_PORT port, boolean remainStatus, int[] status);
+//    public native UF_RET_CODE UF_GetOutputEventList(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT[] events, int[] numOfEvent);
+//    public native UF_RET_CODE UF_ClearAllOutputEvent(UF_OUTPUT_PORT port);
+//    public native UF_RET_CODE UF_ClearOutputEvent(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT event);
+//    public native UF_RET_CODE UF_SetOutputEvent(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT event, UFOutputSignal signal);
+//    public native UF_RET_CODE UF_GetOutputEvent(UF_OUTPUT_PORT port, UF_OUTPUT_EVENT event, UFOutputSignal[] signal);
+//    public native UF_RET_CODE UF_SetOutputStatus(UF_OUTPUT_PORT port, boolean status);
+//    public native UF_RET_CODE UF_SetLegacyWiegandConfig(boolean enableInput, boolean enableOutput, int fcBits, int fcCode);
+//    public native UF_RET_CODE UF_GetLegacyWiegandConfig(boolean[] enableInput, boolean[] enableOutput, int[] fcBits, int[] fcCode);
+//    public native UF_RET_CODE UF_MakeIOConfiguration(UFConfigComponentHeader[] configHeader, byte[] configData);
+//
+//    /**
+//     * IO for SFM3000/SFM5000/SFM6000
+//     */
+//    public native UF_RET_CODE UF_GetGPIOConfiguration(UF_GPIO_PORT port, UF_GPIO_MODE[] mode, int[] numOfData, UFGPIOData[] data);
+//    public native UF_RET_CODE UF_SetInputGPIO(UF_GPIO_PORT port, UFGPIOInputData data);
+//    public native UF_RET_CODE UF_SetOutputGPIO(UF_GPIO_PORT port, int numOfData, UFGPIOOutputData[] data);
+//    public native UF_RET_CODE UF_SetBuzzerGPIO(UF_GPIO_PORT port, int numOfData, UFGPIOOutputData[] data);
+//    public native UF_RET_CODE UF_SetSharedGPIO(UF_GPIO_PORT port, UFGPIOInputData inputData, int numOfOutputData, UFGPIOOutputData[] outputData);
+//    public native UF_RET_CODE UF_DisableGPIO(UF_GPIO_PORT port);
+//    public native UF_RET_CODE UF_ClearAllGPIO();
+//    public native UF_RET_CODE UF_SetDefaultGPIO();
+//    public native UF_RET_CODE UF_EnableWiegandInput(UFGPIOWiegandData data);
+//    public native UF_RET_CODE UF_EnableWiegandOutput(UFGPIOWiegandData data);
+//    public native UF_RET_CODE UF_DisableWiegandInput();
+//    public native UF_RET_CODE UF_DisableWiegandOutput();
+//    public native UF_RET_CODE UF_MakeGPIOConfiguration(UFConfigComponentHeader[] configHeader, byte[] configData);
+//
+//    /**
+//     * User memory
+//     */
+//    public native UF_RET_CODE UF_WriteUserMemory(byte[] memory);
+//    public native UF_RET_CODE UF_ReadUserMemory(byte[] memory);
+//
+//    /**
+//     * Log and time management
+//     */
+//    //TODO Windows only, linux, mac and android should be implemented.
+//    public native UF_RET_CODE UF_SetTime(time_t timeVal);
+//
+//    //TODO Windows only, linux, mac and android should be implemented.
+//    public native UF_RET_CODE UF_GetTime(time_t[] timeVal);
+//    public native UF_RET_CODE UF_GetNumOfLog(int[] numOfLog, int[] numOfTotalLog);
+//    public native UF_RET_CODE UF_ReadLog(int startIndex, int count, UFLogRecord[] logRecord, int[] readCount);
+//    public native UF_RET_CODE UF_ReadLatestLog(int count, UFLogRecord[] logRecord, int[] readCount);
+//    public native UF_RET_CODE UF_DeleteOldestLog(int count, int[] deletedCount);
+//    public native UF_RET_CODE UF_DeleteAllLog();
+//    public native UF_RET_CODE UF_ClearLogCache();
+//    public native UF_RET_CODE UF_ReadLogCache(int dataPacketSize, int[] numOfLog, UFLogRecord[] logRecord);
+//    public native UF_RET_CODE UF_SetCustomLogField(UF_LOG_SOURCE source, int customField);
+//    public native UF_RET_CODE UF_GetCustomLogField(UF_LOG_SOURCE source, int[] customField);
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Upgrade
      */
     public native UF_RET_CODE UF_Upgrade(final byte[] firmwareFilename, int dataPacketSize);
+
     public native UF_RET_CODE UF_UpgradeEx(final byte[] firmwareFilename, UF_UPGRADE_OPTION option, int dataPacketSize);
+
     public native UF_RET_CODE UF_DFU_Upgrade();
 
     /**
      * File System
      */
     public native UF_RET_CODE UF_FormatUserDatabase();
+
     public native UF_RET_CODE UF_ResetSystemConfiguration();
 
     /**
@@ -767,13 +844,16 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * WSQ Decoding
      */
     public native UF_RET_CODE UF_WSQ_Decode(byte[][] odata, int[] ow, int[] oh, int[] od, int[] oppi, int[] lossyflag, byte[] idata, final int ilen);
+
     public native UF_RET_CODE UF_ReadImageEx(UFImage[] image, UF_IMAGE_TYPE type, int wsqBitRate);
+
     public native UF_RET_CODE UF_ScanImageEx(UFImage[] image, UF_IMAGE_TYPE type, int wsqBitRate);
 
     /**
      * Test
      */
     public static native void InitCallbackFunctions();
+
     public native void NDKCallback_Test();
 
     static {

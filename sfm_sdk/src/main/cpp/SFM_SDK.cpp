@@ -11,7 +11,7 @@
 #include "UF_API.h"
 
 // Android log function wrappers
-static const char* kTAG = "jni_SFM_SDK";
+static const char *kTAG = "jni_SFM_SDK";
 
 #define LOGI(...) \
   ((void)__android_log_print(ANDROID_LOG_INFO, kTAG, __VA_ARGS__))
