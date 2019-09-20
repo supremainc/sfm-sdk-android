@@ -396,6 +396,7 @@ void EnrollCallback(BYTE errCode, UF_ENROLL_MODE _enrollMode, int numOfSuccess) 
 
     env->DeleteLocalRef(cls);
     env->DeleteLocalRef(enrollMode);
+    LOGI("Enroll Callback\n");
 }
 
 void DeleteCallback(BYTE errCode) {
@@ -410,6 +411,7 @@ void DeleteCallback(BYTE errCode) {
             return;
     }
     env->CallVoidMethod(g_obj, cbDelete, errCode);
+    LOGI("Delete Callback\n");
 }
 
 
@@ -2358,20 +2360,6 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Sca
 }
 
 
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_DeleteAll
- * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DeleteAll
-        (JNIEnv *env, jobject obj) {
-    g_obj = obj;
-
-    UF_RET_CODE ret = UF_DeleteAll();
-
-    return jobjUF_RET_CODE(env, obj, ret);
-}
-
 /**
  * Identify
  */
@@ -2758,6 +2746,84 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enr
 
     return jobjUF_RET_CODE(env, obj, ret);
 
+}
+
+/**
+ * Delete
+ */
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_Delete
+ * Signature: (I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Delete
+        (JNIEnv *env, jobject obj, jint _userID) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    UF_RET_CODE ret = UF_Delete(userID);
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_DeleteOneTemplate
+ * Signature: (II)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DeleteOneTemplate
+        (JNIEnv *env, jobject obj, jint _userID, jint _subID) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    UINT32 subID = (UINT32) _subID;
+
+    UF_RET_CODE ret = UF_DeleteOneTemplate(userID, subID);
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_DeleteMultipleTemplates
+ * Signature: (II[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DeleteMultipleTemplates
+        (JNIEnv *env, jobject obj, jint _startUserID, jint _lastUserID, jintArray _deletedUserID) {
+    g_obj = obj;
+    UINT32 startUserID = (UINT32) _startUserID;
+    UINT32 lastUserID = (UINT32) _lastUserID;
+    jint *deletedUserID = env->GetIntArrayElements(_deletedUserID, 0);
+    UF_RET_CODE ret = UF_DeleteMultipleTemplates(startUserID, lastUserID, deletedUserID);
+    env->ReleaseIntArrayElements(_deletedUserID, deletedUserID, 0);
+    return jobjUF_RET_CODE(env, obj, ret);
+
+}
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_DeleteAll
+ * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DeleteAll
+        (JNIEnv *env, jobject obj) {
+    g_obj = obj;
+
+    UF_RET_CODE ret = UF_DeleteAll();
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_DeleteAllAfterVerification
+ * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL
+Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DeleteAllAfterVerification
+        (JNIEnv *env, jobject obj) {
+    g_obj = obj;
+    UF_RET_CODE ret = UF_DeleteAllAfterVerification();
+    return jobjUF_RET_CODE(env, obj, ret);
 }
 
 

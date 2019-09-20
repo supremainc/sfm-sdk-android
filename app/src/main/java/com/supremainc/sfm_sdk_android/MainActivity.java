@@ -899,14 +899,15 @@ public class MainActivity extends AppCompatActivity {
         sdk.UF_Reconnect();
 
         // Callback test
-        sdk.UF_SetSendPacketCallback(sendPacketCallback);
-        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
-        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
-        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+//        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+//        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+//        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+//        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
         sdk.UF_SetSendRawDataCallback(sendRawDataCallback);
         sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
         sdk.UF_SetScanCallback(scanCallback);
         sdk.UF_SetEnrollCallback(enrollCallback);
+        sdk.UF_SetDeleteCallback(deleteCallback);
 
         UF_RET_CODE ret = null;
 
@@ -915,7 +916,8 @@ public class MainActivity extends AppCompatActivity {
         int[] imageQuality = new int[1];
         int[] numOfTemplate = new int[1];
         byte[] templateData = new byte[3840];
-
+        int[] templateSize = new int[1];
+        sdk.UF_ScanTemplate(templateData, templateSize, imageQuality);
 //        sdk.UF_SetGenericCommandTimeout(5000);
 //        sdk.UF_SetAdminLevel(10, UF_ADMIN_LEVEL.UF_ADMIN_LEVEL_ALL);
 //
@@ -930,8 +932,8 @@ public class MainActivity extends AppCompatActivity {
 //        if(ret == UF_RET_CODE.UF_RET_SUCCESS)
 //            Log.d(TAG, "Test_Enroll: Enroll Continue : " + ret.toString() + String.format(" enrollID : %d, imageQaulity : %d", enrollID[0], imageQuality[0]));
 
-        ret = sdk.UF_ReadTemplate(1, numOfTemplate, templateData);
-        Log.d(TAG, "Test_Enroll: Read Template :" + ret.toString());
+//        ret = sdk.UF_ReadTemplate(1, numOfTemplate, templateData);
+//        Log.d(TAG, "Test_Enroll: Read Template :" + ret.toString());
 
         ret = sdk.UF_EnrollTemplate(0, UF_ENROLL_OPTION.UF_ENROLL_AUTO_ID, 384, templateData, enrollID);
         Log.d(TAG, "Test_Enroll: Enroll Template : " + ret.toString() + String.format(" enrollID : %d", enrollID[0]));
@@ -992,13 +994,63 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    void Test_Delete() {
+        final String TAG = "DELETE";
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        ////sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        //sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+        sdk.UF_SetSendRawDataCallback(sendRawDataCallback);
+        sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
+        sdk.UF_SetScanCallback(scanCallback);
+        sdk.UF_SetEnrollCallback(enrollCallback);
+        sdk.UF_SetDeleteCallback(deleteCallback);
+
+        UF_RET_CODE ret = null;
+
+        int[] numOfTemplate = new int[1];
+        byte[] templateData = new byte[3840];
+
+        ret = sdk.UF_DeleteAll();
+        Log.d(TAG, "Test_Delete: Delete All : " + ret.toString());
+
+        int[] templateSize = new int[1];
+        int[] imageQuality = new int[1];
+        int[] enrollID = new int[1];
+
+        ret = sdk.UF_ScanTemplate(templateData, templateSize, imageQuality);
+        Log.d(TAG, "Test_Delete: Scan Template : " + ret.toString());
+
+        for (int i = 0; i < 100; i++) {
+            ret = sdk.UF_EnrollTemplate(0, UF_ENROLL_OPTION.UF_ENROLL_AUTO_ID, templateSize[0], templateData, enrollID);
+            Log.d(TAG, "Test_Delete: Enroll Template : " + ret.toString() + String.format("EnrollID : %d", enrollID[0]));
+        }
+
+        ret = sdk.UF_Delete(1);
+        Log.d(TAG, "Test_Delete: Delete Template : " + ret.toString());
+
+        ret = sdk.UF_SetAdminLevel(10, UF_ADMIN_LEVEL.UF_ADMIN_LEVEL_ALL);
+        ret = sdk.UF_DeleteOneTemplate(2, 1);
+        Log.d(TAG, "Test_Delete: Delete One Template : " + ret.toString());
+
+        int[] deletedID = new int[1];
+        ret = sdk.UF_DeleteMultipleTemplates(20, 30, deletedID);
+        Log.d(TAG, "Test_Delete: Delete Multiple Template : " + ret.toString() + String.format(" Number of Deleted ID  : %d", deletedID[0]));
+
+        sdk.UF_DeleteAllAfterVerification();
+    }
+
 
     private class SFMTask extends AsyncTask {
 
         @Override
         protected Object doInBackground(Object[] objects) {
             try {
-                Test_Verify();
+                Test_Delete();
             } catch (Exception e) {
                 e.printStackTrace();
             }
