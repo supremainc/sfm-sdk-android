@@ -774,10 +774,10 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enr
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_EnrollTemplate
- * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;I[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;I[B[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollTemplate
-        (JNIEnv *, jobject, jint, jobject, jint, jintArray, jintArray);
+        (JNIEnv *, jobject, jint, jobject, jint, jbyteArray, jintArray);
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID

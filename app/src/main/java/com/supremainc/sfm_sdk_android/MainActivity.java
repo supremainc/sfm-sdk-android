@@ -18,6 +18,9 @@ import android.widget.Toast;
 
 import com.supremainc.sfm_sdk.MessageHandler;
 import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
+import com.supremainc.sfm_sdk.SFM_SDK_ANDROID_CALLBACK_INTERFACE;
+import com.supremainc.sfm_sdk.UF_ENROLL_MODE;
+import com.supremainc.sfm_sdk.UF_ENROLL_OPTION;
 import com.supremainc.sfm_sdk.UF_IMAGE_TYPE;
 import com.supremainc.sfm_sdk.UF_SYS_PARAM;
 import com.supremainc.sfm_sdk.UsbService;
@@ -151,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     final String str = getCurrentTime() + " - [SEND] " + byteArrayToHex(data) + "\n";
-//                    display.append(str);
+                    display.append(str);
                 }
             });
         }
@@ -164,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     final String str = getCurrentTime() + " - [RECV] " + byteArrayToHex(data) + "\n";
-//                    display.append(str);
+                    display.append(str);
                 }
             });
         }
@@ -218,8 +221,6 @@ public class MainActivity extends AppCompatActivity {
     SFM_SDK_ANDROID.UserInfoCallback userInfoCallback = new SFM_SDK_ANDROID.UserInfoCallback() {
         @Override
         public void callback(int index, int numOfTemplate) {
-
-
         }
     };
 
@@ -234,6 +235,56 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+        }
+    };
+
+    SFM_SDK_ANDROID.IdentifyCallback identifyCallback = new SFM_SDK_ANDROID_CALLBACK_INTERFACE.IdentifyCallback() {
+        @Override
+        public void callback(byte errCode) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    display.append(String.format("IdentifyCallback : 0x%02X\n", errCode));
+                }
+            });
+
+        }
+    };
+
+    SFM_SDK_ANDROID.VerifyCallback verifyCallback = new SFM_SDK_ANDROID_CALLBACK_INTERFACE.VerifyCallback() {
+        @Override
+        public void callback(byte errCode) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    display.append(String.format("VerifyCallback : 0x%02X\n", errCode));
+                }
+            });
+        }
+    };
+
+    SFM_SDK_ANDROID.EnrollCallback enrollCallback = new SFM_SDK_ANDROID_CALLBACK_INTERFACE.EnrollCallback() {
+        @Override
+        public void callback(byte errCode, UF_ENROLL_MODE enrollMode, int numOfSuccess) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    display.append(String.format("EnrollCallback : 0x%02X\n", errCode));
+                    display.append(enrollMode.toString() + String.format(" numOfSuccess : %d\n", numOfSuccess));
+                }
+            });
+        }
+    };
+
+    SFM_SDK_ANDROID.DeleteCallback deleteCallback = new SFM_SDK_ANDROID_CALLBACK_INTERFACE.DeleteCallback() {
+        @Override
+        public void callback(byte errCode) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    display.append(String.format("DeleteCallback : 0x%02X\n", errCode));
+                }
+            });
         }
     };
 
@@ -764,6 +815,7 @@ public class MainActivity extends AppCompatActivity {
         sdk.UF_SetSendRawDataCallback(sendRawDataCallback);
         sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
         sdk.UF_SetScanCallback(scanCallback);
+        sdk.UF_SetIdentifyCallback(identifyCallback);
 
         UF_RET_CODE ret = null;
 
@@ -782,22 +834,29 @@ public class MainActivity extends AppCompatActivity {
 
         UFImage image = new UFImage();
 
-        sdk.UF_SetSysParameter(UF_SYS_PARAM.UF_SYS_IMAGE_FORMAT, UF_IMAGE_TYPE.UF_4BIT_GRAY_IMAGE.getValue());
+        sdk.UF_SetSysParameter(UF_SYS_PARAM.UF_SYS_IMAGE_FORMAT, UF_IMAGE_TYPE.UF_GRAY_IMAGE.getValue());
         ret = sdk.UF_ScanImage(image);
         Log.d(TAG, "Scan Image : " + ret.toString());
 
 //        ret = sdk.UF_ReadImage(image);
 //        Log.d(TAG, "Read Image : " + ret.toString());
 
-//        Bitmap bmp = image.getBitmap();
+        Bitmap bmp = image.getBitmap();
 
-        ret = sdk.UF_SaveImage("/sdcard/fpimage.bmp", image);
-        Log.d(TAG, "Save Image : " + ret.toString());
-
-        UFImage loadedImage = new UFImage();
-        ret = sdk.UF_LoadImage("/sdcard/fpimage.bmp", loadedImage);
-        Log.d(TAG, "Load Image : " + ret.toString());
-        Bitmap bmp = loadedImage.getBitmap();
+//        ret = sdk.UF_SaveImage("/sdcard/fpimage.bmp", image);
+//        Log.d(TAG, "Save Image : " + ret.toString());
+//
+//        UFImage loadedImage = new UFImage();
+//        ret = sdk.UF_LoadImage("/sdcard/fpimage.bmp", loadedImage);
+//        Log.d(TAG, "Load Image : " + ret.toString());
+//
+//
+//        int []userID = new int[1];
+//        byte [] subID = new byte[1];
+//        ret = sdk.UF_Identify(userID, subID );
+//
+//        Bitmap bmp = loadedImage.getBitmap();
+//        Log.d(TAG, "Load Image : " + ret.toString() + String.format(" userID :%d, subID : %d", userID[0], subID[0]));
 
         runOnUiThread(new Runnable() {
             @Override
@@ -834,13 +893,71 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "Test_Identify: IdentifyTemplate : " + ret.toString());
     }
 
+    void Test_Enroll() {
+        final String TAG = "ENROLL";
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+        sdk.UF_SetSendRawDataCallback(sendRawDataCallback);
+        sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
+        sdk.UF_SetScanCallback(scanCallback);
+        sdk.UF_SetEnrollCallback(enrollCallback);
+
+        UF_RET_CODE ret = null;
+
+        int userID = 0;
+        int[] enrollID = new int[1];
+        int[] imageQuality = new int[1];
+        int[] numOfTemplate = new int[1];
+        byte[] templateData = new byte[3840];
+
+//        sdk.UF_SetGenericCommandTimeout(5000);
+//        sdk.UF_SetAdminLevel(10, UF_ADMIN_LEVEL.UF_ADMIN_LEVEL_ALL);
+//
+//        ret = sdk.UF_Enroll(userID, UF_ENROLL_OPTION.UF_ENROLL_AUTO_ID, enrollID, imageQuality);
+//        Log.d(TAG, "Test_Enroll: Enroll : " + ret.toString() + String.format(" enrollID : %d, imageQaulity : %d", enrollID[0], imageQuality[0]));
+//
+//        ret =  sdk.UF_EnrollAfterVerification(10, UF_ENROLL_OPTION.UF_ENROLL_AUTO_ID, imageQuality, imageQuality);
+//        if(ret == UF_RET_CODE.UF_RET_SUCCESS)
+//            Log.d(TAG, "Test_Enroll: Enroll After Verification : " + ret.toString() + String.format(" enrollID : %d, imageQaulity : %d", enrollID[0], imageQuality[0]));
+
+//        ret = sdk.UF_EnrollContinue(0, enrollID, imageQuality);
+//        if(ret == UF_RET_CODE.UF_RET_SUCCESS)
+//            Log.d(TAG, "Test_Enroll: Enroll Continue : " + ret.toString() + String.format(" enrollID : %d, imageQaulity : %d", enrollID[0], imageQuality[0]));
+
+        ret = sdk.UF_ReadTemplate(1, numOfTemplate, templateData);
+        Log.d(TAG, "Test_Enroll: Read Template :" + ret.toString());
+
+        ret = sdk.UF_EnrollTemplate(0, UF_ENROLL_OPTION.UF_ENROLL_AUTO_ID, 384, templateData, enrollID);
+        Log.d(TAG, "Test_Enroll: Enroll Template : " + ret.toString() + String.format(" enrollID : %d", enrollID[0]));
+
+//        ret = sdk.UF_EnrollMultipleTemplates(0, UF_ENROLL_OPTION.UF_ENROLL_AUTO_ID, 1, 384, templateData, enrollID);
+//        Log.d(TAG, "Test_Enroll: Enroll Multiple Template : " + ret.toString() + String.format(" enrollID : %d", enrollID[0]));
+//
+//        ret = sdk.UF_EnrollMultipleTemplatesEx(0, UF_ENROLL_OPTION.UF_ENROLL_AUTO_ID, 1, 1, 384, templateData, enrollID);
+//        Log.d(TAG, "Test_Enroll: Enroll Multiple Template : " + ret.toString() + String.format(" enrollID : %d", enrollID[0]));
+
+        UFImage image = new UFImage();
+
+        ret = sdk.UF_LoadImage("/sdcard/fpimage.bmp", image);
+        ret = sdk.UF_EnrollImage(0, UF_ENROLL_OPTION.UF_ENROLL_AUTO_ID, image.imgLen(), image.buffer(), enrollID, imageQuality);
+        Log.d(TAG, "Test_Enroll: Enroll Image " + ret.toString() + String.format("userID : %d , image Quality : %d", enrollID[0], imageQuality[0]));
+
+        image = null;
+    }
+
 
     private class SFMTask extends AsyncTask {
 
         @Override
         protected Object doInBackground(Object[] objects) {
             try {
-                Test_Image();
+                Test_Enroll();
             } catch (Exception e) {
                 e.printStackTrace();
             }

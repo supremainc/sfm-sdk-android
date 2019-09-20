@@ -191,6 +191,7 @@ static int ReadSerialCallback(unsigned char *data, int size, int timeout) {
         memcpy(data, buf, ret);
         env->ReleaseByteArrayElements(_data, (jbyte *) buf, 0);
     }
+    env->DeleteLocalRef(_data);
 
     return ret;
 }
@@ -212,6 +213,8 @@ static int WriteSerialCallback(unsigned char *data, int size, int timeout) {
 
     int ret = (int) env->CallIntMethod(g_obj, cbWriteSerial, _data, timeout);
 
+    env->DeleteLocalRef(_data);
+
     return ret;
 }
 
@@ -229,6 +232,7 @@ void SendPacketCallback(unsigned char *data) {
 
     jbyteArray _data = as_byte_array(env, data, UF_PACKET_LEN);
     env->CallVoidMethod(g_obj, cbSendPacket, _data);
+    env->DeleteLocalRef(_data);
 }
 
 
@@ -246,6 +250,7 @@ void ReceivePacketCallback(unsigned char *data) {
 
     jbyteArray _data = as_byte_array(env, data, UF_PACKET_LEN);
     env->CallVoidMethod(g_obj, cbReceivePacket, _data);
+    env->DeleteLocalRef(_data);
 }
 
 void SendDataPacketCallback(int index, int numOfPacket) {
@@ -382,14 +387,15 @@ void EnrollCallback(BYTE errCode, UF_ENROLL_MODE _enrollMode, int numOfSuccess) 
     }
 
     jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_ENROLL_MODE");
-    jmethodID mid = env->GetMethodID(cls, "ToEnrollMode",
-                                     "(I)Lcom/supremainc/sfm_sdk/UF_ENROLL_MODE;");
+    jmethodID mid = env->GetStaticMethodID(cls, "ToEnrollMode",
+                                           "(I)Lcom/supremainc/sfm_sdk/UF_ENROLL_MODE;");
 
-    jobject enrollMode = env->NewObject(cls, mid, _enrollMode);
+    jobject enrollMode = env->CallStaticObjectMethod(cls, mid, (int) _enrollMode);
 
     env->CallVoidMethod(g_obj, cbEnroll, errCode, enrollMode, numOfSuccess);
 
     env->DeleteLocalRef(cls);
+    env->DeleteLocalRef(enrollMode);
 }
 
 void DeleteCallback(BYTE errCode) {
@@ -399,8 +405,7 @@ void DeleteCallback(BYTE errCode) {
     g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
 
     if (cbDelete == NULL) {
-        cbDelete = env->GetMethodID(g_cls, "cbEnroll",
-                                    "(BLcom/supremainc/sfm_sdk/UF_ENROLL_MODE;I)V");
+        cbDelete = env->GetMethodID(g_cls, "cbDelete", "(B)V");
         if (cbDelete == NULL)
             return;
     }
@@ -1172,6 +1177,9 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
 
     env->CallVoidMethod(_info, mm, newObj);
 
+    env->DeleteLocalRef(typeObj);
+    env->DeleteLocalRef(versionObj);
+    env->DeleteLocalRef(sensorTypeObj);
     env->DeleteLocalRef(newObj);
     env->DeleteLocalRef(cls_type);
     env->DeleteLocalRef(cls_version);
@@ -1219,9 +1227,10 @@ JNIEXPORT jstring JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
     if (moduleString == NULL)
         return NULL;
 
+    env->DeleteLocalRef(cls_type);
+    env->DeleteLocalRef(cls_version);
+    env->DeleteLocalRef(cls_sensorType);
     return env->NewStringUTF(moduleString);
-
-
 }
 
 /*
@@ -1605,7 +1614,9 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
             jobject reserved_obj = env->GetObjectField(userInfoObj, fReserved);
             env->SetByteArrayRegion(static_cast<jbyteArray>(reserved_obj), 0, 2,
                                     reinterpret_cast<const jbyte *>(pUserInfo[i].reserved));
+            env->DeleteLocalRef(reserved_obj);
             env->DeleteLocalRef(cls_userInfoObj);
+            env->DeleteLocalRef(userInfoObj);
         }
 
         env->SetIntArrayRegion(_numOfUser, 0, 1, &numOfUser);
@@ -1666,7 +1677,11 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
             env->SetByteArrayRegion(static_cast<jbyteArray>(duressArray), 0, 10,
                                     reinterpret_cast<const jbyte *>(pUserInfo[i].duress));
 
+            env->DeleteLocalRef(checksumArray);
+            env->DeleteLocalRef(duressArray);
             env->DeleteLocalRef(cls_userInfoObj);
+            env->DeleteLocalRef(userInfoObj);
+
         }
 
         env->SetIntArrayRegion(_numOfUser, 0, 1, &numOfUser);
@@ -1966,6 +1981,8 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Set
 
     UF_RET_CODE ret = UF_SetAuthType(userID, authType);
 
+    env->DeleteLocalRef(cls);
+
     return jobjUF_RET_CODE(env, obj, ret);
 }
 
@@ -2010,6 +2027,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
     env->ReleaseIntArrayElements(_numOfID, numOfID, 0);
     env->ReleaseIntArrayElements(_userID, userID, 0);
 
+    env->DeleteLocalRef(cls);
     return jobjUF_RET_CODE(env, obj, ret);
 }
 
@@ -2194,6 +2212,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Sav
     env->ReleaseStringUTFChars(_filename, filename);
     env->ReleaseByteArrayElements(static_cast<jbyteArray>(imageBuffer), data, 0);
     env->DeleteLocalRef(cls_imageObj);
+    env->DeleteLocalRef(imageBuffer);
 
     free(image);
     return jobjUF_RET_CODE(env, obj, ret);
@@ -2237,9 +2256,10 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Loa
         env->SetByteArrayRegion(static_cast<jbyteArray>(imageBuffer), 0, image->imgLen,
                                 reinterpret_cast<const jbyte *>(image->buffer));
 
-        env->ReleaseStringUTFChars(_filename, filename);
-        env->DeleteLocalRef(cls_imageObj);
+        env->DeleteLocalRef(imageBuffer);
     }
+    env->ReleaseStringUTFChars(_filename, filename);
+    env->DeleteLocalRef(cls_imageObj);
 
     free(image);
 
@@ -2284,6 +2304,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Rea
                                 reinterpret_cast<const jbyte *>(image->buffer));
 
         env->DeleteLocalRef(cls_imageObj);
+        env->DeleteLocalRef(imageBuffer);
     }
 
     free(image);
@@ -2329,6 +2350,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Sca
                                 reinterpret_cast<const jbyte *>(image->buffer));
 
         env->DeleteLocalRef(cls_imageObj);
+        env->DeleteLocalRef(imageBuffer);
     }
 
     free(image);
@@ -2438,6 +2460,215 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Ide
     env->ReleaseByteArrayElements(_subID, subID, 0);
 
     return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/**
+ * Enroll
+ */
+
+/*
+* Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+        * Method:    UF_Enroll
+        * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+*/
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enroll
+        (JNIEnv *env, jobject obj, jint _userID, jobject _option, jintArray _enrollID,
+         jintArray _imageQuality) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_ENROLL_OPTION");
+    jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
+    UF_ENROLL_OPTION option = (UF_ENROLL_OPTION) env->CallIntMethod(_option, mid);
+    UINT32 enrollID = 0;
+    UINT32 imageQuality = 0;
+
+    UF_RET_CODE ret = UF_Enroll(userID, option, &enrollID, &imageQuality);
+
+    env->SetIntArrayRegion(_enrollID, 0, 1, reinterpret_cast<const jint *>(&enrollID));
+    env->SetIntArrayRegion(_imageQuality, 0, 1, reinterpret_cast<const jint *>(&imageQuality));
+    env->DeleteLocalRef(cls);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_EnrollContinue
+ * Signature: (I[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollContinue
+        (JNIEnv *env, jobject obj, jint _userID, jintArray _enrollID, jintArray _imageQuality) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    UINT32 enrollID = 0;
+    UINT32 imageQuality = 0;
+
+    UF_RET_CODE ret = UF_EnrollContinue(userID, &enrollID, &imageQuality);
+
+    env->SetIntArrayRegion(_enrollID, 0, 1, reinterpret_cast<const jint *>(&enrollID));
+    env->SetIntArrayRegion(_imageQuality, 0, 1, reinterpret_cast<const jint *>(&imageQuality));
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_EnrollAfterVerification
+ * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollAfterVerification
+        (JNIEnv *env, jobject obj, jint _userID, jobject _option, jintArray _enrollID,
+         jintArray _imageQuality) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    UINT32 enrollID = 0;
+    UINT32 imageQuality = 0;
+
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_ENROLL_OPTION");
+    jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
+    UF_ENROLL_OPTION option = (UF_ENROLL_OPTION) env->CallIntMethod(_option, mid);
+
+    UF_RET_CODE ret = UF_EnrollAfterVerification(userID, option, &enrollID, &imageQuality);
+
+    env->SetIntArrayRegion(_enrollID, 0, 1, reinterpret_cast<const jint *>(&enrollID));
+    env->SetIntArrayRegion(_imageQuality, 0, 1, reinterpret_cast<const jint *>(&imageQuality));
+    env->DeleteLocalRef(cls);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_EnrollTemplate
+ * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;I[B[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollTemplate
+        (JNIEnv *env, jobject obj, jint _userID, jobject _option, jint _templateSize,
+         jbyteArray _templateData, jintArray _enrollID) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    UINT32 templateSize = (UINT32) _templateSize;
+    UINT32 enrollID = 0;
+
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_ENROLL_OPTION");
+    jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
+    UF_ENROLL_OPTION option = (UF_ENROLL_OPTION) env->CallIntMethod(_option, mid);
+
+    jbyte *templateData = env->GetByteArrayElements(_templateData, 0);
+
+    UF_RET_CODE ret = UF_EnrollTemplate(userID, option, templateSize,
+                                        reinterpret_cast<BYTE *>(templateData), &enrollID);
+
+    env->SetIntArrayRegion(_enrollID, 0, 1, reinterpret_cast<const jint *>(&enrollID));
+
+    env->ReleaseByteArrayElements(_templateData, templateData, 0);
+    env->DeleteLocalRef(cls);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_EnrollMultipleTemplates
+ * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;II[B[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollMultipleTemplates
+        (JNIEnv *env, jobject obj, jint _userID, jobject _option, jint _numOfTemplate,
+         jint _templateSize, jbyteArray _templateData, jintArray _enrollID) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    UINT32 numOfTempalte = (UINT32) _numOfTemplate;
+    UINT32 templateSize = (UINT32) _templateSize;
+    UINT32 enrollID = 0;
+
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_ENROLL_OPTION");
+    jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
+    UF_ENROLL_OPTION option = (UF_ENROLL_OPTION) env->CallIntMethod(_option, mid);
+
+    jbyte *templateData = env->GetByteArrayElements(_templateData, 0);
+
+    UF_RET_CODE ret = UF_EnrollMultipleTemplates(userID, option, templateSize, numOfTempalte,
+                                                 reinterpret_cast<BYTE *>(templateData), &enrollID);
+
+    env->SetIntArrayRegion(_enrollID, 0, 1, reinterpret_cast<const jint *>(&enrollID));
+    env->ReleaseByteArrayElements(_templateData, templateData, 0);
+    env->DeleteLocalRef(cls);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_EnrollMultipleTemplatesEx
+ * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;III[B[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL
+Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollMultipleTemplatesEx
+        (JNIEnv *env, jobject obj, jint _userID, jobject _option, jint _numOfTemplate,
+         jint _numOfEnroll, jint _templateSize, jbyteArray _templateData, jintArray _enrollID) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    UINT32 numOfTempalte = (UINT32) _numOfTemplate;
+    UINT32 numOfEnroll = (UINT32) _numOfEnroll;
+    UINT32 templateSize = (UINT32) _templateSize;
+    UINT32 enrollID = 0;
+
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_ENROLL_OPTION");
+    jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
+    UF_ENROLL_OPTION option = (UF_ENROLL_OPTION) env->CallIntMethod(_option, mid);
+
+    jbyte *templateData = env->GetByteArrayElements(_templateData, 0);
+
+    UF_RET_CODE ret = UF_EnrollMultipleTemplatesEx(userID, option, templateSize, numOfTempalte,
+                                                   numOfEnroll,
+                                                   reinterpret_cast<BYTE *>(templateData),
+                                                   &enrollID);
+
+    env->SetIntArrayRegion(_enrollID, 0, 1, reinterpret_cast<const jint *>(&enrollID));
+    env->ReleaseByteArrayElements(_templateData, templateData, 0);
+    env->DeleteLocalRef(cls);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_EnrollImage
+ * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;I[B[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollImage
+        (JNIEnv *env, jobject obj, jint _userID, jobject _option, jint _imageSize,
+         jbyteArray _imageData, jintArray _enrollID, jintArray _imageQuality) {
+    g_obj = obj;
+
+    UINT32 userID = (UINT32) _userID;
+    UINT32 imageSize = (UINT32) _imageSize;
+    UINT32 enrollID = 0;
+    UINT32 imageQuality = 0;
+
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_ENROLL_OPTION");
+    jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
+    UF_ENROLL_OPTION option = (UF_ENROLL_OPTION) env->CallIntMethod(_option, mid);
+
+    jbyte *imageData = env->GetByteArrayElements(_imageData, 0);
+
+    UF_RET_CODE ret = UF_EnrollImage(userID, option, imageSize, reinterpret_cast<BYTE *>(imageData),
+                                     &enrollID, &imageQuality);
+
+    env->SetIntArrayRegion(_enrollID, 0, 1, reinterpret_cast<const jint *>(&enrollID));
+    env->SetIntArrayRegion(_imageQuality, 0, 1, reinterpret_cast<const jint *>(&imageQuality));
+    env->ReleaseByteArrayElements(_imageData, imageData, 0);
+    env->DeleteLocalRef(cls);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+
 }
 
 
