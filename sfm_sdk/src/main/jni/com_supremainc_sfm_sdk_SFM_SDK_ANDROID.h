@@ -41,29 +41,18 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Clo
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetSetupSerialCallback_Android
- * Signature: ()V
+ * Method:    UF_InitSocket
+ * Signature: (Ljava/lang/String;IZ)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
-JNIEXPORT void JNICALL
-Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetSetupSerialCallback_1Android
-        (JNIEnv *, jobject);
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1InitSocket
+        (JNIEnv *, jobject, jstring, jint, jboolean);
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetReadSerialCallback_Android
- * Signature: ()V
+ * Method:    UF_CloseSocket
+ * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
-JNIEXPORT void JNICALL
-Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetReadSerialCallback_1Android
-        (JNIEnv *, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetWriteSerialCallback_Android
- * Signature: ()V
- */
-JNIEXPORT void JNICALL
-Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetWriteSerialCallback_1Android
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1CloseSocket
         (JNIEnv *, jobject);
 
 /*

@@ -485,14 +485,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
     public native UF_RET_CODE UF_InitCommPort(String commPort, int baudrate, boolean asciiMode);
     public native UF_RET_CODE UF_CloseCommPort();
 
-    // Deprecated
-    // public native UF_RET_CODE UF_InitSocket(String inetAddr, int port, boolean asciiMode);
-    // public native UF_RET_CODE UF_CloseSocket();
+    @Deprecated
+    public native UF_RET_CODE UF_InitSocket(String inetAddr, int port, boolean asciiMode);
 
-
-    public native void UF_SetSetupSerialCallback_Android();
-    public native void UF_SetReadSerialCallback_Android();
-    public native void UF_SetWriteSerialCallback_Android();
+    @Deprecated
+    public native UF_RET_CODE UF_CloseSocket();
 
     public native void UF_Reconnect(); // OK
     public native UF_RET_CODE UF_SetBaudrate(int baudrate);

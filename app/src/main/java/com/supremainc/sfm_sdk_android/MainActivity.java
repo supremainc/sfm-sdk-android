@@ -1044,13 +1044,35 @@ public class MainActivity extends AppCompatActivity {
         sdk.UF_DeleteAllAfterVerification();
     }
 
+    void Test_FileSystem() throws InterruptedException {
+        final String TAG = "FILESYSTEM";
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+
+        UF_RET_CODE ret = null;
+
+//        ret = sdk.UF_FormatUserDatabase();
+//        Log.d(TAG, "Test_FileSystem: Format User Database : " + ret.toString());
+
+
+        ret = sdk.UF_ResetSystemConfiguration();
+        Log.d(TAG, "Test_FileSystem: ResetSystemConfituration : " + ret.toString());
+
+
+    }
 
     private class SFMTask extends AsyncTask {
 
         @Override
         protected Object doInBackground(Object[] objects) {
             try {
-                Test_Delete();
+                Test_FileSystem();
             } catch (Exception e) {
                 e.printStackTrace();
             }
