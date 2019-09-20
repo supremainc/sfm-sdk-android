@@ -951,13 +951,54 @@ public class MainActivity extends AppCompatActivity {
         image = null;
     }
 
+    void Test_Verify() {
+        final String TAG = "VERIFY";
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+        sdk.UF_SetSendRawDataCallback(sendRawDataCallback);
+        sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
+        sdk.UF_SetScanCallback(scanCallback);
+        sdk.UF_SetVerifyCallback(verifyCallback);
+
+        UF_RET_CODE ret = null;
+
+        int[] numOfTemplate = new int[1];
+        byte[] templateData = new byte[3840];
+
+        ret = sdk.UF_ReadTemplate(10, numOfTemplate, templateData);
+
+        byte[] subID = new byte[1];
+
+        ret = sdk.UF_Verify(10, subID);
+        Log.d(TAG, "Test_Verify: Verify : " + ret.toString() + String.format(" SubID : %d", subID[0]));
+
+        ret = sdk.UF_VerifyHostTemplate(1, 384, templateData);
+        Log.d(TAG, "Test_Verify: Verify by Host: " + ret.toString());
+
+        ret = sdk.UF_VerifyTemplate(384, templateData, 10, subID);
+        Log.d(TAG, "Test_Verify: Verify by Template: " + ret.toString());
+
+        UFImage image = new UFImage();
+        ret = sdk.UF_ScanImage(image);
+        ret = sdk.UF_VerifyImage(image.imgLen(), image.buffer(), 10, subID);
+        Log.d(TAG, "Test_Verify: Verify by Image: " + ret.toString() + ret.toString() + String.format(" SubID : %d", subID[0]));
+
+
+    }
+
 
     private class SFMTask extends AsyncTask {
 
         @Override
         protected Object doInBackground(Object[] objects) {
             try {
-                Test_Enroll();
+                Test_Verify();
             } catch (Exception e) {
                 e.printStackTrace();
             }

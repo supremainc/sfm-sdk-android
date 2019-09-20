@@ -2463,6 +2463,95 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Ide
 }
 
 /**
+ * Verify
+ */
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_Verify
+ * Signature: (I[B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Verify
+        (JNIEnv *env, jobject obj, jint _userID, jbyteArray _subID) {
+    g_obj = obj;
+    UINT32 userID = (UINT32) _userID;
+    BYTE subID = 0;
+
+    UF_RET_CODE ret = UF_Verify(userID, &subID);
+
+    env->SetByteArrayRegion(_subID, 0, 1, reinterpret_cast<const jbyte *>(&subID));
+
+    return jobjUF_RET_CODE(env, obj, ret);
+
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_VerifyTemplate
+ * Signature: (I[BI[B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1VerifyTemplate
+        (JNIEnv *env, jobject obj, jint _templateSize, jbyteArray _templateData, jint _userID,
+         jbyteArray _subID) {
+    g_obj = obj;
+    UINT32 userID = (UINT32) _userID;
+    UINT32 templateSize = (UINT32) _templateSize;
+    BYTE subID = 0;
+
+    jbyte *templateData = env->GetByteArrayElements(_templateData, 0);
+    UF_RET_CODE ret = UF_VerifyTemplate(templateSize, reinterpret_cast<BYTE *>(templateData),
+                                        userID, &subID);
+    env->ReleaseByteArrayElements(_templateData, templateData, 0);
+    env->SetByteArrayRegion(_subID, 0, 1, reinterpret_cast<const jbyte *>(&subID));
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_VerifyHostTemplate
+ * Signature: (II[B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1VerifyHostTemplate
+        (JNIEnv *env, jobject obj, jint _numOfTemplate, jint _templateSize,
+         jbyteArray _templateData) {
+    g_obj = obj;
+    UINT32 numOfTemplate = (UINT32) _numOfTemplate;
+    UINT32 templateSize = (UINT32) _templateSize;
+
+    jbyte *templateData = env->GetByteArrayElements(_templateData, 0);
+    UF_RET_CODE ret = UF_VerifyHostTemplate(numOfTemplate, templateSize,
+                                            reinterpret_cast<BYTE *>(templateData));
+    env->ReleaseByteArrayElements(_templateData, templateData, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_VerifyImage
+ * Signature: (I[BI[B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1VerifyImage
+        (JNIEnv *env, jobject obj, jint _imageSize, jbyteArray _imageData, jint _userID,
+         jbyteArray _subID) {
+    g_obj = obj;
+    UINT32 imageSize = (UINT32) _imageSize;
+    UINT32 userID = (UINT32) _userID;
+    BYTE subID = 0;
+
+    jbyte *imageData = env->GetByteArrayElements(_imageData, 0);
+
+    UF_RET_CODE ret = UF_VerifyImage(imageSize, reinterpret_cast<BYTE *>(imageData), userID,
+                                     &subID);
+
+    env->ReleaseByteArrayElements(_imageData, imageData, 0);
+    env->SetByteArrayRegion(_subID, 0, 1, reinterpret_cast<const jbyte *>(&subID));
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/**
  * Enroll
  */
 
