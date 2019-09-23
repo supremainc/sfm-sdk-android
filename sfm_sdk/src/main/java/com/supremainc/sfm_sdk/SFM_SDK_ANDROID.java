@@ -849,11 +849,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
     /**
      * WSQ Decoding
      */
-    public native UF_RET_CODE UF_WSQ_Decode(byte[][] odata, int[] ow, int[] oh, int[] od, int[] oppi, int[] lossyflag, byte[] idata, final int ilen);
+    public native UF_RET_CODE UF_WSQ_Decode(byte[] odata, int[] ow, int[] oh, int[] od, int[] oppi, int[] lossyflag, byte[] idata, final int ilen);
 
-    public native UF_RET_CODE UF_ReadImageEx(UFImage[] image, UF_IMAGE_TYPE type, int wsqBitRate);
+    public native UF_RET_CODE UF_ReadImageEx(UFImage image, UF_IMAGE_TYPE type, int wsqBitRate);
 
-    public native UF_RET_CODE UF_ScanImageEx(UFImage[] image, UF_IMAGE_TYPE type, int wsqBitRate);
+    public native UF_RET_CODE UF_ScanImageEx(UFImage image, UF_IMAGE_TYPE type, int wsqBitRate);
 
     /**
      * Test

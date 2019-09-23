@@ -34,6 +34,7 @@ import com.supremainc.sfm_sdk.structure.UFModuleInfo;
 import com.supremainc.sfm_sdk.structure.UFUserInfo;
 import com.supremainc.sfm_sdk.structure.UFUserInfoEx;
 
+import java.nio.ByteOrder;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -1142,12 +1143,60 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    void Test_WSQ() {
+        final String TAG = "WSQ";
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+        sdk.UF_SetScanCallback(scanCallback);
+
+        UF_RET_CODE ret = null;
+
+        UFImage image = new UFImage();
+        ret = sdk.UF_SetSysParameter(UF_SYS_PARAM.UF_SYS_IMAGE_FORMAT, UF_IMAGE_TYPE.UF_WSQ_IMAGE.getValue());
+        Log.d(TAG, "Test_WSQ: Set System Parameter :  " + ret.toString());
+
+        sdk.UF_Save();
+
+//        ret = sdk.UF_ScanImageEx(image, UF_IMAGE_TYPE.UF_WSQ_MQ_IMAGE, 225);
+
+        ret = sdk.UF_ReadImageEx(image, UF_IMAGE_TYPE.UF_WSQ_MQ_IMAGE, 225);
+        Log.d(TAG, "Test_WSQ: " + ret.toString());
+
+
+        int[] ow = new int[1];
+        int[] oh = new int[1];
+        int[] od = new int[1];
+        int[] oppi = new int[1];
+        int[] lossyflag = new int[1];
+
+
+        ret = sdk.UF_WSQ_Decode(image.rawData(), ow, oh, od, oppi, lossyflag, image.buffer(), image.imgLen());
+
+        Log.d(TAG, "Test_WSQ: " + ret.toString() + String.format(" %02X  %02X", image.buffer()[0], image.buffer()[1]));
+
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                imageView.setImageBitmap(image.getWSQImage());
+            }
+        });
+
+
+    }
+
     private class SFMTask extends AsyncTask {
 
         @Override
         protected Object doInBackground(Object[] objects) {
             try {
-                Test_Upgrade();
+                Test_WSQ();
             } catch (Exception e) {
                 e.printStackTrace();
             }
