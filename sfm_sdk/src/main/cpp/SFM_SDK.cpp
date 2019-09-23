@@ -2893,6 +2893,29 @@ Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DeleteAllAfterVerification
     return jobjUF_RET_CODE(env, obj, ret);
 }
 
+/**
+ * Upgrade
+ */
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_Upgrade
+ * Signature: (Ljava/lang/String;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Upgrade
+        (JNIEnv *env, jobject obj, jstring _firmwareFilename, jint dataPacketSize) {
+    g_obj = obj;
+
+    const char *firmwareFilename = env->GetStringUTFChars(_firmwareFilename, 0);
+
+    UF_RET_CODE ret = UF_Upgrade(firmwareFilename, dataPacketSize);
+
+    env->ReleaseStringUTFChars(_firmwareFilename, firmwareFilename);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID

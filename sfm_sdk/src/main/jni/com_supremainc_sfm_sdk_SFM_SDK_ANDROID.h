@@ -797,26 +797,10 @@ Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DeleteAllAfterVerification
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_Upgrade
- * Signature: ([BI)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Ljava/lang/String;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Upgrade
-        (JNIEnv *, jobject, jbyteArray, jint);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_UpgradeEx
- * Signature: ([BLcom/supremainc/sfm_sdk/enumeration/UF_UPGRADE_OPTION;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1UpgradeEx
-        (JNIEnv *, jobject, jbyteArray, jobject, jint);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_DFU_Upgrade
- * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DFU_1Upgrade
-        (JNIEnv *, jobject);
+        (JNIEnv *, jobject, jstring, jint);
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID

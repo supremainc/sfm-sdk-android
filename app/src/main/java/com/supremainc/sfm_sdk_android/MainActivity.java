@@ -176,7 +176,13 @@ public class MainActivity extends AppCompatActivity {
     SFM_SDK_ANDROID.SendDataPacketCallback sendDataPacketCallback = new SFM_SDK_ANDROID.SendDataPacketCallback() {
         @Override
         public void callback(int index, int numOfPacket) {
-
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    final String str = getCurrentTime() + String.format(" %d / %d written\n", index, numOfPacket);
+                    display.append(str);
+                }
+            });
         }
     };
 
@@ -1118,12 +1124,30 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    void Test_Upgrade() {
+        final String TAG = "UPGRADE";
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+
+        UF_RET_CODE ret = null;
+
+        ret = sdk.UF_Upgrade("/sdcard/SFMFW_SFMSLIM_SLIM_S34A_19071814_680C4935.bin", 4096);
+        Log.d(TAG, "Test_Upgrade: " + ret.toString());
+
+    }
+
     private class SFMTask extends AsyncTask {
 
         @Override
         protected Object doInBackground(Object[] objects) {
             try {
-                Test_SearchModule();
+                Test_Upgrade();
             } catch (Exception e) {
                 e.printStackTrace();
             }

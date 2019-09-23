@@ -15,7 +15,6 @@ import com.supremainc.sfm_sdk.enumeration.UF_ADMIN_LEVEL;
 import com.supremainc.sfm_sdk.enumeration.UF_AUTH_TYPE;
 import com.supremainc.sfm_sdk.enumeration.UF_PROTOCOL;
 import com.supremainc.sfm_sdk.enumeration.UF_RET_CODE;
-import com.supremainc.sfm_sdk.enumeration.UF_UPGRADE_OPTION;
 import com.supremainc.sfm_sdk.enumeration.UF_USER_SECURITY_LEVEL;
 import com.supremainc.sfm_sdk.structure.UFImage;
 import com.supremainc.sfm_sdk.structure.UFModuleInfo;
@@ -811,11 +810,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
     /**
      * Upgrade
      */
-    public native UF_RET_CODE UF_Upgrade(final byte[] firmwareFilename, int dataPacketSize);
+    public native UF_RET_CODE UF_Upgrade(final String firmwareFilename, int dataPacketSize);
 
-    public native UF_RET_CODE UF_UpgradeEx(final byte[] firmwareFilename, UF_UPGRADE_OPTION option, int dataPacketSize);
-
-    public native UF_RET_CODE UF_DFU_Upgrade();
+    // UNSUPPORTED
+    // public native UF_RET_CODE UF_UpgradeEx(final byte[] firmwareFilename, UF_UPGRADE_OPTION option, int dataPacketSize);
+    // public native UF_RET_CODE UF_DFU_Upgrade();
 
     /**
      * File System
