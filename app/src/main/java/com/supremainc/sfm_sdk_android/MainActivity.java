@@ -288,6 +288,18 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    SFM_SDK_ANDROID.SearchModuleCallback searchModuleCallback = new SFM_SDK_ANDROID_CALLBACK_INTERFACE.SearchModuleCallback() {
+        @Override
+        public void callback(String comPort, int baudrate) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    display.append(comPort + String.format("  baudrate : %d\n", baudrate));
+                }
+            });
+        }
+    };
+
     private void Test_Basic_Packet_Interface() {
         UF_RET_CODE ret;
         // UF_Reconnect
@@ -1067,12 +1079,51 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    void Test_SearchModule() {
+        final String TAG = "SEARCH_MODULE";
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+
+        UF_RET_CODE ret = null;
+
+        String port = sdk.UF_GetDevicePort();
+        int[] baudrate = new int[1];
+        boolean[] asciiMode = new boolean[1];
+        UF_PROTOCOL[] protocol = new UF_PROTOCOL[1];
+        int[] moduleID = new int[1];
+
+        sdk.UF_SetSysParameter(UF_SYS_PARAM.UF_SYS_PROTOCOL_INTERFACE, UF_PROTOCOL.UF_NETWORK_PROTOCOL.getValue());
+
+
+        ret = sdk.UF_SearchModule(port, baudrate, asciiMode, protocol, moduleID, searchModuleCallback);
+        Log.d(TAG, "Test_SearchModule: Search Module : " + ret.toString() + String.format("baudrate : %d,  asciiMode : %s,  moduleID : %d", baudrate[0], Boolean.toString(asciiMode[0]), moduleID[0]));
+        Log.d(TAG, "Test_SearchModule: Search Module : " + protocol[0].toString());
+
+
+        ret = sdk.UF_SearchModuleID(moduleID);
+        Log.d(TAG, "Test_SearchModule: Search Module ID : " + String.format("module ID : %d", moduleID[0]));
+
+
+        short[] foundModuleID = new short[10];
+        int[] numOfID = new int[10];
+        short[] moduleID_short = new short[10];
+        ret = sdk.UF_SearchModuleIDEx(foundModuleID, 0, moduleID_short, numOfID);
+        Log.d(TAG, "Test_SearchModule: Search Module ID Ex :" + ret.toString());
+
+    }
+
     private class SFMTask extends AsyncTask {
 
         @Override
         protected Object doInBackground(Object[] objects) {
             try {
-                Test_FileSystem();
+                Test_SearchModule();
             } catch (Exception e) {
                 e.printStackTrace();
             }

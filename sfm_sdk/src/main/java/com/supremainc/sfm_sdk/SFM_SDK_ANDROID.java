@@ -140,6 +140,14 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
         return ret;
     }
 
+    public String UF_GetDevicePort() {
+        String deviceName = null;
+        if (usbService != null)
+            deviceName = usbService.getUsbDeviceName();
+
+        return deviceName;
+    }
+
 
     public void WriteTest(String data) {
         if (usbService != null) { // if UsbService was correctly binded, Send data
@@ -555,7 +563,7 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * Searching module
      */
 
-    public native UF_RET_CODE UF_SearchModule(final byte[] port, int[] baudrate, boolean[] asciiMode, UF_PROTOCOL[] protocol, int[] moduleID, SearchModuleCallback callback);
+    public native UF_RET_CODE UF_SearchModule(final String port, int[] baudrate, boolean[] asciiMode, UF_PROTOCOL[] protocol, int[] moduleID, SearchModuleCallback callback);
 
     public native UF_RET_CODE UF_SearchModuleID(int[] moduleID);
 
@@ -580,10 +588,9 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
 
     public native UF_RET_CODE UF_ChangePassword(final byte[] newPassword, final byte[] oldPassword);
 
-
-    public native UF_RET_CODE UF_ReadChallengeCode(byte[] challengeCode);
-
-    public native UF_RET_CODE UF_WriteChallengeCode(final byte[] challengeCode);
+    // UNSUPPORTED
+    // public native UF_RET_CODE UF_ReadChallengeCode(byte[] challengeCode);
+    // public native UF_RET_CODE UF_WriteChallengeCode(final byte[] challengeCode);
 
     /**
      * Power off

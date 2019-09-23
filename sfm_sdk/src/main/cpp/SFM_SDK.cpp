@@ -436,9 +436,9 @@ void SearchModuleCallback(const char *_comPort, int baudrate) {
 
     jstring comPort = env->NewStringUTF(_comPort);
 
-    env->CallBooleanMethod(g_searchModuleCallback, g_searchModuleCallback_method_id, comPort,
-                           baudrate);
-    env->ReleaseStringUTFChars(comPort, _comPort);
+    env->CallVoidMethod(g_searchModuleCallback, g_searchModuleCallback_method_id, comPort,
+                        baudrate);
+    env->DeleteLocalRef(comPort);
 
     if (env->ExceptionOccurred())
         env->ExceptionClear();
@@ -1236,13 +1236,51 @@ JNIEXPORT jstring JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
     return env->NewStringUTF(moduleString);
 }
 
+/**
+ * Searching Module
+ */
+
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_SearchModule
- * Signature: ([B[I[Z[Lcom/supremainc/sfm_sdk/enumeration/UF_PROTOCOL;[ILcom/supremainc/sfm_sdk/SFM_SDK_ANDROID/SerialCallback;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Ljava/lang/String;[I[Z[Lcom/supremainc/sfm_sdk/enumeration/UF_PROTOCOL;[ILcom/supremainc/sfm_sdk/SFM_SDK_ANDROID_CALLBACK_INTERFACE/SearchModuleCallback;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SearchModule
-        (JNIEnv *, jobject, jbyteArray, jintArray, jbooleanArray, jobjectArray, jintArray, jobject);
+        (JNIEnv *env, jobject obj, jstring _port, jintArray _baudrate, jbooleanArray _asciiMode,
+         jobjectArray _protocol, jintArray _moduleID, jobject _callback) {
+
+    g_obj = obj;
+
+    jclass objclass = env->GetObjectClass(_callback);
+    jmethodID method = env->GetMethodID(objclass, "callback", "(Ljava/lang/String;I)V");
+    if (method == nullptr) {
+        return nullptr;
+    }
+    g_searchModuleCallback_method_id = method;
+    g_searchModuleCallback = _callback;
+
+    const char *port = env->GetStringUTFChars(_port, 0);
+    int baudrate = 0;
+    BOOL asciiMode_temp = FALSE;
+    UF_PROTOCOL protocol_temp;
+    UINT32 moduleID = 0;
+
+    UF_RET_CODE ret = UF_SearchModule(port, &baudrate, &asciiMode_temp, &protocol_temp, &moduleID,
+                                      SearchModuleCallback);
+
+    env->SetIntArrayRegion(_baudrate, 0, 1, &baudrate);
+
+    jobject protocol = jobjUF_PROTOCOL(env, obj, protocol_temp);
+
+    jboolean asciiMode = (asciiMode_temp == 1 ? true : false);
+    env->SetBooleanArrayRegion(_asciiMode, 0, 1, &asciiMode);
+    env->SetObjectArrayElement(_protocol, 0, protocol);
+    env->SetIntArrayRegion(_moduleID, 0, 1, reinterpret_cast<const jint *>(&moduleID));
+
+    env->DeleteLocalRef(protocol);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
@@ -1250,7 +1288,17 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Sea
  * Signature: ([I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SearchModuleID
-        (JNIEnv *, jobject, jintArray);
+        (JNIEnv *env, jobject obj, jintArray _moduleID) {
+    g_obj = obj;
+
+    jint *moduleID = env->GetIntArrayElements(_moduleID, 0);
+
+    UF_RET_CODE ret = UF_SearchModuleID(reinterpret_cast<UINT32 *>(moduleID));
+
+    env->ReleaseIntArrayElements(_moduleID, moduleID, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
@@ -1258,7 +1306,24 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Sea
  * Signature: ([SI[S[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SearchModuleIDEx
-        (JNIEnv *, jobject, jshortArray, jint, jshortArray, jintArray);
+        (JNIEnv *env, jobject obj, jshortArray _foundModuleID, jint _numOfFoundID,
+         jshortArray _moduleID, jintArray _numOfID) {
+    g_obj = obj;
+
+    jshort *foundModuleID = env->GetShortArrayElements(_foundModuleID, 0);
+    int numOfFoundID = (int) _numOfFoundID;
+    jshort *moduleID = env->GetShortArrayElements(_moduleID, 0);
+    jint *numOfID = env->GetIntArrayElements(_numOfID, 0);
+    UF_RET_CODE ret = UF_SearchModuleIDEx(reinterpret_cast<unsigned short *>(foundModuleID),
+                                          numOfFoundID,
+                                          reinterpret_cast<unsigned short *>(moduleID), numOfID);
+
+    env->ReleaseShortArrayElements(_foundModuleID, foundModuleID, 0);
+    env->ReleaseShortArrayElements(_moduleID, moduleID, 0);
+    env->ReleaseIntArrayElements(_numOfID, numOfID, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
