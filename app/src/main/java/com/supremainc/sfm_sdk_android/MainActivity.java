@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2001 - 2019. Suprema Inc. All rights reserved.
+ * Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
 package com.supremainc.sfm_sdk_android;
 
 import android.content.BroadcastReceiver;
@@ -16,19 +21,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.supremainc.sfm_sdk.MessageHandler;
 import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
-import com.supremainc.sfm_sdk.SFM_SDK_ANDROID_CALLBACK_INTERFACE;
-import com.supremainc.sfm_sdk.UF_ENROLL_MODE;
-import com.supremainc.sfm_sdk.UF_ENROLL_OPTION;
-import com.supremainc.sfm_sdk.UF_IMAGE_TYPE;
-import com.supremainc.sfm_sdk.UF_SYS_PARAM;
 import com.supremainc.sfm_sdk.UsbService;
+import com.supremainc.sfm_sdk.callback_interface.SFM_SDK_ANDROID_CALLBACK_INTERFACE;
 import com.supremainc.sfm_sdk.enumeration.UF_ADMIN_LEVEL;
 import com.supremainc.sfm_sdk.enumeration.UF_AUTH_TYPE;
+import com.supremainc.sfm_sdk.enumeration.UF_ENROLL_MODE;
+import com.supremainc.sfm_sdk.enumeration.UF_ENROLL_OPTION;
+import com.supremainc.sfm_sdk.enumeration.UF_IMAGE_TYPE;
 import com.supremainc.sfm_sdk.enumeration.UF_PROTOCOL;
 import com.supremainc.sfm_sdk.enumeration.UF_RET_CODE;
+import com.supremainc.sfm_sdk.enumeration.UF_SYS_PARAM;
 import com.supremainc.sfm_sdk.enumeration.UF_USER_SECURITY_LEVEL;
+import com.supremainc.sfm_sdk.message_handler.MessageHandler;
 import com.supremainc.sfm_sdk.structure.UFImage;
 import com.supremainc.sfm_sdk.structure.UFModuleInfo;
 import com.supremainc.sfm_sdk.structure.UFUserInfo;
@@ -37,24 +42,186 @@ import com.supremainc.sfm_sdk.structure.UFUserInfoEx;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-//import com.supremainc.sfm_sdk.MessageHandler;
+//import com.supremainc.sfm_sdk.message_handler.MessageHandler;
 //import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
 //import com.supremainc.sfm_sdk.UsbService;
 
-//import com.supremainc.sfm_sdk.MessageHandler;
+//import com.supremainc.sfm_sdk.message_handler.MessageHandler;
 //import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
 //import com.supremainc.sfm_sdk.UsbService;
 
 
 public class MainActivity extends AppCompatActivity {
 
+    SFM_SDK_ANDROID.ReceiveDataPacketCallback receiveDataPacketCallback = new SFM_SDK_ANDROID.ReceiveDataPacketCallback() {
+        @Override
+        public void callback(int index, int numOfPacket) {
+
+        }
+    };
+    SFM_SDK_ANDROID.SendRawDataCallback sendRawDataCallback = new SFM_SDK_ANDROID.SendRawDataCallback() {
+        @Override
+        public void callback(int writtenLen, int totalSize) {
+
+        }
+    };
+    SFM_SDK_ANDROID.ReceiveRawDataCallback receiveRawDataCallback = new SFM_SDK_ANDROID.ReceiveRawDataCallback() {
+        @Override
+        public void callback(int readLen, int totalSize) {
+
+        }
+    };
+    SFM_SDK_ANDROID.UserInfoCallback userInfoCallback = new SFM_SDK_ANDROID.UserInfoCallback() {
+        @Override
+        public void callback(int index, int numOfTemplate) {
+        }
+    };
     private TextView display;
+    private final MessageHandler mHandler = new MessageHandler(this) {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+
+                case UsbService.MESSAGE_FROM_SERIAL_PORT:
+                    String data = "[RECV] " + msg.obj + "\n";
+                    display.append(data);
+                    break;
+                case UsbService.CTS_CHANGE:
+                    Toast.makeText(mActivity.get(), "CTS_CHANGE", Toast.LENGTH_LONG).show();
+                    break;
+                case UsbService.DSR_CHANGE:
+                    Toast.makeText(mActivity.get(), "DSR_CHANGE", Toast.LENGTH_LONG).show();
+                    break;
+                case UsbService.SYNC_READ:
+                    String buffer = (String) msg.obj;
+                    display.append(buffer);
+
+
+            }
+        }
+    };
+    SFM_SDK_ANDROID.SendPacketCallback sendPacketCallback = new SFM_SDK_ANDROID.SendPacketCallback() {
+        @Override
+        public void callback(byte[] data) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    final String str = getCurrentTime() + " - [SEND] " + byteArrayToHex(data) + "\n";
+                    display.append(str);
+                }
+            });
+        }
+    };
+    SFM_SDK_ANDROID.ReceivePacketCallback receivePacketCallback = new SFM_SDK_ANDROID.ReceivePacketCallback() {
+        @Override
+        public void callback(byte[] data) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    final String str = getCurrentTime() + " - [RECV] " + byteArrayToHex(data) + "\n";
+                    display.append(str);
+                }
+            });
+        }
+    };
+    SFM_SDK_ANDROID.SendDataPacketCallback sendDataPacketCallback = new SFM_SDK_ANDROID.SendDataPacketCallback() {
+        @Override
+        public void callback(int index, int numOfPacket) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    final String str = getCurrentTime() + String.format(" %d / %d written\n", index, numOfPacket);
+                    display.append(str);
+                }
+            });
+        }
+    };
+    SFM_SDK_ANDROID.MsgCallback msgCallback = new SFM_SDK_ANDROID.MsgCallback() {
+        @Override
+        public boolean callback(byte message) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    display.append(String.format("CommandEx callback : 0x%02X\n", message));
+                }
+            });
+
+            return message != 0x62;
+        }
+    };
+    SFM_SDK_ANDROID.ScanCallback scanCallback = new SFM_SDK_ANDROID.ScanCallback() {
+        @Override
+        public void callback(byte errCode) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    final String str = "Scan Success\n";
+                    display.append(str);
+                }
+            });
+
+        }
+    };
+    SFM_SDK_ANDROID.IdentifyCallback identifyCallback = new SFM_SDK_ANDROID_CALLBACK_INTERFACE.IdentifyCallback() {
+        @Override
+        public void callback(byte errCode) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    display.append(String.format("IdentifyCallback : 0x%02X\n", errCode));
+                }
+            });
+
+        }
+    };
+    SFM_SDK_ANDROID.VerifyCallback verifyCallback = new SFM_SDK_ANDROID_CALLBACK_INTERFACE.VerifyCallback() {
+        @Override
+        public void callback(byte errCode) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    display.append(String.format("VerifyCallback : 0x%02X\n", errCode));
+                }
+            });
+        }
+    };
+    SFM_SDK_ANDROID.EnrollCallback enrollCallback = new SFM_SDK_ANDROID_CALLBACK_INTERFACE.EnrollCallback() {
+        @Override
+        public void callback(byte errCode, UF_ENROLL_MODE enrollMode, int numOfSuccess) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    display.append(String.format("EnrollCallback : 0x%02X\n", errCode));
+                    display.append(enrollMode.toString() + String.format(" numOfSuccess : %d\n", numOfSuccess));
+                }
+            });
+        }
+    };
+    SFM_SDK_ANDROID.DeleteCallback deleteCallback = new SFM_SDK_ANDROID_CALLBACK_INTERFACE.DeleteCallback() {
+        @Override
+        public void callback(byte errCode) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    display.append(String.format("DeleteCallback : 0x%02X\n", errCode));
+                }
+            });
+        }
+    };
+    SFM_SDK_ANDROID.SearchModuleCallback searchModuleCallback = new SFM_SDK_ANDROID_CALLBACK_INTERFACE.SearchModuleCallback() {
+        @Override
+        public void callback(String comPort, int baudrate) {
+            display.post(new Runnable() {
+                @Override
+                public void run() {
+                    display.append(comPort + String.format("  baudrate : %d\n", baudrate));
+                }
+            });
+        }
+    };
     private EditText editText;
     private ImageView imageView;
-
     private SFM_SDK_ANDROID sdk;
-
-
     /*
      * Notifications from UsbService will be received here.
      */
@@ -108,30 +275,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-
-    private final MessageHandler mHandler = new MessageHandler(this) {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-
-                case UsbService.MESSAGE_FROM_SERIAL_PORT:
-                    String data = "[RECV] " + (String) msg.obj + "\n";
-                    display.append(data);
-                    break;
-                case UsbService.CTS_CHANGE:
-                    Toast.makeText(mActivity.get(), "CTS_CHANGE", Toast.LENGTH_LONG).show();
-                    break;
-                case UsbService.DSR_CHANGE:
-                    Toast.makeText(mActivity.get(), "DSR_CHANGE", Toast.LENGTH_LONG).show();
-                    break;
-                case UsbService.SYNC_READ:
-                    String buffer = (String) msg.obj;
-                    display.append(buffer);
-
-
-            }
-        }
-    };
+    private SFMTask task;
 
     String byteArrayToHex(byte[] a) {
         StringBuilder sb = new StringBuilder();
@@ -146,147 +290,6 @@ public class MainActivity extends AppCompatActivity {
 
         return format.format(time);
     }
-
-    SFM_SDK_ANDROID.SendPacketCallback sendPacketCallback = new SFM_SDK_ANDROID.SendPacketCallback() {
-        @Override
-        public void callback(byte[] data) {
-            display.post(new Runnable() {
-                @Override
-                public void run() {
-                    final String str = getCurrentTime() + " - [SEND] " + byteArrayToHex(data) + "\n";
-                    display.append(str);
-                }
-            });
-        }
-    };
-
-    SFM_SDK_ANDROID.ReceivePacketCallback receivePacketCallback = new SFM_SDK_ANDROID.ReceivePacketCallback() {
-        @Override
-        public void callback(byte[] data) {
-            display.post(new Runnable() {
-                @Override
-                public void run() {
-                    final String str = getCurrentTime() + " - [RECV] " + byteArrayToHex(data) + "\n";
-                    display.append(str);
-                }
-            });
-        }
-    };
-
-    SFM_SDK_ANDROID.SendDataPacketCallback sendDataPacketCallback = new SFM_SDK_ANDROID.SendDataPacketCallback() {
-        @Override
-        public void callback(int index, int numOfPacket) {
-
-        }
-    };
-
-    SFM_SDK_ANDROID.ReceiveDataPacketCallback receiveDataPacketCallback = new SFM_SDK_ANDROID.ReceiveDataPacketCallback() {
-        @Override
-        public void callback(int index, int numOfPacket) {
-
-        }
-    };
-
-    SFM_SDK_ANDROID.SendRawDataCallback sendRawDataCallback = new SFM_SDK_ANDROID.SendRawDataCallback() {
-        @Override
-        public void callback(int writtenLen, int totalSize) {
-
-        }
-    };
-
-    SFM_SDK_ANDROID.ReceiveRawDataCallback receiveRawDataCallback = new SFM_SDK_ANDROID.ReceiveRawDataCallback() {
-        @Override
-        public void callback(int readLen, int totalSize) {
-
-        }
-    };
-
-    SFM_SDK_ANDROID.MsgCallback msgCallback = new SFM_SDK_ANDROID.MsgCallback() {
-        @Override
-        public boolean callback(byte message) {
-            display.post(new Runnable() {
-                @Override
-                public void run() {
-                    display.append(String.format("CommandEx callback : 0x%02X\n", message));
-                }
-            });
-
-            if (message == 0x62)
-                return false;
-            else
-                return true;
-        }
-    };
-
-    SFM_SDK_ANDROID.UserInfoCallback userInfoCallback = new SFM_SDK_ANDROID.UserInfoCallback() {
-        @Override
-        public void callback(int index, int numOfTemplate) {
-        }
-    };
-
-    SFM_SDK_ANDROID.ScanCallback scanCallback = new SFM_SDK_ANDROID.ScanCallback() {
-        @Override
-        public void callback(byte errCode) {
-            display.post(new Runnable() {
-                @Override
-                public void run() {
-                    final String str = "Scan Success\n";
-                    display.append(str);
-                }
-            });
-
-        }
-    };
-
-    SFM_SDK_ANDROID.IdentifyCallback identifyCallback = new SFM_SDK_ANDROID_CALLBACK_INTERFACE.IdentifyCallback() {
-        @Override
-        public void callback(byte errCode) {
-            display.post(new Runnable() {
-                @Override
-                public void run() {
-                    display.append(String.format("IdentifyCallback : 0x%02X\n", errCode));
-                }
-            });
-
-        }
-    };
-
-    SFM_SDK_ANDROID.VerifyCallback verifyCallback = new SFM_SDK_ANDROID_CALLBACK_INTERFACE.VerifyCallback() {
-        @Override
-        public void callback(byte errCode) {
-            display.post(new Runnable() {
-                @Override
-                public void run() {
-                    display.append(String.format("VerifyCallback : 0x%02X\n", errCode));
-                }
-            });
-        }
-    };
-
-    SFM_SDK_ANDROID.EnrollCallback enrollCallback = new SFM_SDK_ANDROID_CALLBACK_INTERFACE.EnrollCallback() {
-        @Override
-        public void callback(byte errCode, UF_ENROLL_MODE enrollMode, int numOfSuccess) {
-            display.post(new Runnable() {
-                @Override
-                public void run() {
-                    display.append(String.format("EnrollCallback : 0x%02X\n", errCode));
-                    display.append(enrollMode.toString() + String.format(" numOfSuccess : %d\n", numOfSuccess));
-                }
-            });
-        }
-    };
-
-    SFM_SDK_ANDROID.DeleteCallback deleteCallback = new SFM_SDK_ANDROID_CALLBACK_INTERFACE.DeleteCallback() {
-        @Override
-        public void callback(byte errCode) {
-            display.post(new Runnable() {
-                @Override
-                public void run() {
-                    display.append(String.format("DeleteCallback : 0x%02X\n", errCode));
-                }
-            });
-        }
-    };
 
     private void Test_Basic_Packet_Interface() {
         UF_RET_CODE ret;
@@ -514,7 +517,6 @@ public class MainActivity extends AppCompatActivity {
         Log.d("UF_Save", ret.toString());
 
     }
-
 
     private void Test_Module_Information() {
         final String TAG = "TEST_MODULE_INFORMATION";
@@ -791,8 +793,8 @@ public class MainActivity extends AppCompatActivity {
         ret = sdk.UF_SetEntranceLimit(1, 10);
         Log.d(TAG, "Set Entrance Limit : " + ret.toString());
 
-        int entranceLimit[] = new int[1];
-        int entranceCount[] = new int[1];
+        int[] entranceLimit = new int[1];
+        int[] entranceCount = new int[1];
         ret = sdk.UF_GetEntranceLimit(1, entranceLimit, entranceCount);
         Log.d(TAG, "Get Entrance Limit : " + ret.toString());
 
@@ -1067,38 +1069,123 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private class SFMTask extends AsyncTask {
+    void Test_SearchModule() {
+        final String TAG = "SEARCH_MODULE";
+        // UF_Reconnect
+        sdk.UF_Reconnect();
 
-        @Override
-        protected Object doInBackground(Object[] objects) {
-            try {
-                Test_FileSystem();
-            } catch (Exception e) {
-                e.printStackTrace();
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+
+        UF_RET_CODE ret = null;
+
+        String port = sdk.UF_GetDeviceName();
+        int[] baudrate = new int[1];
+        boolean[] asciiMode = new boolean[1];
+        UF_PROTOCOL[] protocol = new UF_PROTOCOL[1];
+        int[] moduleID = new int[1];
+
+        sdk.UF_SetSysParameter(UF_SYS_PARAM.UF_SYS_PROTOCOL_INTERFACE, UF_PROTOCOL.UF_NETWORK_PROTOCOL.getValue());
+
+
+        ret = sdk.UF_SearchModule(port, baudrate, asciiMode, protocol, moduleID, searchModuleCallback);
+        Log.d(TAG, "Test_SearchModule: Search Module : " + ret.toString() + String.format("baudrate : %d,  asciiMode : %s,  moduleID : %d", baudrate[0], Boolean.toString(asciiMode[0]), moduleID[0]));
+        Log.d(TAG, "Test_SearchModule: Search Module : " + protocol[0].toString());
+
+
+        ret = sdk.UF_SearchModuleID(moduleID);
+        Log.d(TAG, "Test_SearchModule: Search Module ID : " + String.format("module ID : %d", moduleID[0]));
+
+
+        short[] foundModuleID = new short[10];
+        int[] numOfID = new int[10];
+        short[] moduleID_short = new short[10];
+        ret = sdk.UF_SearchModuleIDEx(foundModuleID, 0, moduleID_short, numOfID);
+        Log.d(TAG, "Test_SearchModule: Search Module ID Ex :" + ret.toString());
+
+    }
+
+    void Test_Upgrade() {
+        final String TAG = "UPGRADE";
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+
+        UF_RET_CODE ret = null;
+
+        ret = sdk.UF_Upgrade("/sdcard/SFMFW_SFMSLIM_SLIM_S34A_19071814_680C4935.bin", 4096);
+        Log.d(TAG, "Test_Upgrade: " + ret.toString());
+
+    }
+
+    void Test_WSQ() {
+        final String TAG = "WSQ";
+        // UF_Reconnect
+        sdk.UF_Reconnect();
+
+        // Callback test
+        sdk.UF_SetSendPacketCallback(sendPacketCallback);
+        sdk.UF_SetReceivePacketCallback(receivePacketCallback);
+        sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
+        sdk.UF_SetReceiveDataPacketCallback(receiveDataPacketCallback);
+        sdk.UF_SetScanCallback(scanCallback);
+
+        UF_RET_CODE ret = null;
+
+        UFImage image = new UFImage();
+        ret = sdk.UF_SetSysParameter(UF_SYS_PARAM.UF_SYS_IMAGE_FORMAT, UF_IMAGE_TYPE.UF_WSQ_IMAGE.getValue());
+        Log.d(TAG, "Test_WSQ: Set System Parameter :  " + ret.toString());
+
+        sdk.UF_Save();
+
+        ret = sdk.UF_ScanImageEx(image, UF_IMAGE_TYPE.UF_WSQ_MQ_IMAGE, 225);
+
+//        ret = sdk.UF_ReadImageEx(image, UF_IMAGE_TYPE.UF_WSQ_MQ_IMAGE, 225);
+        Log.d(TAG, "Test_WSQ: " + ret.toString());
+
+
+        int[] ow = new int[1];
+        int[] oh = new int[1];
+        int[] od = new int[1];
+        int[] oppi = new int[1];
+        int[] lossyflag = new int[1];
+
+
+        ret = sdk.UF_WSQ_Decode(image.rawData(), ow, oh, od, oppi, lossyflag, image.buffer(), image.imgLen());
+
+        Log.d(TAG, "Test_WSQ: " + ret.toString() + String.format(" %02X  %02X", image.buffer()[0], image.buffer()[1]));
+
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                imageView.setImageBitmap(image.getWSQImage());
             }
+        });
 
-            return null;
-        }
+
     }
 
-    private void Test_NDK() {
-
-        sdk.NDKCallback_Test();
-    }
-
-    private SFMTask task;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        display = (TextView) findViewById(R.id.textView1);
-        editText = (EditText) findViewById(R.id.editText1);
-        imageView = (ImageView) findViewById(R.id.imageView);
+        display = findViewById(R.id.textView1);
+        editText = findViewById(R.id.editText1);
+        imageView = findViewById(R.id.imageView);
         sdk = new SFM_SDK_ANDROID(this, mHandler, mUsbReceiver);
 
-        Button sendButton = (Button) findViewById(R.id.buttonSend);
+        Button sendButton = findViewById(R.id.buttonSend);
 
 
         sendButton.setOnClickListener(new View.OnClickListener() {
@@ -1134,5 +1221,19 @@ public class MainActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         sdk.pauseService();
+    }
+
+    private class SFMTask extends AsyncTask {
+
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            try {
+                Test_WSQ();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
     }
 }

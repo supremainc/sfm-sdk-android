@@ -71,15 +71,16 @@ extern "C"
     //
     
     // Open serial
-    //UF_API void UF_SetOpenSerialCallback_Android(BOOL(*Callback)(void));
+//UF_API void UF_SetOpenSerialCallback(BOOL(*Callback)(void));
     // Cloase serial
-    //UF_API void UF_SetCloseSerialCallback_Android(void(*Callback)(void));
+//UF_API void UF_SetCloseSerialCallback(void(*Callback)(void));
     // Set baudrate
-    UF_API void UF_SetSetupSerialCallback_Android(void(*Callback)(int));
+UF_API void UF_SetSetupSerialCallback(void(*Callback)(int));
     // Read serial
-    UF_API void UF_SetReadSerialCallback_Android(int(*Callback)(BYTE*, int, int));
+UF_API void UF_SetReadSerialCallback(int(*Callback)(BYTE *, int, int));
     // Write serial
-    UF_API void UF_SetWriteSerialCallback_Android(int(*Callback)(BYTE*, int, int));
+UF_API void UF_SetWriteSerialCallback(int(*Callback)(BYTE *, int, int));
+    	
 #endif
 
     //
@@ -126,7 +127,9 @@ extern "C"
     UF_API UF_RET_CODE UF_GetModuleInfo(UF_MODULE_TYPE *type, UF_MODULE_VERSION *version, UF_MODULE_SENSOR *sensorType);
     UF_API char *UF_GetModuleString(UF_MODULE_TYPE type, UF_MODULE_VERSION version, UF_MODULE_SENSOR sensorType);
     UF_API UF_RET_CODE UF_SearchModule(const char *port, int *baudrate, BOOL *asciiMode, UF_PROTOCOL *protocol, UINT32 *moduleID, void (*callback)(const char *comPort, int baudrate));
+#ifdef _WIN32 // Supports windows only
     UF_API UF_RET_CODE UF_SearchModuleBySocket(const char *inetAddr, int tcpPort, BOOL *asciiMode, UF_PROTOCOL *protocol, UINT32 *moduleID);
+#endif
     UF_API UF_RET_CODE UF_SearchModuleID(UINT32 *moduleID);
     UF_API UF_RET_CODE UF_SearchModuleIDEx(unsigned short *foundModuleID, int numOfFoundID, unsigned short *moduleID, int *numOfID);
     UF_API UF_RET_CODE UF_CalibrateSensor();

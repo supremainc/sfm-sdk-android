@@ -1,5 +1,13 @@
+/*
+ * Copyright (c) 2001 - 2019. Suprema Inc. All rights reserved.
+ * Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
 package com.supremainc.sfm_sdk.enumeration;
 
+/**
+ * Please refer to the SFM Protocol Manual for the details.
+ */
 public enum UF_AUTH_TYPE {
     UF_AUTH_FINGERPRINT(0x00),
     UF_AUTH_BYPASS(0x01),

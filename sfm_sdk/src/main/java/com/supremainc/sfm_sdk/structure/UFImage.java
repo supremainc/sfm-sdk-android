@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2001 - 2019. Suprema Inc. All rights reserved.
+ * Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
 package com.supremainc.sfm_sdk.structure;
 
 import android.graphics.Bitmap;
@@ -11,6 +16,7 @@ public class UFImage {
     private static final int IMAGE_FORMAT_GRAY = 0;
     private static final int IMAGE_FORMAT_BINARY = 1;
     private static final int IMAGE_FORMAT_4BIT_GRAY = 2;
+    private static final int IMAGE_FORMAT_WSQ = 3;
     private final int UF_IMAGE_HEADER_SIZE = 7;
     private final int UF_MAX_IMAGE_SIZE = (640 * 480);
     private int _width;
@@ -21,6 +27,7 @@ public class UFImage {
     private int _imgLen;
     private int _templateLen;
     private byte[] _buffer = new byte[UF_MAX_IMAGE_SIZE];
+    private byte[] _rawData = new byte[UF_MAX_IMAGE_SIZE];
     private Bitmap _bitmap;
 
     public int width() {
@@ -55,8 +62,13 @@ public class UFImage {
         return this._buffer;
     }
 
+    public byte[] rawData() {
+        getBitmap();
+        return _rawData;
+    }
 
-    public UFImage(int width, int height, int compressed, int encrypted, int format, int imgLen, int templateLen, byte[] buffer) {
+
+    public UFImage(int width, int height, int compressed, int encrypted, int format, int imgLen, int templateLen, byte[] receivedBuffer, byte[] rawData) {
         this._width = width;
         this._height = height;
         this._compressed = compressed;
@@ -64,7 +76,8 @@ public class UFImage {
         this._format = format;
         this._imgLen = imgLen;
         this._templateLen = templateLen;
-        this._buffer = Arrays.copyOf(buffer, buffer.length);
+        this._buffer = Arrays.copyOf(receivedBuffer, receivedBuffer.length);
+        this._rawData = Arrays.copyOf(rawData, rawData.length);
     }
 
     public UFImage() {
@@ -77,6 +90,21 @@ public class UFImage {
 //        return this._bitmap;
 //    }
 
+
+    public Bitmap getWSQImage() {
+
+        for (int i = 0; i < this.width() * this.height(); i++) {
+
+            this._rawData[i] = (byte) ~this._rawData[i];
+        }
+        Log.d("IMAGE", "getBitmap: " + String.format("width : %d, height : %d, imgLen : %d, templateLen : %d image format : %d", _width, _height, _imgLen, _templateLen, _format));
+        Bitmap bm = Bitmap.createBitmap(width(), height(), Bitmap.Config.ALPHA_8);
+        bm.copyPixelsFromBuffer(ByteBuffer.wrap(_rawData));
+
+        this._bitmap = bm;
+        return this._bitmap;
+
+    }
 
     public Bitmap getBitmap() {
 
@@ -113,10 +141,9 @@ public class UFImage {
                         bmImageBuffer[targetIdx++] = (byte) ~(_buffer[sourceIdx++] & 0xF0);
                     }
                 }
-
                 break;
-
             default:
+                bmImageBuffer = null;
                 return null;
 
         }
@@ -124,6 +151,9 @@ public class UFImage {
         Log.d("IMAGE", "getBitmap: " + String.format("width : %d, height : %d, imgLen : %d, templateLen : %d image format : %d", _width, _height, _imgLen, _templateLen, _format));
         Bitmap bm = Bitmap.createBitmap(width(), height(), Bitmap.Config.ALPHA_8);
         bm.copyPixelsFromBuffer(ByteBuffer.wrap(bmImageBuffer));
+
+        System.arraycopy(bmImageBuffer, 0, this._rawData, 0, bmImageBuffer.length);
+
         this._bitmap = bm;
 
         bmImageBuffer = null;

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2001 - 2019. Suprema Inc. All rights reserved.
+ * Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
 package com.supremainc.sfm_sdk;
 
 import android.app.PendingIntent;
@@ -25,10 +30,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Class of the UsbService using UsbSerial library on https://github.com/felHR85/UsbSerial
+ * This is modified for the SFM SDK for Android.
+ */
 public class UsbService extends Service {
 
     public static final String TAG = "UsbService";
-    
+
     public static final String ACTION_USB_READY = "com.felhr.connectivityservices.USB_READY";
     public static final String ACTION_USB_ATTACHED = "android.hardware.usb.action.USB_DEVICE_ATTACHED";
     public static final String ACTION_USB_DETACHED = "android.hardware.usb.action.USB_DEVICE_DETACHED";
@@ -185,8 +194,7 @@ public class UsbService extends Service {
             serialPort.write(data);
     }
 
-    synchronized int writeSerial(byte[]data, int timeout)
-    {
+    synchronized int writeSerial(byte[]data, int timeout) {
         if(serialPort != null) {
             int ret = serialPort.syncWrite(data, timeout);
             dlog.d("writeSerial :",Arrays.toString(data));
@@ -199,8 +207,7 @@ public class UsbService extends Service {
 
     byte[] tempSerialBuffer = new byte[16384];
 
-    int readSerial(byte[] data, int timeout)
-    {
+    int readSerial(byte[] data, int timeout) {
 
         long startTime = SystemClock.currentThreadTimeMillis();
 
@@ -214,13 +221,11 @@ public class UsbService extends Service {
             // Clear read serial buffer.
             if(data == null && timeout == 0) // condition of the initialization of the serial buffer.
             {
-                for(int i=0; i<tempSerialBuffer.length; i++)
-                {
+                for(int i=0; i<tempSerialBuffer.length; i++) {
                     tempSerialBuffer[i] = 0;
 
                 }
-                for(int i=0; i<serialByteBuffer.capacity(); i++)
-                {
+                for(int i=0; i<serialByteBuffer.capacity(); i++) {
                     serialByteBuffer.array()[i] = 0;
                 }
                 serialByteBuffer.clear();
@@ -253,9 +258,7 @@ public class UsbService extends Service {
                         dlog.d(TAG, String.format("[7] pos [%d]  limit [%d]  capacity [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity()));
                         return data.length;
                     }
-                }
-                else
-                {
+                } else {
                     int pos = serialByteBuffer.position();
                     //int limit = serialByteBuffer.limit();
                     dlog.d(TAG, String.format("[8_0] pos [%d]  limit [%d]  capacity [%d]", serialByteBuffer.position(), serialByteBuffer.limit(), serialByteBuffer.capacity()));
@@ -281,8 +284,7 @@ public class UsbService extends Service {
         return -1;
     }
 
-    public void setBuadrate(int baudrate)
-    {
+    public void setBuadrate(int baudrate) {
         if(serialPort != null)
             serialPort.setBaudRate(baudrate);
     }
@@ -291,8 +293,7 @@ public class UsbService extends Service {
      * This function will get the name of serialPort
      */
 
-    public String getUsbDeviceName()
-    {
+    public String getUsbDeviceName() {
         String deviceName = null;
         if(serialPort != null)
             deviceName = device.getDeviceName();

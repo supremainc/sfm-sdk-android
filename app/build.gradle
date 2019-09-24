@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2001 - 2019. Suprema Inc. All rights reserved.
+ * Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
 apply plugin: 'com.android.application'
 
 android {
@@ -17,8 +22,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8  //included for jitpack
+        targetCompatibility JavaVersion.VERSION_1_8  //included for jitpack
     }
 }
 

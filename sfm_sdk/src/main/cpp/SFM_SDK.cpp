@@ -380,14 +380,14 @@ void EnrollCallback(BYTE errCode, UF_ENROLL_MODE _enrollMode, int numOfSuccess) 
 
     if (cbEnroll == nullptr) {
         cbEnroll = env->GetMethodID(g_cls, "cbEnroll",
-                                    "(BLcom/supremainc/sfm_sdk/UF_ENROLL_MODE;I)V");
+                                    "(BLcom/supremainc/sfm_sdk/enumeration/UF_ENROLL_MODE;I)V");
         if (cbEnroll == nullptr)
             return;
     }
 
-    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_ENROLL_MODE");
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_ENROLL_MODE");
     jmethodID mid = env->GetStaticMethodID(cls, "ToEnrollMode",
-                                           "(I)Lcom/supremainc/sfm_sdk/UF_ENROLL_MODE;");
+                                           "(I)Lcom/supremainc/sfm_sdk/enumeration/UF_ENROLL_MODE;");
 
     jobject enrollMode = env->CallStaticObjectMethod(cls, mid, (int) _enrollMode);
 
@@ -436,9 +436,9 @@ void SearchModuleCallback(const char *_comPort, int baudrate) {
 
     jstring comPort = env->NewStringUTF(_comPort);
 
-    env->CallBooleanMethod(g_searchModuleCallback, g_searchModuleCallback_method_id, comPort,
-                           baudrate);
-    env->ReleaseStringUTFChars(comPort, _comPort);
+    env->CallVoidMethod(g_searchModuleCallback, g_searchModuleCallback_method_id, comPort,
+                        baudrate);
+    env->DeleteLocalRef(comPort);
 
     if (env->ExceptionOccurred())
         env->ExceptionClear();
@@ -454,9 +454,9 @@ JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_InitCallba
         (JNIEnv *env, jclass obj) {
     g_obj = obj;
 
-    UF_SetSetupSerialCallback_Android(SetupSerialCallback);
-    UF_SetWriteSerialCallback_Android(WriteSerialCallback);
-    UF_SetReadSerialCallback_Android(ReadSerialCallback);
+    UF_SetSetupSerialCallback(SetupSerialCallback);
+    UF_SetWriteSerialCallback(WriteSerialCallback);
+    UF_SetReadSerialCallback(ReadSerialCallback);
     UF_SetSendPacketCallback(SendPacketCallback);
     UF_SetReceivePacketCallback(ReceivePacketCallback);
     UF_SetSendDataPacketCallback(SendDataPacketCallback);
@@ -1138,27 +1138,27 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
 
     jclass cls = env->FindClass("com/supremainc/sfm_sdk/structure/UFModuleInfo");
     jmethodID mid = env->GetMethodID(cls, "<init>",
-                                     "(Lcom/supremainc/sfm_sdk/UF_MODULE_TYPE;Lcom/supremainc/sfm_sdk/UF_MODULE_VERSION;Lcom/supremainc/sfm_sdk/UF_MODULE_SENSOR;)V");
+                                     "(Lcom/supremainc/sfm_sdk/enumeration/UF_MODULE_TYPE;Lcom/supremainc/sfm_sdk/enumeration/UF_MODULE_VERSION;Lcom/supremainc/sfm_sdk/enumeration/UF_MODULE_SENSOR;)V");
 
-    jclass cls_type = env->FindClass("com/supremainc/sfm_sdk/UF_MODULE_TYPE");
+    jclass cls_type = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_MODULE_TYPE");
     if (cls_type == nullptr) return nullptr;
 
-    jclass cls_version = env->FindClass("com/supremainc/sfm_sdk/UF_MODULE_VERSION");
+    jclass cls_version = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_MODULE_VERSION");
     if (cls_version == nullptr) return nullptr;
 
-    jclass cls_sensorType = env->FindClass("com/supremainc/sfm_sdk/UF_MODULE_SENSOR");
+    jclass cls_sensorType = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_MODULE_SENSOR");
     if (cls_sensorType == nullptr) return nullptr;
 
     jmethodID mid_type = env->GetStaticMethodID(cls_type, "ToObjectType",
-                                                "(I)Lcom/supremainc/sfm_sdk/UF_MODULE_TYPE;");
+                                                "(I)Lcom/supremainc/sfm_sdk/enumeration/UF_MODULE_TYPE;");
     if (mid_type == nullptr) return nullptr;
 
     jmethodID mid_version = env->GetStaticMethodID(cls_version, "ToObjectType",
-                                                   "(I)Lcom/supremainc/sfm_sdk/UF_MODULE_VERSION;");
+                                                   "(I)Lcom/supremainc/sfm_sdk/enumeration/UF_MODULE_VERSION;");
     if (mid_version == nullptr) return nullptr;
 
     jmethodID mid_sensorType = env->GetStaticMethodID(cls_sensorType, "ToObjectType",
-                                                      "(I)Lcom/supremainc/sfm_sdk/UF_MODULE_SENSOR;");
+                                                      "(I)Lcom/supremainc/sfm_sdk/enumeration/UF_MODULE_SENSOR;");
     if (mid_sensorType == nullptr) return nullptr;
 
     int type;
@@ -1195,19 +1195,19 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_GetModuleString
- * Signature: (Lcom/supremainc/sfm_sdk/UF_MODULE_TYPE;Lcom/supremainc/sfm_sdk/UF_MODULE_VERSION;Lcom/supremainc/sfm_sdk/UF_MODULE_SENSOR;)Ljava/lang/String;
+ * Signature: (Lcom/supremainc/sfm_sdk/enumeration/UF_MODULE_TYPE;Lcom/supremainc/sfm_sdk/enumeration/UF_MODULE_VERSION;Lcom/supremainc/sfm_sdk/enumeration/UF_MODULE_SENSOR;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetModuleString
         (JNIEnv *env, jobject obj, jobject _type, jobject _version, jobject _sensorType) {
     g_obj = obj;
 
-    jclass cls_type = env->FindClass("com/supremainc/sfm_sdk/UF_MODULE_TYPE");
+    jclass cls_type = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_MODULE_TYPE");
     if (cls_type == nullptr) return nullptr;
 
-    jclass cls_version = env->FindClass("com/supremainc/sfm_sdk/UF_MODULE_VERSION");
+    jclass cls_version = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_MODULE_VERSION");
     if (cls_version == nullptr) return nullptr;
 
-    jclass cls_sensorType = env->FindClass("com/supremainc/sfm_sdk/UF_MODULE_SENSOR");
+    jclass cls_sensorType = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_MODULE_SENSOR");
     if (cls_sensorType == nullptr) return nullptr;
 
     jmethodID mid_type = env->GetMethodID(cls_type, "getValue", "()I");
@@ -1236,13 +1236,51 @@ JNIEXPORT jstring JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
     return env->NewStringUTF(moduleString);
 }
 
+/**
+ * Searching Module
+ */
+
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_SearchModule
- * Signature: ([B[I[Z[Lcom/supremainc/sfm_sdk/enumeration/UF_PROTOCOL;[ILcom/supremainc/sfm_sdk/SFM_SDK_ANDROID/SerialCallback;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Ljava/lang/String;[I[Z[Lcom/supremainc/sfm_sdk/enumeration/UF_PROTOCOL;[ILcom/supremainc/sfm_sdk/SFM_SDK_ANDROID_CALLBACK_INTERFACE/SearchModuleCallback;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SearchModule
-        (JNIEnv *, jobject, jbyteArray, jintArray, jbooleanArray, jobjectArray, jintArray, jobject);
+        (JNIEnv *env, jobject obj, jstring _port, jintArray _baudrate, jbooleanArray _asciiMode,
+         jobjectArray _protocol, jintArray _moduleID, jobject _callback) {
+
+    g_obj = obj;
+
+    jclass objclass = env->GetObjectClass(_callback);
+    jmethodID method = env->GetMethodID(objclass, "callback", "(Ljava/lang/String;I)V");
+    if (method == nullptr) {
+        return nullptr;
+    }
+    g_searchModuleCallback_method_id = method;
+    g_searchModuleCallback = _callback;
+
+    const char *port = env->GetStringUTFChars(_port, 0);
+    int baudrate = 0;
+    BOOL asciiMode_temp = FALSE;
+    UF_PROTOCOL protocol_temp;
+    UINT32 moduleID = 0;
+
+    UF_RET_CODE ret = UF_SearchModule(port, &baudrate, &asciiMode_temp, &protocol_temp, &moduleID,
+                                      SearchModuleCallback);
+
+    env->SetIntArrayRegion(_baudrate, 0, 1, &baudrate);
+
+    jobject protocol = jobjUF_PROTOCOL(env, obj, protocol_temp);
+
+    jboolean asciiMode = (asciiMode_temp == 1 ? true : false);
+    env->SetBooleanArrayRegion(_asciiMode, 0, 1, &asciiMode);
+    env->SetObjectArrayElement(_protocol, 0, protocol);
+    env->SetIntArrayRegion(_moduleID, 0, 1, reinterpret_cast<const jint *>(&moduleID));
+
+    env->DeleteLocalRef(protocol);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
@@ -1250,7 +1288,17 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Sea
  * Signature: ([I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SearchModuleID
-        (JNIEnv *, jobject, jintArray);
+        (JNIEnv *env, jobject obj, jintArray _moduleID) {
+    g_obj = obj;
+
+    jint *moduleID = env->GetIntArrayElements(_moduleID, 0);
+
+    UF_RET_CODE ret = UF_SearchModuleID(reinterpret_cast<UINT32 *>(moduleID));
+
+    env->ReleaseIntArrayElements(_moduleID, moduleID, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
@@ -1258,7 +1306,24 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Sea
  * Signature: ([SI[S[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SearchModuleIDEx
-        (JNIEnv *, jobject, jshortArray, jint, jshortArray, jintArray);
+        (JNIEnv *env, jobject obj, jshortArray _foundModuleID, jint _numOfFoundID,
+         jshortArray _moduleID, jintArray _numOfID) {
+    g_obj = obj;
+
+    jshort *foundModuleID = env->GetShortArrayElements(_foundModuleID, 0);
+    int numOfFoundID = (int) _numOfFoundID;
+    jshort *moduleID = env->GetShortArrayElements(_moduleID, 0);
+    jint *numOfID = env->GetIntArrayElements(_numOfID, 0);
+    UF_RET_CODE ret = UF_SearchModuleIDEx(reinterpret_cast<unsigned short *>(foundModuleID),
+                                          numOfFoundID,
+                                          reinterpret_cast<unsigned short *>(moduleID), numOfID);
+
+    env->ReleaseShortArrayElements(_foundModuleID, foundModuleID, 0);
+    env->ReleaseShortArrayElements(_moduleID, moduleID, 0);
+    env->ReleaseIntArrayElements(_numOfID, numOfID, 0);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
@@ -1383,13 +1448,13 @@ JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1InitSy
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_GetSysParameter
- * Signature: (Lcom/supremainc/sfm_sdk/UF_SYS_PARAM;[J)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Lcom/supremainc/sfm_sdk/enumeration/UF_SYS_PARAM;[J)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetSysParameter
         (JNIEnv *env, jobject obj, jobject _parameter, jintArray _value) {
     g_obj = obj;
 
-    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_SYS_PARAM");
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_SYS_PARAM");
     if (cls == nullptr) return nullptr;
 
     jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
@@ -1419,12 +1484,12 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_SetSysParameter
- * Signature: (Lcom/supremainc/sfm_sdk/UF_SYS_PARAM;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Lcom/supremainc/sfm_sdk/enumeration/UF_SYS_PARAM;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetSysParameter
         (JNIEnv *env, jobject obj, jobject _parameter, jint _value) {
     g_obj = obj;
-    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_SYS_PARAM");
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_SYS_PARAM");
     if (cls == nullptr) return nullptr;
 
     jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
@@ -1441,7 +1506,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Set
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_GetMultiSysParameter
- * Signature: (I[Lcom/supremainc/sfm_sdk/UF_SYS_PARAM;[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (I[Lcom/supremainc/sfm_sdk/enumeration/UF_SYS_PARAM;[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetMultiSysParameter
         (JNIEnv *env, jobject obj, jint _parameterCount, jobjectArray _parameters,
@@ -1451,7 +1516,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
 
     int parameterCount = _parameterCount;
 
-    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_SYS_PARAM");
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_SYS_PARAM");
     if (cls == nullptr) return nullptr;
 
     jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
@@ -1487,7 +1552,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_SetMultiSysParameter
- * Signature: (I[Lcom/supremainc/sfm_sdk/UF_SYS_PARAM;[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (I[Lcom/supremainc/sfm_sdk/enumeration/UF_SYS_PARAM;[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetMultiSysParameter
         (JNIEnv *env, jobject obj, jint _parameterCount, jobjectArray _parameters,
@@ -1496,7 +1561,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Set
 
     int parameterCount = _parameterCount;
 
-    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_SYS_PARAM");
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_SYS_PARAM");
     if (cls == nullptr) return nullptr;
 
     jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
@@ -2548,7 +2613,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Ver
 /*
 * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
         * Method:    UF_Enroll
-        * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+        * Signature: (ILcom/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION;[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
 */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enroll
         (JNIEnv *env, jobject obj, jint _userID, jobject _option, jintArray _enrollID,
@@ -2557,7 +2622,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enr
 
     UINT32 userID = (UINT32) _userID;
 
-    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_ENROLL_OPTION");
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION");
     jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
     UF_ENROLL_OPTION option = (UF_ENROLL_OPTION) env->CallIntMethod(_option, mid);
     UINT32 enrollID = 0;
@@ -2596,7 +2661,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enr
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_EnrollAfterVerification
- * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (ILcom/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION;[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollAfterVerification
         (JNIEnv *env, jobject obj, jint _userID, jobject _option, jintArray _enrollID,
@@ -2607,7 +2672,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enr
     UINT32 enrollID = 0;
     UINT32 imageQuality = 0;
 
-    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_ENROLL_OPTION");
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION");
     jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
     UF_ENROLL_OPTION option = (UF_ENROLL_OPTION) env->CallIntMethod(_option, mid);
 
@@ -2623,7 +2688,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enr
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_EnrollTemplate
- * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;I[B[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (ILcom/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION;I[B[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollTemplate
         (JNIEnv *env, jobject obj, jint _userID, jobject _option, jint _templateSize,
@@ -2634,7 +2699,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enr
     UINT32 templateSize = (UINT32) _templateSize;
     UINT32 enrollID = 0;
 
-    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_ENROLL_OPTION");
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION");
     jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
     UF_ENROLL_OPTION option = (UF_ENROLL_OPTION) env->CallIntMethod(_option, mid);
 
@@ -2654,7 +2719,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enr
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_EnrollMultipleTemplates
- * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;II[B[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (ILcom/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION;II[B[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollMultipleTemplates
         (JNIEnv *env, jobject obj, jint _userID, jobject _option, jint _numOfTemplate,
@@ -2666,7 +2731,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enr
     UINT32 templateSize = (UINT32) _templateSize;
     UINT32 enrollID = 0;
 
-    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_ENROLL_OPTION");
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION");
     jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
     UF_ENROLL_OPTION option = (UF_ENROLL_OPTION) env->CallIntMethod(_option, mid);
 
@@ -2685,7 +2750,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enr
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_EnrollMultipleTemplatesEx
- * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;III[B[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (ILcom/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION;III[B[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL
 Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollMultipleTemplatesEx
@@ -2699,7 +2764,7 @@ Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollMultipleTemplatesEx
     UINT32 templateSize = (UINT32) _templateSize;
     UINT32 enrollID = 0;
 
-    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_ENROLL_OPTION");
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION");
     jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
     UF_ENROLL_OPTION option = (UF_ENROLL_OPTION) env->CallIntMethod(_option, mid);
 
@@ -2720,7 +2785,7 @@ Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollMultipleTemplatesEx
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_EnrollImage
- * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;I[B[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (ILcom/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION;I[B[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollImage
         (JNIEnv *env, jobject obj, jint _userID, jobject _option, jint _imageSize,
@@ -2732,7 +2797,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enr
     UINT32 enrollID = 0;
     UINT32 imageQuality = 0;
 
-    jclass cls = env->FindClass("com/supremainc/sfm_sdk/UF_ENROLL_OPTION");
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION");
     jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
     UF_ENROLL_OPTION option = (UF_ENROLL_OPTION) env->CallIntMethod(_option, mid);
 
@@ -2828,6 +2893,29 @@ Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DeleteAllAfterVerification
     return jobjUF_RET_CODE(env, obj, ret);
 }
 
+/**
+ * Upgrade
+ */
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_Upgrade
+ * Signature: (Ljava/lang/String;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Upgrade
+        (JNIEnv *env, jobject obj, jstring _firmwareFilename, jint dataPacketSize) {
+    g_obj = obj;
+
+    const char *firmwareFilename = env->GetStringUTFChars(_firmwareFilename, 0);
+
+    UF_RET_CODE ret = UF_Upgrade(firmwareFilename, dataPacketSize);
+
+    env->ReleaseStringUTFChars(_firmwareFilename, firmwareFilename);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
@@ -2870,6 +2958,165 @@ Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ResetSystemConfiguration
         (JNIEnv *env, jobject obj) {
     g_obj = obj;
     UF_RET_CODE ret = UF_ResetSystemConfiguration();
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+
+/**
+ * WSQ Image
+ */
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_WSQ_Decode
+ * Signature: ([B[I[I[I[I[I[BI)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1WSQ_1Decode
+        (JNIEnv *env, jobject obj, jbyteArray _odata, jintArray _ow, jintArray _oh, jintArray _od,
+         jintArray _oppi, jintArray _lossyflag, jbyteArray _idata, jint iLen) {
+    g_obj = obj;
+
+    unsigned char *odata_temp = NULL;
+    int ow = 0;
+    int oh = 0;
+    int od = 0;
+    int oppi = 0;
+    int lossyflag = 0;
+
+    unsigned char *wsqData = as_unsigned_char_array(env, _idata);
+
+    for (int i = 0; i < 2; i++) {
+        LOGI("%02X ", wsqData[i]);
+    }
+
+
+    FILE *fp = fopen("/sdcard/wsqimage.wsq", "wb");
+
+    fwrite(wsqData, 1, iLen, fp);
+
+    fclose(fp);
+
+
+    UF_RET_CODE ret = UF_WSQ_Decode(&odata_temp, &ow, &oh, &od, &oppi, &lossyflag,
+                                    wsqData, (int) iLen);
+
+    env->SetByteArrayRegion(_odata, 0, ow * oh, reinterpret_cast<const jbyte *>(odata_temp));
+
+    env->SetIntArrayRegion(_ow, 0, 1, reinterpret_cast<const jint *>(&ow));
+    env->SetIntArrayRegion(_oh, 0, 1, reinterpret_cast<const jint *>(&oh));
+    env->SetIntArrayRegion(_od, 0, 1, reinterpret_cast<const jint *>(&od));
+    env->SetIntArrayRegion(_oppi, 0, 1, reinterpret_cast<const jint *>(&oppi));
+    env->SetIntArrayRegion(_lossyflag, 0, 1, reinterpret_cast<const jint *>(&lossyflag));
+
+    //env->ReleaseByteArrayElements(_idata, wsqData, 0);
+    free(odata_temp);
+    free(wsqData);
+
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_ReadImageEx
+ * Signature: (Lcom/supremainc/sfm_sdk/structure/UFImage;Lcom/supremainc/sfm_sdk/enumeration/UF_IMAGE_TYPE;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ReadImageEx
+        (JNIEnv *env, jobject obj, jobject _image, jobject _type, jint wsqBitRate) {
+    g_obj = obj;
+
+    UFImage *image = (UFImage *) malloc(UF_IMAGE_HEADER_SIZE * sizeof(int) + UF_MAX_IMAGE_SIZE);
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_IMAGE_TYPE");
+    jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
+    UF_IMAGE_TYPE type = static_cast<UF_IMAGE_TYPE>(env->CallIntMethod(_type, mid));
+
+    UF_RET_CODE ret = UF_ReadImageEx(image, type, wsqBitRate);
+
+    if (ret == UF_RET_SUCCESS) {
+        jclass cls_imageObj = env->GetObjectClass(_image);
+        jfieldID width = env->GetFieldID(cls_imageObj, "_width", "I");
+        jfieldID height = env->GetFieldID(cls_imageObj, "_height", "I");
+        jfieldID compressed = env->GetFieldID(cls_imageObj, "_compressed", "I");
+        jfieldID encrypted = env->GetFieldID(cls_imageObj, "_encrypted", "I");
+        jfieldID format = env->GetFieldID(cls_imageObj, "_format", "I");
+        jfieldID imgLen = env->GetFieldID(cls_imageObj, "_imgLen", "I");
+        jfieldID templateLen = env->GetFieldID(cls_imageObj, "_templateLen", "I");
+        jfieldID buffer = env->GetFieldID(cls_imageObj, "_buffer", "[B");
+
+        env->SetIntField(_image, width, image->width);
+        env->SetIntField(_image, height, image->height);
+        env->SetIntField(_image, compressed, image->compressed);
+        env->SetIntField(_image, encrypted, image->encrypted);
+        env->SetIntField(_image, imgLen, image->imgLen);
+        env->SetIntField(_image, format, image->format);
+        env->SetIntField(_image, templateLen, image->templateLen);
+
+        jobject imageBuffer = env->GetObjectField(_image, buffer);
+
+        env->SetByteArrayRegion(static_cast<jbyteArray>(imageBuffer), 0, image->imgLen,
+                                reinterpret_cast<const jbyte *>(image->buffer));
+
+        env->DeleteLocalRef(cls_imageObj);
+        env->DeleteLocalRef(imageBuffer);
+    }
+
+    env->DeleteLocalRef(cls);
+
+    free(image);
+    return jobjUF_RET_CODE(env, obj, ret);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    UF_ScanImageEx
+ * Signature: (Lcom/supremainc/sfm_sdk/structure/UFImage;Lcom/supremainc/sfm_sdk/enumeration/UF_IMAGE_TYPE;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ */
+JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ScanImageEx
+        (JNIEnv *env, jobject obj, jobject _image, jobject _type, jint _wsqBitRate) {
+    g_obj = obj;
+
+    UFImage *image = (UFImage *) malloc(UF_IMAGE_HEADER_SIZE * sizeof(int) + UF_MAX_IMAGE_SIZE);
+    jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_IMAGE_TYPE");
+    jmethodID mid = env->GetMethodID(cls, "getValue", "()I");
+    UF_IMAGE_TYPE type = static_cast<UF_IMAGE_TYPE>(env->CallIntMethod(_type, mid));
+
+
+    UF_RET_CODE ret = UF_ScanImageEx(image, type, _wsqBitRate);
+
+    for (int i = 0; i < 2; i++) {
+        LOGI("%02X ", image->buffer[i]);
+    }
+
+    if (ret == UF_RET_SUCCESS) {
+        jclass cls_imageObj = env->GetObjectClass(_image);
+        jfieldID width = env->GetFieldID(cls_imageObj, "_width", "I");
+        jfieldID height = env->GetFieldID(cls_imageObj, "_height", "I");
+        jfieldID compressed = env->GetFieldID(cls_imageObj, "_compressed", "I");
+        jfieldID encrypted = env->GetFieldID(cls_imageObj, "_encrypted", "I");
+        jfieldID format = env->GetFieldID(cls_imageObj, "_format", "I");
+        jfieldID imgLen = env->GetFieldID(cls_imageObj, "_imgLen", "I");
+        jfieldID templateLen = env->GetFieldID(cls_imageObj, "_templateLen", "I");
+        jfieldID buffer = env->GetFieldID(cls_imageObj, "_buffer", "[B");
+
+        env->SetIntField(_image, width, image->width);
+        env->SetIntField(_image, height, image->height);
+        env->SetIntField(_image, compressed, image->compressed);
+        env->SetIntField(_image, encrypted, image->encrypted);
+        env->SetIntField(_image, format, image->format);
+        env->SetIntField(_image, imgLen, image->imgLen);
+        env->SetIntField(_image, templateLen, image->templateLen);
+
+        jobject imageBuffer = env->GetObjectField(_image, buffer);
+
+        env->SetByteArrayRegion(static_cast<jbyteArray>(imageBuffer), 0, image->imgLen,
+                                reinterpret_cast<const jbyte *>(image->buffer));
+
+        env->DeleteLocalRef(cls_imageObj);
+        env->DeleteLocalRef(imageBuffer);
+    }
+
+    env->DeleteLocalRef(cls);
+
+    free(image);
+
     return jobjUF_RET_CODE(env, obj, ret);
 }
 

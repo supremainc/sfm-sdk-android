@@ -41,22 +41,6 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Clo
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_InitSocket
- * Signature: (Ljava/lang/String;IZ)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1InitSocket
-        (JNIEnv *, jobject, jstring, jint, jboolean);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_CloseSocket
- * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1CloseSocket
-        (JNIEnv *, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_Reconnect
  * Signature: ()V
  */
@@ -283,7 +267,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_GetModuleString
- * Signature: (Lcom/supremainc/sfm_sdk/UF_MODULE_TYPE;Lcom/supremainc/sfm_sdk/UF_MODULE_VERSION;Lcom/supremainc/sfm_sdk/UF_MODULE_SENSOR;)Ljava/lang/String;
+ * Signature: (Lcom/supremainc/sfm_sdk/enumeration/UF_MODULE_TYPE;Lcom/supremainc/sfm_sdk/enumeration/UF_MODULE_VERSION;Lcom/supremainc/sfm_sdk/enumeration/UF_MODULE_SENSOR;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetModuleString
         (JNIEnv *, jobject, jobject, jobject, jobject);
@@ -291,10 +275,10 @@ JNIEXPORT jstring JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_SearchModule
- * Signature: ([B[I[Z[Lcom/supremainc/sfm_sdk/enumeration/UF_PROTOCOL;[ILcom/supremainc/sfm_sdk/SFM_SDK_ANDROID_CALLBACK_INTERFACE/SearchModuleCallback;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Ljava/lang/String;[I[Z[Lcom/supremainc/sfm_sdk/enumeration/UF_PROTOCOL;[ILcom/supremainc/sfm_sdk/SFM_SDK_ANDROID_CALLBACK_INTERFACE/SearchModuleCallback;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SearchModule
-        (JNIEnv *, jobject, jbyteArray, jintArray, jbooleanArray, jobjectArray, jintArray, jobject);
+        (JNIEnv *, jobject, jstring, jintArray, jbooleanArray, jobjectArray, jintArray, jobject);
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
@@ -354,22 +338,6 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Cha
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_ReadChallengeCode
- * Signature: ([B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ReadChallengeCode
-        (JNIEnv *, jobject, jbyteArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_WriteChallengeCode
- * Signature: ([B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1WriteChallengeCode
-        (JNIEnv *, jobject, jbyteArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_PowerOff
  * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
@@ -387,7 +355,7 @@ JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1InitSy
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_GetSysParameter
- * Signature: (Lcom/supremainc/sfm_sdk/UF_SYS_PARAM;[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Lcom/supremainc/sfm_sdk/enumeration/UF_SYS_PARAM;[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetSysParameter
         (JNIEnv *, jobject, jobject, jintArray);
@@ -395,7 +363,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_SetSysParameter
- * Signature: (Lcom/supremainc/sfm_sdk/UF_SYS_PARAM;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Lcom/supremainc/sfm_sdk/enumeration/UF_SYS_PARAM;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetSysParameter
         (JNIEnv *, jobject, jobject, jint);
@@ -403,7 +371,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Set
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_GetMultiSysParameter
- * Signature: (I[Lcom/supremainc/sfm_sdk/UF_SYS_PARAM;[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (I[Lcom/supremainc/sfm_sdk/enumeration/UF_SYS_PARAM;[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetMultiSysParameter
         (JNIEnv *, jobject, jint, jobjectArray, jintArray);
@@ -411,7 +379,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_SetMultiSysParameter
- * Signature: (I[Lcom/supremainc/sfm_sdk/UF_SYS_PARAM;[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (I[Lcom/supremainc/sfm_sdk/enumeration/UF_SYS_PARAM;[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetMultiSysParameter
         (JNIEnv *, jobject, jint, jobjectArray, jintArray);
@@ -455,14 +423,6 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetAllUserInfoEx
         (JNIEnv *, jobject, jobjectArray, jintArray, jintArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SortUserInfo
- * Signature: ([Lcom/supremainc/sfm_sdk/structure/UFUserInfo;I)V
- */
-JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SortUserInfo
-        (JNIEnv *, jobject, jobjectArray, jint);
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
@@ -739,7 +699,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Ver
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_Enroll
- * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (ILcom/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION;[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enroll
         (JNIEnv *, jobject, jint, jobject, jintArray, jintArray);
@@ -755,7 +715,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enr
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_EnrollAfterVerification
- * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (ILcom/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION;[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollAfterVerification
         (JNIEnv *, jobject, jint, jobject, jintArray, jintArray);
@@ -763,7 +723,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enr
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_EnrollTemplate
- * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;I[B[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (ILcom/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION;I[B[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollTemplate
         (JNIEnv *, jobject, jint, jobject, jint, jbyteArray, jintArray);
@@ -771,7 +731,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enr
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_EnrollMultipleTemplates
- * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;II[B[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (ILcom/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION;II[B[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollMultipleTemplates
         (JNIEnv *, jobject, jint, jobject, jint, jint, jbyteArray, jintArray);
@@ -779,7 +739,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Enr
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_EnrollMultipleTemplatesEx
- * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;III[B[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (ILcom/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION;III[B[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL
 Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollMultipleTemplatesEx
@@ -788,7 +748,7 @@ Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollMultipleTemplatesEx
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_EnrollImage
- * Signature: (ILcom/supremainc/sfm_sdk/UF_ENROLL_OPTION;I[B[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (ILcom/supremainc/sfm_sdk/enumeration/UF_ENROLL_OPTION;I[B[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnrollImage
         (JNIEnv *, jobject, jint, jobject, jint, jbyteArray, jintArray, jintArray);
@@ -836,339 +796,11 @@ Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DeleteAllAfterVerification
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_InitIO
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1InitIO
-        (JNIEnv *, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetInputFunction
- * Signature: (Lcom/supremainc/sfm_sdk/UF_INPUT_PORT;Lcom/supremainc/sfm_sdk/UF_INPUT_FUNC;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetInputFunction
-        (JNIEnv *, jobject, jobject, jobject, jint);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_GetInputFunction
- * Signature: (Lcom/supremainc/sfm_sdk/UF_INPUT_PORT;[Lcom/supremainc/sfm_sdk/UF_INPUT_FUNC;[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetInputFunction
-        (JNIEnv *, jobject, jobject, jobjectArray, jintArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_GetInputStatus
- * Signature: (Lcom/supremainc/sfm_sdk/UF_INPUT_PORT;Z[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetInputStatus
-        (JNIEnv *, jobject, jobject, jboolean, jintArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_GetOutputEventList
- * Signature: (Lcom/supremainc/sfm_sdk/UF_OUTPUT_PORT;[Lcom/supremainc/sfm_sdk/UF_OUTPUT_EVENT;[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetOutputEventList
-        (JNIEnv *, jobject, jobject, jobjectArray, jintArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_ClearAllOutputEvent
- * Signature: (Lcom/supremainc/sfm_sdk/UF_OUTPUT_PORT;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ClearAllOutputEvent
-        (JNIEnv *, jobject, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_ClearOutputEvent
- * Signature: (Lcom/supremainc/sfm_sdk/UF_OUTPUT_PORT;Lcom/supremainc/sfm_sdk/UF_OUTPUT_EVENT;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ClearOutputEvent
-        (JNIEnv *, jobject, jobject, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetOutputEvent
- * Signature: (Lcom/supremainc/sfm_sdk/UF_OUTPUT_PORT;Lcom/supremainc/sfm_sdk/UF_OUTPUT_EVENT;Lcom/supremainc/sfm_sdk/structure/UFOutputSignal;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetOutputEvent
-        (JNIEnv *, jobject, jobject, jobject, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_GetOutputEvent
- * Signature: (Lcom/supremainc/sfm_sdk/UF_OUTPUT_PORT;Lcom/supremainc/sfm_sdk/UF_OUTPUT_EVENT;[Lcom/supremainc/sfm_sdk/structure/UFOutputSignal;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetOutputEvent
-        (JNIEnv *, jobject, jobject, jobject, jobjectArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetOutputStatus
- * Signature: (Lcom/supremainc/sfm_sdk/UF_OUTPUT_PORT;Z)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetOutputStatus
-        (JNIEnv *, jobject, jobject, jboolean);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetLegacyWiegandConfig
- * Signature: (ZZII)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetLegacyWiegandConfig
-        (JNIEnv *, jobject, jboolean, jboolean, jint, jint);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_GetLegacyWiegandConfig
- * Signature: ([Z[Z[I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetLegacyWiegandConfig
-        (JNIEnv *, jobject, jbooleanArray, jbooleanArray, jintArray, jintArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_MakeIOConfiguration
- * Signature: ([Lcom/supremainc/sfm_sdk/structure/UFConfigComponentHeader;[B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1MakeIOConfiguration
-        (JNIEnv *, jobject, jobjectArray, jbyteArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_GetGPIOConfiguration
- * Signature: (Lcom/supremainc/sfm_sdk/UF_GPIO_PORT;[Lcom/supremainc/sfm_sdk/UF_GPIO_MODE;[I[Lcom/supremainc/sfm_sdk/structure/UFGPIOData;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetGPIOConfiguration
-        (JNIEnv *, jobject, jobject, jobjectArray, jintArray, jobjectArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetInputGPIO
- * Signature: (Lcom/supremainc/sfm_sdk/UF_GPIO_PORT;Lcom/supremainc/sfm_sdk/structure/UFGPIOInputData;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetInputGPIO
-        (JNIEnv *, jobject, jobject, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetOutputGPIO
- * Signature: (Lcom/supremainc/sfm_sdk/UF_GPIO_PORT;I[Lcom/supremainc/sfm_sdk/structure/UFGPIOOutputData;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetOutputGPIO
-        (JNIEnv *, jobject, jobject, jint, jobjectArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetBuzzerGPIO
- * Signature: (Lcom/supremainc/sfm_sdk/UF_GPIO_PORT;I[Lcom/supremainc/sfm_sdk/structure/UFGPIOOutputData;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetBuzzerGPIO
-        (JNIEnv *, jobject, jobject, jint, jobjectArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetSharedGPIO
- * Signature: (Lcom/supremainc/sfm_sdk/UF_GPIO_PORT;Lcom/supremainc/sfm_sdk/structure/UFGPIOInputData;I[Lcom/supremainc/sfm_sdk/structure/UFGPIOOutputData;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetSharedGPIO
-        (JNIEnv *, jobject, jobject, jobject, jint, jobjectArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_DisableGPIO
- * Signature: (Lcom/supremainc/sfm_sdk/UF_GPIO_PORT;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DisableGPIO
-        (JNIEnv *, jobject, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_ClearAllGPIO
- * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ClearAllGPIO
-        (JNIEnv *, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetDefaultGPIO
- * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetDefaultGPIO
-        (JNIEnv *, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_EnableWiegandInput
- * Signature: (Lcom/supremainc/sfm_sdk/structure/UFGPIOWiegandData;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnableWiegandInput
-        (JNIEnv *, jobject, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_EnableWiegandOutput
- * Signature: (Lcom/supremainc/sfm_sdk/structure/UFGPIOWiegandData;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1EnableWiegandOutput
-        (JNIEnv *, jobject, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_DisableWiegandInput
- * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DisableWiegandInput
-        (JNIEnv *, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_DisableWiegandOutput
- * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DisableWiegandOutput
-        (JNIEnv *, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_MakeGPIOConfiguration
- * Signature: ([Lcom/supremainc/sfm_sdk/structure/UFConfigComponentHeader;[B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1MakeGPIOConfiguration
-        (JNIEnv *, jobject, jobjectArray, jbyteArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_WriteUserMemory
- * Signature: ([B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1WriteUserMemory
-        (JNIEnv *, jobject, jbyteArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_ReadUserMemory
- * Signature: ([B)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ReadUserMemory
-        (JNIEnv *, jobject, jbyteArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetTime
- * Signature: (Lcom/supremainc/sfm_sdk/structure/time_t;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetTime
-        (JNIEnv *, jobject, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_GetTime
- * Signature: ([Lcom/supremainc/sfm_sdk/structure/time_t;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetTime
-        (JNIEnv *, jobject, jobjectArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_GetNumOfLog
- * Signature: ([I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetNumOfLog
-        (JNIEnv *, jobject, jintArray, jintArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_ReadLog
- * Signature: (II[Lcom/supremainc/sfm_sdk/structure/UFLogRecord;[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ReadLog
-        (JNIEnv *, jobject, jint, jint, jobjectArray, jintArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_ReadLatestLog
- * Signature: (I[Lcom/supremainc/sfm_sdk/structure/UFLogRecord;[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ReadLatestLog
-        (JNIEnv *, jobject, jint, jobjectArray, jintArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_DeleteOldestLog
- * Signature: (I[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DeleteOldestLog
-        (JNIEnv *, jobject, jint, jintArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_DeleteAllLog
- * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DeleteAllLog
-        (JNIEnv *, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_ClearLogCache
- * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ClearLogCache
-        (JNIEnv *, jobject);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_ReadLogCache
- * Signature: (I[I[Lcom/supremainc/sfm_sdk/structure/UFLogRecord;)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ReadLogCache
-        (JNIEnv *, jobject, jint, jintArray, jobjectArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_SetCustomLogField
- * Signature: (Lcom/supremainc/sfm_sdk/UF_LOG_SOURCE;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1SetCustomLogField
-        (JNIEnv *, jobject, jobject, jint);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_GetCustomLogField
- * Signature: (Lcom/supremainc/sfm_sdk/UF_LOG_SOURCE;[I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1GetCustomLogField
-        (JNIEnv *, jobject, jobject, jintArray);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_Upgrade
- * Signature: ([BI)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Ljava/lang/String;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Upgrade
-        (JNIEnv *, jobject, jbyteArray, jint);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_UpgradeEx
- * Signature: ([BLcom/supremainc/sfm_sdk/enumeration/UF_UPGRADE_OPTION;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1UpgradeEx
-        (JNIEnv *, jobject, jbyteArray, jobject, jint);
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    UF_DFU_Upgrade
- * Signature: ()Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
- */
-JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1DFU_1Upgrade
-        (JNIEnv *, jobject);
+        (JNIEnv *, jobject, jstring, jint);
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
@@ -1190,27 +822,27 @@ Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ResetSystemConfiguration
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_WSQ_Decode
- * Signature: ([[B[I[I[I[I[I[BI)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: ([B[I[I[I[I[I[BI)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1WSQ_1Decode
-        (JNIEnv *, jobject, jobjectArray, jintArray, jintArray, jintArray, jintArray, jintArray,
+        (JNIEnv *, jobject, jbyteArray, jintArray, jintArray, jintArray, jintArray, jintArray,
          jbyteArray, jint);
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_ReadImageEx
- * Signature: ([Lcom/supremainc/sfm_sdk/structure/UFImage;Lcom/supremainc/sfm_sdk/UF_IMAGE_TYPE;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Lcom/supremainc/sfm_sdk/structure/UFImage;Lcom/supremainc/sfm_sdk/enumeration/UF_IMAGE_TYPE;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ReadImageEx
-        (JNIEnv *, jobject, jobjectArray, jobject, jint);
+        (JNIEnv *, jobject, jobject, jobject, jint);
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
  * Method:    UF_ScanImageEx
- * Signature: ([Lcom/supremainc/sfm_sdk/structure/UFImage;Lcom/supremainc/sfm_sdk/UF_IMAGE_TYPE;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
+ * Signature: (Lcom/supremainc/sfm_sdk/structure/UFImage;Lcom/supremainc/sfm_sdk/enumeration/UF_IMAGE_TYPE;I)Lcom/supremainc/sfm_sdk/enumeration/UF_RET_CODE;
  */
 JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1ScanImageEx
-        (JNIEnv *, jobject, jobjectArray, jobject, jint);
+        (JNIEnv *, jobject, jobject, jobject, jint);
 
 /*
  * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
