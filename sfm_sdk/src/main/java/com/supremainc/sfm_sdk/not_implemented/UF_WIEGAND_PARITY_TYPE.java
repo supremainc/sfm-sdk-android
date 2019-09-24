@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.not_implemented;
 
 public enum UF_WIEGAND_PARITY_TYPE {
     UF_WIEGAND_EVEN_PARITY(0),

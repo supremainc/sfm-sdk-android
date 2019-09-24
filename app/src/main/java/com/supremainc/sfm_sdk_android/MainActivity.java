@@ -16,13 +16,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.supremainc.sfm_sdk.MessageHandler;
+import com.supremainc.sfm_sdk.message_handler.MessageHandler;
 import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
-import com.supremainc.sfm_sdk.SFM_SDK_ANDROID_CALLBACK_INTERFACE;
-import com.supremainc.sfm_sdk.UF_ENROLL_MODE;
-import com.supremainc.sfm_sdk.UF_ENROLL_OPTION;
-import com.supremainc.sfm_sdk.UF_IMAGE_TYPE;
-import com.supremainc.sfm_sdk.UF_SYS_PARAM;
+import com.supremainc.sfm_sdk.callback_interface.SFM_SDK_ANDROID_CALLBACK_INTERFACE;
+import com.supremainc.sfm_sdk.enumeration.UF_ENROLL_MODE;
+import com.supremainc.sfm_sdk.enumeration.UF_ENROLL_OPTION;
+import com.supremainc.sfm_sdk.enumeration.UF_IMAGE_TYPE;
+import com.supremainc.sfm_sdk.enumeration.UF_SYS_PARAM;
 import com.supremainc.sfm_sdk.UsbService;
 import com.supremainc.sfm_sdk.enumeration.UF_ADMIN_LEVEL;
 import com.supremainc.sfm_sdk.enumeration.UF_AUTH_TYPE;
@@ -34,15 +34,14 @@ import com.supremainc.sfm_sdk.structure.UFModuleInfo;
 import com.supremainc.sfm_sdk.structure.UFUserInfo;
 import com.supremainc.sfm_sdk.structure.UFUserInfoEx;
 
-import java.nio.ByteOrder;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-//import com.supremainc.sfm_sdk.MessageHandler;
+//import com.supremainc.sfm_sdk.message_handler.MessageHandler;
 //import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
 //import com.supremainc.sfm_sdk.UsbService;
 
-//import com.supremainc.sfm_sdk.MessageHandler;
+//import com.supremainc.sfm_sdk.message_handler.MessageHandler;
 //import com.supremainc.sfm_sdk.SFM_SDK_ANDROID;
 //import com.supremainc.sfm_sdk.UsbService;
 
@@ -1163,9 +1162,9 @@ public class MainActivity extends AppCompatActivity {
 
         sdk.UF_Save();
 
-//        ret = sdk.UF_ScanImageEx(image, UF_IMAGE_TYPE.UF_WSQ_MQ_IMAGE, 225);
+        ret = sdk.UF_ScanImageEx(image, UF_IMAGE_TYPE.UF_WSQ_MQ_IMAGE, 225);
 
-        ret = sdk.UF_ReadImageEx(image, UF_IMAGE_TYPE.UF_WSQ_MQ_IMAGE, 225);
+//        ret = sdk.UF_ReadImageEx(image, UF_IMAGE_TYPE.UF_WSQ_MQ_IMAGE, 225);
         Log.d(TAG, "Test_WSQ: " + ret.toString());
 
 

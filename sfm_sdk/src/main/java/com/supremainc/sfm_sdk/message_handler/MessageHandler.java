@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.message_handler;
 
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;

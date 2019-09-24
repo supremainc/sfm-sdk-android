@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.not_implemented;
 
 public enum UF_OUTPUT_EVENT {
     UF_OUTPUT_CLEAR_ALL_EVENTS(0x00),

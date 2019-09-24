@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.enumeration;
 
 public enum UF_MODULE_VERSION {
     UF_VERSION_1_0(0),

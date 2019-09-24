@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.not_implemented;
 
 public enum UF_LOG_SOURCE {
     UF_LOG_SOURCE_SYSTEM(0x00),

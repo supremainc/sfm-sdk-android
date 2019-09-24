@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.not_implemented;
 
 public enum UF_GPIO_OUTPUT_LEVEL {
     UF_GPIO_OUT_ACTIVE_HIGH(0x82),

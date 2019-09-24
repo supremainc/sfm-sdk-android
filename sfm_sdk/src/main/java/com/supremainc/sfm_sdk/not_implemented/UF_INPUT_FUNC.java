@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.not_implemented;
 
 //#region UF_3500IO_H
 public enum UF_INPUT_FUNC {

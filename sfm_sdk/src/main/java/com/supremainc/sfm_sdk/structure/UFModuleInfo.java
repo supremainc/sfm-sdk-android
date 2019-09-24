@@ -1,8 +1,8 @@
 package com.supremainc.sfm_sdk.structure;
 
-import com.supremainc.sfm_sdk.UF_MODULE_SENSOR;
-import com.supremainc.sfm_sdk.UF_MODULE_TYPE;
-import com.supremainc.sfm_sdk.UF_MODULE_VERSION;
+import com.supremainc.sfm_sdk.enumeration.UF_MODULE_SENSOR;
+import com.supremainc.sfm_sdk.enumeration.UF_MODULE_TYPE;
+import com.supremainc.sfm_sdk.enumeration.UF_MODULE_VERSION;
 
 public class UFModuleInfo {
     public UF_MODULE_TYPE _type;

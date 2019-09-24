@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.not_implemented;
 
 //SFM3000/SFM6000
 public enum UF_GPIO_PORT {

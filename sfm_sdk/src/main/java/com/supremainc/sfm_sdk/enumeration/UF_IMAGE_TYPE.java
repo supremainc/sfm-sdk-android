@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.enumeration;
 
 public enum UF_IMAGE_TYPE {
     UF_GRAY_IMAGE(0x30),

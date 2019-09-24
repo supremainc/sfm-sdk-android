@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.enumeration;
 
 public enum UF_SYS_PARAM {
     UF_SYS_TIMEOUT(0x62),

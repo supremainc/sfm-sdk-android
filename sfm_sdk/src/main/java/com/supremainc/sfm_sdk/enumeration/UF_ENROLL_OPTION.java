@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.enumeration;
 
 public enum UF_ENROLL_OPTION {
     UF_ENROLL_NONE(0x00),

@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.enumeration;
 
 public enum UF_ENROLL_MODE {
     UF_ENROLL_ONE_TIME(0x30),

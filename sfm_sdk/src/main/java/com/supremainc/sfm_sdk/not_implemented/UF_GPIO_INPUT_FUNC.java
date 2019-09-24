@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.not_implemented;
 
 public enum UF_GPIO_INPUT_FUNC {
     UF_GPIO_IN_ENROLL(0x01),

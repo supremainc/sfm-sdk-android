@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.not_implemented;
 
 public enum UF_WIEGAND_INPUT_MODE {
     UF_WIEGAND_INPUT_DISABLE(0x00),

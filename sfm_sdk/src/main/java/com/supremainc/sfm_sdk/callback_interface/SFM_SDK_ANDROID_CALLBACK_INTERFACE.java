@@ -1,4 +1,6 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.callback_interface;
+
+import com.supremainc.sfm_sdk.enumeration.UF_ENROLL_MODE;
 
 public class SFM_SDK_ANDROID_CALLBACK_INTERFACE {
     /**

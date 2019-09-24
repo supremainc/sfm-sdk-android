@@ -1,4 +1,4 @@
-package com.supremainc.sfm_sdk;
+package com.supremainc.sfm_sdk.not_implemented;
 
 public enum UF_CHANNEL_TYPE {
     UF_SERIAL_CHANNEL(0),
