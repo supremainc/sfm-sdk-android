@@ -1,5 +1,13 @@
+/*
+ * Copyright (c) 2001 - 2019. Suprema Inc. All rights reserved.
+ * Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
 package com.supremainc.sfm_sdk.enumeration;
 
+/**
+ * Please refer to the SFM Protocol Manual for the details.
+ */
 public enum UF_ENROLL_MODE {
     UF_ENROLL_ONE_TIME(0x30),
     UF_ENROLL_TWO_TIMES1(0x31),

@@ -1,5 +1,13 @@
+/*
+ * Copyright (c) 2001 - 2019. Suprema Inc. All rights reserved.
+ * Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
 package com.supremainc.sfm_sdk.enumeration;
 
+/**
+ * Please refer to the SFM Protocol Manual for the details.
+ */
 public enum UF_MODULE_TYPE {
     UF_MODULE_3000(0),
     UF_MODULE_3500(1),

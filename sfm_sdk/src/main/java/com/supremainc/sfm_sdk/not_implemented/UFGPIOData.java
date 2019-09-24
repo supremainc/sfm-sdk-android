@@ -3,4 +3,7 @@
  * Licensed under the MIT license. See LICENSE file in the project root for details.
  */
 
-include ':app', ':sfm_sdk'
+package com.supremainc.sfm_sdk.not_implemented;
+
+public class UFGPIOData {
+}

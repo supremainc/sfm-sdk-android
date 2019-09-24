@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2001 - 2019. Suprema Inc. All rights reserved.
+ * Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
 package com.supremainc.sfm_sdk.structure;
 
 import android.graphics.Bitmap;
@@ -100,6 +105,7 @@ public class UFImage {
         return this._bitmap;
 
     }
+
     public Bitmap getBitmap() {
 
         if (_imgLen == 0)

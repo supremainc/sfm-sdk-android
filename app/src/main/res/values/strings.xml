@@ -1,3 +1,8 @@
+<!--
+  ~ Copyright (c) 2001 - 2019. Suprema Inc. All rights reserved.
+  ~ Licensed under the MIT license. See LICENSE file in the project root for details.
+  -->
+
 <resources>
     <string name="app_name">sfm-sdk-android</string>
     <string name="hello_world">Hello world!</string>

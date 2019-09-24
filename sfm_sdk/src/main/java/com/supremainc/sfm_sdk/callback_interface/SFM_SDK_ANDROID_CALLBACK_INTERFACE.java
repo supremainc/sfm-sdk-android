@@ -1,11 +1,14 @@
+/*
+ * Copyright (c) 2001 - 2019. Suprema Inc. All rights reserved.
+ * Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
 package com.supremainc.sfm_sdk.callback_interface;
 
 import com.supremainc.sfm_sdk.enumeration.UF_ENROLL_MODE;
 
 public class SFM_SDK_ANDROID_CALLBACK_INTERFACE {
-    /**
-     * Interfaces for callback functions from Java (17 functions)
-     */
+    // Interfaces for callback functions from Java (17 functions)
 
     public static interface SetupSerialCallback {
         public void callback(int baudrate);

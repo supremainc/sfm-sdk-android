@@ -1,7 +1,16 @@
+/*
+ * Copyright (c) 2001 - 2019. Suprema Inc. All rights reserved.
+ * Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
 package com.supremainc.sfm_sdk.enumeration;
 
 // Command definitions
 //
+
+/**
+ * Please refer to the SFM Protocol Manual for the details.
+ */
 public enum UF_COMMAND {
     UF_COM_SW(0x01),
     UF_COM_SF(0x02),

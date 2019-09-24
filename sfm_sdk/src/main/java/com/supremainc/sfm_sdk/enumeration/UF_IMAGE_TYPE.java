@@ -1,5 +1,13 @@
+/*
+ * Copyright (c) 2001 - 2019. Suprema Inc. All rights reserved.
+ * Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
 package com.supremainc.sfm_sdk.enumeration;
 
+/**
+ * Please refer to the SFM Protocol Manual for the details.
+ */
 public enum UF_IMAGE_TYPE {
     UF_GRAY_IMAGE(0x30),
     UF_BINARY_IMAGE(0x31),

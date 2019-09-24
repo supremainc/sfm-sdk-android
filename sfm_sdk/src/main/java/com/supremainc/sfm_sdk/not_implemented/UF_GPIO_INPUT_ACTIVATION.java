@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2001 - 2019. Suprema Inc. All rights reserved.
+ * Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
+
 package com.supremainc.sfm_sdk.not_implemented;
 
 public enum UF_GPIO_INPUT_ACTIVATION
@@ -8,12 +13,12 @@ public enum UF_GPIO_INPUT_ACTIVATION
     UF_GPIO_IN_FALLING_EDGE(0x04),
     ;
     private int value;
-    UF_GPIO_INPUT_ACTIVATION(int i)
-    {
+
+    UF_GPIO_INPUT_ACTIVATION(int i) {
         this.value = i;
     }
-    public int getValue()
-    {
+
+    public int getValue() {
         return this.value;
     }
 }
