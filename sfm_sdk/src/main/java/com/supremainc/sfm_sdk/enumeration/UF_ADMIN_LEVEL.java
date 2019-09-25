@@ -23,7 +23,7 @@ public enum UF_ADMIN_LEVEL {
         return this.value;
     }
 
-    public static UF_ADMIN_LEVEL ToSecurityLevel(int i) {
+    public static UF_ADMIN_LEVEL ToAdminLevel(int i) {
         UF_ADMIN_LEVEL adminLevel = null;
 
         for (UF_ADMIN_LEVEL iter : UF_ADMIN_LEVEL.values()) {

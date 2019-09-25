@@ -32,7 +32,7 @@ public enum UF_USER_SECURITY_LEVEL {
         return this.value;
     }
 
-    public static UF_USER_SECURITY_LEVEL ToAdminLevel(int i) {
+    public static UF_USER_SECURITY_LEVEL ToSecurityLevel(int i) {
         UF_USER_SECURITY_LEVEL userSecurityLevel = null;
 
         for (UF_USER_SECURITY_LEVEL iter : UF_USER_SECURITY_LEVEL.values()) {

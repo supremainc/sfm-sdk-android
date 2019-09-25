@@ -80,7 +80,7 @@ jobject jobjUF_ADMIN_LEVEL(JNIEnv *env, jobject thiz, UF_ADMIN_LEVEL adminLevel)
     jclass cls = env->FindClass("com/supremainc/sfm_sdk/enumeration/UF_ADMIN_LEVEL");
     if (cls == nullptr) return nullptr;
 
-    jmethodID mid = env->GetStaticMethodID(cls, "ToSecurityLevel",
+    jmethodID mid = env->GetStaticMethodID(cls, "ToAdminLevel",
                                            "(I)Lcom/supremainc/sfm_sdk/enumeration/UF_ADMIN_LEVEL;");
     if (mid == nullptr) return nullptr;
 

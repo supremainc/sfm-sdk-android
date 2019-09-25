@@ -51,6 +51,7 @@ public enum UF_SYS_PARAM {
     UF_SYS_POWEROFF_TIMEOUT(0x9c),
     UF_SYS_EXPOSURE(0x9d),
     UF_SYS_PROTOCOL_INTERFACE(0X9e),
+    UF_SYS_TOUCH_SENSOR_SENSITIVITY(0xA1),
     UF_SYS_RESERVED(0xff),
     ;
     private int value;
