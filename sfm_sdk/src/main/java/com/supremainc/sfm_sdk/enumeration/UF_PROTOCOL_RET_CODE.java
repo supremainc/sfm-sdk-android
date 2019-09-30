@@ -11,7 +11,7 @@ package com.supremainc.sfm_sdk.enumeration;
  */
 public enum UF_PROTOCOL_RET_CODE {
     UF_PROTO_RET_SUCCESS(0x61),
-    UF_PROTO_RET_SCAN_SUCCESS(062),
+    UF_PROTO_RET_SCAN_SUCCESS(0x62),
     UF_PROTO_RET_SCAN_FAIL(0x63),
     UF_PROTO_RET_NOT_FOUND(0x69),
     UF_PROTO_RET_NOT_MATCH(0x6A),
