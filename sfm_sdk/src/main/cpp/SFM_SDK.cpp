@@ -338,9 +338,6 @@ void ScanCallback(BYTE errCode) {
         if (cbScan == nullptr)
             return;
     }
-
-    LOGE("Scan Success\n");
-
     env->CallVoidMethod(g_obj, cbScan, errCode);
 }
 
@@ -395,7 +392,6 @@ void EnrollCallback(BYTE errCode, UF_ENROLL_MODE _enrollMode, int numOfSuccess) 
 
     env->DeleteLocalRef(cls);
     env->DeleteLocalRef(enrollMode);
-    LOGI("Enroll Callback\n");
 }
 
 void DeleteCallback(BYTE errCode) {
@@ -410,7 +406,6 @@ void DeleteCallback(BYTE errCode) {
             return;
     }
     env->CallVoidMethod(g_obj, cbDelete, errCode);
-    LOGI("Delete Callback\n");
 }
 
 
@@ -478,10 +473,9 @@ JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_InitCallba
 
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
-    LOGI("JNI_OnLoad\n");
 
     g_vm = vm;
-//    JNIEnv *env;
+
     if (vm->GetEnv(reinterpret_cast<void **>(&g_env), JNI_VERSION_1_6) != JNI_OK) {
         return JNI_ERR;
     }
@@ -493,9 +487,6 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     g_cls = reinterpret_cast<jclass>(g_env->NewGlobalRef(cls));
 
     g_env->DeleteLocalRef(cls);
-
-//    g_env = env;
-//    g_cls = cls;
 
     return JNI_VERSION_1_6;
 }
@@ -1002,8 +993,6 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Com
                                    reinterpret_cast<UINT32 *>(pSize),
                                    reinterpret_cast<BYTE *>(pFlag), MsgCallback);
 
-    LOGI("UF_CommandEx : %X %X %X\n", pParam[0], pSize[0], pFlag[0]);
-
     if (ret == UF_RET_SUCCESS) {
         env->SetIntArrayRegion(_param, 0, 1, pParam);
         env->SetIntArrayRegion(_size, 0, 1, pSize);
@@ -1473,7 +1462,6 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
 
     if (ret == UF_RET_SUCCESS) {
         env->SetIntArrayRegion(_value, 0, 1, pValue);
-        LOGI("ParamID in JNI : 0x%02X , value : %X\n", param_id, pValue[0]);
 
     }
     env->ReleaseIntArrayElements(_value, pValue, 0);
@@ -1578,7 +1566,6 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Set
 
     for (int i = 0; i < paramSize; i++) {
         parameters[i] = (int) env->CallIntMethod(env->GetObjectArrayElement(_parameters, i), mid);
-        LOGI("parameters : %02X , values : %02X", parameters[i], values[i]);
     }
 
     UF_RET_CODE ret = UF_SetMultiSysParameter(parameterCount, (UF_SYS_PARAM *) parameters,
@@ -1676,8 +1663,6 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Get
             env->SetIntField(userInfoObj, fUserID, pUserInfo[i].userID);
             env->SetByteField(userInfoObj, fNumOfTemplate, pUserInfo[i].numOfTemplate);
             env->SetByteField(userInfoObj, fAdminLevel, pUserInfo[i].adminLevel);
-            LOGI("userID : %d numOfTemplate : %d adminLevel : %d", pUserInfo[i].userID,
-                 pUserInfo[i].numOfTemplate, pUserInfo[i].adminLevel);
 
             jobject reserved_obj = env->GetObjectField(userInfoObj, fReserved);
 
@@ -2251,7 +2236,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Sav
     g_obj = obj;
 
     const char *filename = env->GetStringUTFChars(_filename, 0);
-    LOGI("filename : %s \n", filename);
+
     UFImage *image = (UFImage *) malloc(UF_IMAGE_HEADER_SIZE * sizeof(int) + UF_MAX_IMAGE_SIZE);
 
     jclass cls_imageObj = env->GetObjectClass(_image);
@@ -2297,7 +2282,7 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Loa
     g_obj = obj;
 
     const char *filename = env->GetStringUTFChars(_filename, nullptr);
-    LOGI("filename : %s \n", filename);
+
     UFImage *image = (UFImage *) malloc(UF_IMAGE_HEADER_SIZE * sizeof(int) + UF_MAX_IMAGE_SIZE);
 
     jclass cls_imageObj = env->GetObjectClass(_image);
@@ -2928,7 +2913,6 @@ JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_NDKCallbac
     jobjUF_AUTH_TYPE(env, obj, UF_AUTH_FINGERPRINT);
     jobjUF_RET_CODE(env, obj, UF_RET_SUCCESS);
     ReadSerialCallback((unsigned char *) "test", 4, 1);
-    LOGI("Test done");
 }
 
 /**
@@ -2984,17 +2968,6 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1WSQ
 
     unsigned char *wsqData = as_unsigned_char_array(env, _idata);
 
-    for (int i = 0; i < 2; i++) {
-        LOGI("%02X ", wsqData[i]);
-    }
-
-
-    FILE *fp = fopen("/sdcard/wsqimage.wsq", "wb");
-
-    fwrite(wsqData, 1, iLen, fp);
-
-    fclose(fp);
-
 
     UF_RET_CODE ret = UF_WSQ_Decode(&odata_temp, &ow, &oh, &od, &oppi, &lossyflag,
                                     wsqData, (int) iLen);
@@ -3007,7 +2980,6 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1WSQ
     env->SetIntArrayRegion(_oppi, 0, 1, reinterpret_cast<const jint *>(&oppi));
     env->SetIntArrayRegion(_lossyflag, 0, 1, reinterpret_cast<const jint *>(&lossyflag));
 
-    //env->ReleaseByteArrayElements(_idata, wsqData, 0);
     free(odata_temp);
     free(wsqData);
 
@@ -3081,9 +3053,6 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Sca
 
     UF_RET_CODE ret = UF_ScanImageEx(image, type, _wsqBitRate);
 
-    for (int i = 0; i < 2; i++) {
-        LOGI("%02X ", image->buffer[i]);
-    }
 
     if (ret == UF_RET_SUCCESS) {
         jclass cls_imageObj = env->GetObjectClass(_image);

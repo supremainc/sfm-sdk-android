@@ -1146,7 +1146,7 @@ public class MainActivity extends AppCompatActivity {
 
         sdk.UF_Save();
 
-        ret = sdk.UF_ScanImageEx(image, UF_IMAGE_TYPE.UF_WSQ_MQ_IMAGE, 225);
+        ret = sdk.UF_ScanImageEx(image, UF_IMAGE_TYPE.UF_WSQ_LQ_IMAGE, 0);
 
 //        ret = sdk.UF_ReadImageEx(image, UF_IMAGE_TYPE.UF_WSQ_MQ_IMAGE, 225);
         Log.d(TAG, "Test_WSQ: " + ret.toString());
@@ -1171,6 +1171,39 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+    }
+
+    void Enroll_Test2() {
+        final String TAG = "Eroll_2";
+        sdk.UF_SetSendRawDataCallback(sendRawDataCallback);
+        sdk.UF_SetReceiveRawDataCallback(receiveRawDataCallback);
+        sdk.UF_SetScanCallback(scanCallback);
+        sdk.UF_SetEnrollCallback(enrollCallback);
+        sdk.UF_SetDeleteCallback(deleteCallback);
+
+        UF_RET_CODE ret = null;
+
+        int userID = 0;
+        int[] enrollID = new int[1];
+        int[] imageQuality = new int[1];
+        int[] numOfTemplate = new int[1];
+        byte[] templateData = new byte[3840];
+        int[] templateSize = new int[1];
+        int[] _userID = new int[1];
+        byte[] _subID = new byte[1];
+
+        enrollID[0] = 0;
+        imageQuality[0] = 0;
+        ret = sdk.UF_Enroll(0, UF_ENROLL_OPTION.UF_ENROLL_AUTO_ID, enrollID, imageQuality);
+        //ret = sdk.UF_Identify(_userID, _subID);
+
+        if (ret == UF_RET_CODE.UF_RET_SUCCESS) {
+            Log.d(TAG, "Enroll_Test2: Success");
+        }
+        if (ret == UF_RET_CODE.UF_ERR_TIME_OUT) {
+            Log.d(TAG, "Enroll_Test2: Timeout");
+        }
 
     }
 
