@@ -153,7 +153,7 @@ unsigned char *as_unsigned_char_array(JNIEnv *env, jbyteArray array) {
  */
 
 
-void SetupSerialCallback(int baudrate) {
+static void SetupSerialCallback(int baudrate) {
     static jmethodID cbSetupSerial = nullptr;
 
     JNIEnv *env;
@@ -438,34 +438,6 @@ void SearchModuleCallback(const char *_comPort, int baudrate) {
     if (env->ExceptionOccurred())
         env->ExceptionClear();
 }
-
-
-/*
- * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
- * Method:    InitCallbackFunctions
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_InitCallbackFunctions
-        (JNIEnv *env, jclass obj) {
-    g_obj = obj;
-
-    UF_SetSetupSerialCallback(SetupSerialCallback);
-    UF_SetWriteSerialCallback(WriteSerialCallback);
-    UF_SetReadSerialCallback(ReadSerialCallback);
-    UF_SetSendPacketCallback(SendPacketCallback);
-    UF_SetReceivePacketCallback(ReceivePacketCallback);
-    UF_SetSendDataPacketCallback(SendDataPacketCallback);
-    UF_SetReceiveDataPacketCallback(ReceiveDataPacketCallback);
-    UF_SetSendRawDataCallback(SendRawDataCallback);
-    UF_SetReceiveRawDataCallback(ReceiveRawDataCallback);
-    UF_SetUserInfoCallback(UserInfoCallback);
-    UF_SetScanCallback(ScanCallback);
-    UF_SetIdentifyCallback(IdentifyCallback);
-    UF_SetVerifyCallback(VerifyCallback);
-    UF_SetEnrollCallback(EnrollCallback);
-    UF_SetDeleteCallback(DeleteCallback);
-}
-
 
 /**
  * JNI_OnLoad
@@ -3034,6 +3006,237 @@ JNIEXPORT jobject JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID_UF_1Rea
 
     free(image);
     return jobjUF_RET_CODE(env, obj, ret);
+}
+
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    _SetupSerialCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/callback_interface/SFM_SDK_ANDROID_CALLBACK_INTERFACE/SetupSerialCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID__1SetupSerialCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    g_obj = obj;
+
+    if (_callback != nullptr) {
+        UF_SetSetupSerialCallback(SetupSerialCallback);
+    } else
+        UF_SetSetupSerialCallback(nullptr);
+
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    _ReadSerialCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/callback_interface/SFM_SDK_ANDROID_CALLBACK_INTERFACE/ReadSerialCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID__1ReadSerialCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    g_obj = obj;
+
+    if (_callback != nullptr)
+        UF_SetReadSerialCallback(ReadSerialCallback);
+    else
+        UF_SetReadSerialCallback((nullptr));
+}
+
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    _WriteSerialCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/callback_interface/SFM_SDK_ANDROID_CALLBACK_INTERFACE/WriteSerialCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID__1WriteSerialCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    g_obj = obj;
+
+    if (_callback != nullptr)
+        UF_SetWriteSerialCallback(WriteSerialCallback);
+    else
+        UF_SetWriteSerialCallback(nullptr);
+
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    _SendPacketCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/callback_interface/SFM_SDK_ANDROID_CALLBACK_INTERFACE/SendPacketCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID__1SendPacketCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    g_obj = obj;
+
+    if (_callback != nullptr)
+        UF_SetSendPacketCallback(SendPacketCallback);
+    else
+        UF_SetSendPacketCallback(nullptr);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    _ReceivePacketCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/callback_interface/SFM_SDK_ANDROID_CALLBACK_INTERFACE/ReceivePacketCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID__1ReceivePacketCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    g_obj = obj;
+
+    if(_callback != nullptr)
+        UF_SetReceivePacketCallback(ReceivePacketCallback);
+    else
+        UF_SetReceivePacketCallback(nullptr);
+
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    _SendDataPacketCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/callback_interface/SFM_SDK_ANDROID_CALLBACK_INTERFACE/SendDataPacketCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID__1SendDataPacketCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    g_obj = obj;
+
+    if(_callback!= nullptr)
+        UF_SetSendDataPacketCallback(SendDataPacketCallback);
+    else
+        UF_SetSendDataPacketCallback(nullptr);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    _ReceiveDataPacketCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/callback_interface/SFM_SDK_ANDROID_CALLBACK_INTERFACE/ReceiveDataPacketCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID__1ReceiveDataPacketCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    g_obj = obj;
+
+    if(_callback!= nullptr)
+        UF_SetReceiveDataPacketCallback(ReceiveDataPacketCallback);
+    else
+        UF_SetReceiveDataPacketCallback(nullptr);
+
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    _SendRawDataCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/callback_interface/SFM_SDK_ANDROID_CALLBACK_INTERFACE/SendRawDataCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID__1SendRawDataCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    g_obj = obj;
+
+    if(_callback!= nullptr)
+        UF_SetSendRawDataCallback(SendRawDataCallback);
+    else
+        UF_SetSendRawDataCallback(nullptr);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    _ReceiveRawDataCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/callback_interface/SFM_SDK_ANDROID_CALLBACK_INTERFACE/ReceiveRawDataCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID__1ReceiveRawDataCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    g_obj = obj;
+
+    if(_callback!= nullptr)
+        UF_SetReceiveRawDataCallback(ReceiveRawDataCallback);
+    else
+        UF_SetReceiveRawDataCallback(nullptr);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    _UserInfoCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/callback_interface/SFM_SDK_ANDROID_CALLBACK_INTERFACE/UserInfoCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID__1UserInfoCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    g_obj = obj;
+
+    if(_callback!= nullptr)
+        UF_SetUserInfoCallback(UserInfoCallback);
+    else
+        UF_SetUserInfoCallback(nullptr);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    _ScanCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/callback_interface/SFM_SDK_ANDROID_CALLBACK_INTERFACE/ScanCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID__1ScanCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    g_obj = obj;
+
+    if(_callback != nullptr)
+        UF_SetScanCallback(ScanCallback);
+    else
+        UF_SetScanCallback(nullptr);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    _IdentifyCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/callback_interface/SFM_SDK_ANDROID_CALLBACK_INTERFACE/IdentifyCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID__1IdentifyCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    g_obj = obj;
+
+    if(_callback != nullptr)
+        UF_SetIdentifyCallback(IdentifyCallback);
+    else
+        UF_SetIdentifyCallback(nullptr);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    _VerifyCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/callback_interface/SFM_SDK_ANDROID_CALLBACK_INTERFACE/VerifyCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID__1VerifyCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    g_obj = obj;
+
+    if(_callback != nullptr)
+        UF_SetVerifyCallback(VerifyCallback);
+    else
+        UF_SetVerifyCallback(nullptr);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    _EnrollCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/callback_interface/SFM_SDK_ANDROID_CALLBACK_INTERFACE/EnrollCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID__1EnrollCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    g_obj = obj;
+
+    if(_callback != nullptr)
+        UF_SetEnrollCallback(EnrollCallback);
+    else
+        UF_SetEnrollCallback(nullptr);
+}
+
+/*
+ * Class:     com_supremainc_sfm_sdk_SFM_SDK_ANDROID
+ * Method:    _DeleteCallback
+ * Signature: (Lcom/supremainc/sfm_sdk/callback_interface/SFM_SDK_ANDROID_CALLBACK_INTERFACE/DeleteCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_supremainc_sfm_1sdk_SFM_1SDK_1ANDROID__1DeleteCallback
+        (JNIEnv *env, jobject obj, jobject _callback) {
+    g_obj = obj;
+
+    if(_callback != nullptr)
+        UF_SetDeleteCallback(DeleteCallback);
+    else
+        UF_SetDeleteCallback(nullptr);
 }
 
 /*
