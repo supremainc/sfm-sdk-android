@@ -5,12 +5,14 @@
 
 package com.supremainc.sfm_sdk_android;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -222,6 +224,9 @@ public class MainActivity extends AppCompatActivity {
     private EditText editText;
     private ImageView imageView;
     private SFM_SDK_ANDROID sdk;
+    private final int USB = 0xF1;
+    private final int UART = 0xF2;
+    private final int ConnectionType = USB;
     /*
      * Notifications from UsbService will be received here.
      */
@@ -235,29 +240,13 @@ public class MainActivity extends AppCompatActivity {
                     String version = "SDK Version : " + sdk.UF_GetSDKVersion() + "\n";
                     display.append(version);
 
+
+                    // Initialize system parameter (this must be called before using SDK )
                     sdk.UF_InitSysParameter();
-//
+
+                    // Init Com Port ( This must be called before using SDK )
                     UF_RET_CODE result = sdk.UF_InitCommPort(115200, false);
-//
-//                    String ret = result.toString();
-//
-//                    Log.i("[INFO]",version);
-//
-//                    if(result == UF_RET_CODE.UF_RET_SUCCESS)
-//                    {
-////                        long id = sdk.UF_GetModuleID();
-////                        Log.i("[INFO]", String.format("Module ID %d", id));
-////
-//                        int[] value = new int[10];
-//                        result = sdk.UF_GetSysParameter(UF_SYS_PARAM.UF_SYS_BAUDRATE, value );
-////
-//                        Log.i("[INFO]", String.format("Param %d", value[0]));
-//                    }
 
-
-//                    sdk.UF_InitCommPort(115200, true);
-
-//                    Test_Identify();
 
                     break;
                 case UsbService.ACTION_USB_PERMISSION_NOT_GRANTED: // USB PERMISSION NOT GRANTED
@@ -265,6 +254,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case UsbService.ACTION_NO_USB: // NO USB CONNECTED
                     Toast.makeText(context, "No USB connected", Toast.LENGTH_SHORT).show();
+
                     break;
                 case UsbService.ACTION_USB_DISCONNECTED: // USB DISCONNECTED
                     Toast.makeText(context, "USB disconnected", Toast.LENGTH_SHORT).show();
@@ -1126,12 +1116,22 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private AppCompatActivity mainActivity;
     void Test_WSQ() {
         final String TAG = "WSQ";
         // UF_Reconnect
+
+//        if(sdk==null)
+//        {
+//            sdk = new SFM_SDK_ANDROID();
+//            sdk.UF_InitSysParameter();
+//            sdk.UF_InitCommPort("/dev/ttyACM0", 115200, false);
+//        }
+
         sdk.UF_Reconnect();
 
         // Callback test
+        sdk.UF_SetDefaultPacketSize(0x1000*3);
         sdk.UF_SetSendPacketCallback(sendPacketCallback);
         sdk.UF_SetReceivePacketCallback(receivePacketCallback);
         sdk.UF_SetSendDataPacketCallback(sendDataPacketCallback);
@@ -1216,7 +1216,18 @@ public class MainActivity extends AppCompatActivity {
         display = findViewById(R.id.textView1);
         editText = findViewById(R.id.editText1);
         imageView = findViewById(R.id.imageView);
-        sdk = new SFM_SDK_ANDROID(this, mHandler, mUsbReceiver);
+
+        // for USB connection
+        if(this.ConnectionType == USB) {
+            sdk = new SFM_SDK_ANDROID(this, mHandler, mUsbReceiver);
+        }
+
+        else {
+            // for UART connection
+            sdk = new SFM_SDK_ANDROID();
+            sdk.UF_InitSysParameter();
+            sdk.UF_InitCommPort("/dev/ttyACM1", 115200, false);
+        }
 
         Button sendButton = findViewById(R.id.buttonSend);
 
@@ -1228,15 +1239,15 @@ public class MainActivity extends AppCompatActivity {
 
                 if (!editText.getText().toString().equals("")) {
 
-                    task = new SFMTask();
-                    task.execute();
+//                    task = new SFMTask();
+//                    task.execute();
 
-//                    new Thread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Test_Image();
-//                        }
-//                    }).start();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Test_WSQ();
+                        }
+                    }).start();
 
                 }
             }
@@ -1246,14 +1257,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        sdk.resumeService();
+        if(this.ConnectionType == USB)
+            sdk.resumeService();
 
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        sdk.pauseService();
+        if(this.ConnectionType == USB)
+          sdk.pauseService();
     }
 
     private class SFMTask extends AsyncTask {

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2001 - 2019. Suprema Inc. All rights reserved.
+  ~ Licensed under the MIT license. See LICENSE file in the project root for details.
+  -->
+
+<resources>
+    <drawable name="fp_image" />
+    <drawable name="fpImage" />
+</resources>

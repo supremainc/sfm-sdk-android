@@ -14,7 +14,6 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.supremainc.sfm_sdk.callback_interface.SFM_SDK_ANDROID_CALLBACK_INTERFACE;
 import com.supremainc.sfm_sdk.enumeration.UF_ADMIN_LEVEL;
@@ -54,8 +53,16 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * Constructor
      */
 
+
     /**
-     * Constructor of the SFM SDK for Android.
+     * Constructor of the SFM SDK for Android. (UART)
+     */
+    public SFM_SDK_ANDROID() {
+
+    }
+
+    /**
+     * Constructor of the SFM SDK for Android. (USB)
      *
      * @param activity An instance of main activity. This is must be passed by the constructor.
      */
@@ -64,7 +71,7 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
     }
 
     /**
-     * Constructor of the SFM SDK for Android.
+     * Constructor of the SFM SDK for Android. (USB)
      *
      * @param activity An instance of main activity. This is must be passed by the constructor.
      * @param handler  A handler which can bring the message of the SDK to the main activity.
@@ -72,10 +79,15 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
     public SFM_SDK_ANDROID(AppCompatActivity activity, MessageHandler handler) {
         mActivity = activity;
         mHandler = handler;
+
+        // Set callback functions for using USB library.
+        UF_SetSetupSerialCallback(setupSerialCallback);
+        UF_SetWriteSerialCallback(writeSerialCallback);
+        UF_SetReadSerialCallback(readSerialCallback);
     }
 
     /**
-     * Constructor of the SFM SDK for Android.
+     * Constructor of the SFM SDK for Android. (USB)
      *
      * @param activity An instance of main activity. This is must be passed by the constructor.
      * @param handler  A handler which can bring the message of the SDK to the main activity.
@@ -87,14 +99,21 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
         mActivity = activity;
         mHandler = handler;
         mUsbReceiver = receiver;
+
+        // Set callback functions for using USB library.
+        UF_SetSetupSerialCallback(setupSerialCallback);
+        UF_SetWriteSerialCallback(writeSerialCallback);
+        UF_SetReadSerialCallback(readSerialCallback);
     }
 
     private final ServiceConnection usbConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder arg1) {
-            usbService = ((UsbService.UsbBinder) arg1).getService();
-            if (mHandler != null)
+
+            if (mHandler != null) {
+                usbService = ((UsbService.UsbBinder) arg1).getService();
                 usbService.setHandler(mHandler);
+            }
         }
 
         @Override
@@ -104,30 +123,34 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
     };
 
     private void startService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
-        if (!UsbService.SERVICE_CONNECTED) {
-            Intent startService = new Intent(mActivity, service);
-            if (extras != null && !extras.isEmpty()) {
-                Set<String> keys = extras.keySet();
-                for (String key : keys) {
-                    String extra = extras.getString(key);
-                    startService.putExtra(key, extra);
+        if (mHandler != null) {
+            if (!UsbService.SERVICE_CONNECTED) {
+                Intent startService = new Intent(mActivity, service);
+                if (extras != null && !extras.isEmpty()) {
+                    Set<String> keys = extras.keySet();
+                    for (String key : keys) {
+                        String extra = extras.getString(key);
+                        startService.putExtra(key, extra);
+                    }
                 }
+                mActivity.startService(startService);
             }
-            mActivity.startService(startService);
+            Intent bindingIntent = new Intent(mActivity, service);
+            mActivity.bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         }
-        Intent bindingIntent = new Intent(mActivity, service);
-        mActivity.bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     private void setFilters() {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(UsbService.ACTION_USB_PERMISSION_GRANTED);
-        filter.addAction(UsbService.ACTION_NO_USB);
-        filter.addAction(UsbService.ACTION_USB_DISCONNECTED);
-        filter.addAction(UsbService.ACTION_USB_NOT_SUPPORTED);
-        filter.addAction(UsbService.ACTION_USB_PERMISSION_NOT_GRANTED);
-        if (mUsbReceiver != null)
-            mActivity.registerReceiver(mUsbReceiver, filter);
+        if (mHandler != null) {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(UsbService.ACTION_USB_PERMISSION_GRANTED);
+            filter.addAction(UsbService.ACTION_NO_USB);
+            filter.addAction(UsbService.ACTION_USB_DISCONNECTED);
+            filter.addAction(UsbService.ACTION_USB_NOT_SUPPORTED);
+            filter.addAction(UsbService.ACTION_USB_PERMISSION_NOT_GRANTED);
+            if (mUsbReceiver != null)
+                mActivity.registerReceiver(mUsbReceiver, filter);
+        }
     }
 
 
@@ -181,17 +204,12 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
 
     public UF_RET_CODE UF_InitCommPort(int baudrate, boolean asciiMode) {
         String commPort = null;
-        if (usbService != null)
+        UF_RET_CODE ret = UF_RET_CODE.UF_ERR_CANNOT_OPEN_SERIAL;
+        if (usbService != null) {
             commPort = usbService.getUsbDeviceName();
 
-
-        // set callback funcgtion.
-        UF_SetSetupSerialCallback(setupSerialCallback);
-        UF_SetWriteSerialCallback(writeSerialCallback);
-        UF_SetReadSerialCallback(readSerialCallback);
-
-
-        UF_RET_CODE ret = UF_InitCommPort(commPort, baudrate, asciiMode);
+            ret = UF_InitCommPort(commPort, baudrate, asciiMode);
+        }
 
         return ret;
     }
@@ -214,8 +232,10 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * Resume Usb Service.
      */
     public void resumeService() {
-        setFilters();  // Start listening notifications from UsbService
-        startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
+        if (mHandler != null) {
+            setFilters();  // Start listening notifications from UsbService
+            startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
+        }
 
     }
 
@@ -223,9 +243,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * Pause Usb Service.
      */
     public void pauseService() {
-        if (mUsbReceiver != null)
-            mActivity.unregisterReceiver(mUsbReceiver);
-        mActivity.unbindService(usbConnection);
+        if (mHandler != null) {
+            if (mUsbReceiver != null)
+                mActivity.unregisterReceiver(mUsbReceiver);
+            mActivity.unbindService(usbConnection);
+        }
     }
 
 
@@ -261,8 +283,6 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
         public int callback(byte[] data, int size, int timeout) {
 
             int ret = usbService.readSerial(data, timeout);
-//            Log.d("[INFO] cbReadSerial", byteArrayToHex(data));
-//            Log.d("[INFO]", String.format("ret : %d timeout : %d", ret, timeout));
 
             return ret;
         }
@@ -271,7 +291,7 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
     private WriteSerialCallback writeSerialCallback = new WriteSerialCallback() {
         @Override
         public int callback(byte[] data, int size, int timeout) {
-//            Log.d("[INFO] cbWriteSerial", Arrays.toString(data));
+
             int ret = usbService.writeSerial(data, timeout);
             return ret;
         }
@@ -280,14 +300,14 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
     private SendPacketCallback sendPacketCallback = new SendPacketCallback() {
         @Override
         public void callback(byte[] data) {
-            Log.d("[INFO] cbSendPacket", Arrays.toString(data));
+
         }
     };
 
     private ReceivePacketCallback receivePacketCallback = new ReceivePacketCallback() {
         @Override
         public void callback(byte[] data) {
-            Log.d("[INFO] cbReceivePacket", Arrays.toString(data));
+
         }
     };
 
@@ -380,6 +400,38 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
 
     //endregion
 
+    //region
+    private native void _SetupSerialCallback(SetupSerialCallback callback);
+
+    private native void _ReadSerialCallback(ReadSerialCallback callback);
+
+    private native void _WriteSerialCallback(WriteSerialCallback callback);
+
+    private native void _SendPacketCallback(SendPacketCallback callback);
+
+    private native void _ReceivePacketCallback(ReceivePacketCallback callback);
+
+    private native void _SendDataPacketCallback(SendDataPacketCallback callback);
+
+    private native void _ReceiveDataPacketCallback(ReceiveDataPacketCallback callback);
+
+    private native void _SendRawDataCallback(SendRawDataCallback callback);
+
+    private native void _ReceiveRawDataCallback(ReceiveRawDataCallback callback);
+
+    private native void _UserInfoCallback(UserInfoCallback callback);
+
+    private native void _ScanCallback(ScanCallback callback);
+
+    private native void _IdentifyCallback(IdentifyCallback callback);
+
+    private native void _VerifyCallback(VerifyCallback callback);
+
+    private native void _EnrollCallback(EnrollCallback callback);
+
+    private native void _DeleteCallback(DeleteCallback callback);
+    //endregion
+
 
     //region Registering functions for callback functions from Java (15 functions to set callback)
 
@@ -389,7 +441,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * @param callback The callback function.
      */
     public void UF_SetSetupSerialCallback(SetupSerialCallback callback) {
-        setupSerialCallback = callback;
+        if (callback != null) {
+            setupSerialCallback = callback;
+            _SetupSerialCallback(setupSerialCallback);
+        } else
+            _SetupSerialCallback(null);
     }
 
     /**
@@ -398,7 +454,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * @param callback The callback function.
      */
     public void UF_SetReadSerialCallback(ReadSerialCallback callback) {
-        readSerialCallback = callback;
+        if (callback != null) {
+            readSerialCallback = callback;
+            _ReadSerialCallback(readSerialCallback);
+        } else
+            _ReadSerialCallback(null);
     }
 
     /**
@@ -407,7 +467,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * @param callback The callback function.
      */
     public void UF_SetWriteSerialCallback(WriteSerialCallback callback) {
-        writeSerialCallback = callback;
+        if (callback != null) {
+            writeSerialCallback = callback;
+            _WriteSerialCallback(writeSerialCallback);
+        } else
+            _WriteSerialCallback(null);
     }
 
     /**
@@ -416,7 +480,12 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * @param callback The callback function.
      */
     public void UF_SetSendPacketCallback(SendPacketCallback callback) {
-        sendPacketCallback = callback;
+        if (callback != null) {
+            sendPacketCallback = callback;
+            _SendPacketCallback(sendPacketCallback);
+        } else
+            _SendPacketCallback(null);
+
     }
 
     /**
@@ -425,7 +494,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * @param callback The callback function.
      */
     public void UF_SetReceivePacketCallback(ReceivePacketCallback callback) {
-        receivePacketCallback = callback;
+        if (callback != null) {
+            receivePacketCallback = callback;
+            _ReceivePacketCallback(receivePacketCallback);
+        } else
+            _ReceivePacketCallback(null);
     }
 
     /**
@@ -434,7 +507,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * @param callback The callback function.
      */
     public void UF_SetSendDataPacketCallback(SendDataPacketCallback callback) {
-        sendDataPacketCallback = callback;
+        if (callback != null) {
+            sendDataPacketCallback = callback;
+            _SendDataPacketCallback(sendDataPacketCallback);
+        } else
+            _SendDataPacketCallback(null);
     }
 
     /**
@@ -443,7 +520,12 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * @param callback The callback function.
      */
     public void UF_SetReceiveDataPacketCallback(ReceiveDataPacketCallback callback) {
-        receiveDataPacketCallback = callback;
+        if (callback != null) {
+            receiveDataPacketCallback = callback;
+            _ReceiveDataPacketCallback(receiveDataPacketCallback);
+        } else
+            _ReceiveDataPacketCallback(null);
+
     }
 
     /**
@@ -452,7 +534,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * @param callback The callback function.
      */
     public void UF_SetSendRawDataCallback(SendRawDataCallback callback) {
-        sendRawDataCallback = callback;
+        if (callback != null) {
+            sendRawDataCallback = callback;
+            _SendRawDataCallback(sendRawDataCallback);
+        } else
+            _SendRawDataCallback(null);
     }
 
     /**
@@ -461,7 +547,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * @param callback The callback function.
      */
     public void UF_SetReceiveRawDataCallback(ReceiveRawDataCallback callback) {
-        receiveRawDataCallback = callback;
+        if (callback != null) {
+            receiveRawDataCallback = callback;
+            _ReceiveRawDataCallback(receiveRawDataCallback);
+        } else
+            _ReceiveRawDataCallback(null);
     }
 
     /**
@@ -470,7 +560,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * @param callback The callback function.
      */
     public void UF_SetUserInfoCallback(UserInfoCallback callback) {
-        userInfoCallback = callback;
+        if (callback != null) {
+            userInfoCallback = callback;
+            _UserInfoCallback(userInfoCallback);
+        } else
+            _UserInfoCallback(null);
     }
 
     /**
@@ -479,7 +573,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * @param callback The callback function.
      */
     public void UF_SetScanCallback(ScanCallback callback) {
-        scanCallback = callback;
+        if (callback != null) {
+            scanCallback = callback;
+            _ScanCallback(scanCallback);
+        } else
+            _ScanCallback(null);
     }
 
     /**
@@ -488,7 +586,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * @param callback The callback function.
      */
     public void UF_SetIdentifyCallback(IdentifyCallback callback) {
-        identifyCallback = callback;
+        if (callback != null) {
+            identifyCallback = callback;
+            _IdentifyCallback(identifyCallback);
+        } else
+            _IdentifyCallback(null);
     }
 
     /**
@@ -497,7 +599,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * @param callback The callback function.
      */
     public void UF_SetVerifyCallback(VerifyCallback callback) {
-        verifyCallback = callback;
+        if (callback != null) {
+            verifyCallback = callback;
+            _VerifyCallback(verifyCallback);
+        } else
+            _VerifyCallback(null);
     }
 
     /**
@@ -506,7 +612,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * @param callback The callback function.
      */
     public void UF_SetEnrollCallback(EnrollCallback callback) {
-        enrollCallback = callback;
+        if (callback != null) {
+            enrollCallback = callback;
+            _EnrollCallback(enrollCallback);
+        } else
+            _EnrollCallback(null);
     }
 
     /**
@@ -515,7 +625,11 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      * @param callback The callback function.
      */
     public void UF_SetDeleteCallback(DeleteCallback callback) {
-        deleteCallback = callback;
+        if (callback != null) {
+            deleteCallback = callback;
+            _DeleteCallback(deleteCallback);
+        } else
+            _DeleteCallback(null);
     }
     //endregion
 
@@ -1969,20 +2083,16 @@ public class SFM_SDK_ANDROID extends SFM_SDK_ANDROID_CALLBACK_INTERFACE {
      */
     public native UF_RET_CODE UF_ScanImageEx(UFImage image, UF_IMAGE_TYPE type, int wsqBitRate);
 
-    /**
-     * Test
-     */
 
     /**
      * Initialize callback functions from the JNI.
      */
-    private static native void InitCallbackFunctions();
+    // private static native void InitCallbackFunctions(); [DEPRECATED]
 
 
     static {
 
         System.loadLibrary("native-lib");
-        InitCallbackFunctions();
     }
 
 }
