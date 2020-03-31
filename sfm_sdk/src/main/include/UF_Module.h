@@ -3,7 +3,7 @@
  */
 
 /*  
- *  Copyright (c) 2001-2019 Suprema Inc. All Rights Reserved.
+ *  Copyright (c) 2001-2020 Suprema Inc. All Rights Reserved.
  * 
  *  This software is the confidential and proprietary information of 
  *  Suprema Inc. ("Confidential Information").  You shall not
