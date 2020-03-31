@@ -3,7 +3,7 @@
  */
 
 /*  
- *  Copyright (c) 2001-2019 Suprema Inc. All Rights Reserved.
+ *  Copyright (c) 2001-2020 Suprema Inc. All Rights Reserved.
  * 
  *  This software is the confidential and proprietary information of 
  *  Suprema Inc. ("Confidential Information").  You shall not
@@ -21,7 +21,10 @@
 #endif // _WIN32
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
+#include <string.h>
+
 #include "UF_Def.h"
 #include "UF_Error.h"
 #include "UF_Packet.h"
@@ -39,10 +42,10 @@
 #include "UF_Log.h"
 #include "UF_Delete.h"
 #include "UF_AccessControl.h"
-#include "UF_WSQ.h"
 #include "UF_Serial.h"
 #include "UF_Upgrade.h"
 #include "UF_Socket.h"
+#include "UF_WSQ.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -65,23 +68,16 @@ extern "C"
     UF_API UF_RET_CODE UF_SetBaudrate(int baudrate);
     UF_API void UF_SetAsciiMode(BOOL asciiMode);
 
-#ifdef __ANDROID__
     //
-    // Callback functions for android 
+    // Callback functions for the user-defined UART handler (Android)
     //
-    
-    // Open serial
-//UF_API void UF_SetOpenSerialCallback(BOOL(*Callback)(void));
-    // Cloase serial
-//UF_API void UF_SetCloseSerialCallback(void(*Callback)(void));
-    // Set baudrate
-UF_API void UF_SetSetupSerialCallback(void(*Callback)(int));
-    // Read serial
-UF_API void UF_SetReadSerialCallback(int(*Callback)(BYTE *, int, int));
-    // Write serial
-UF_API void UF_SetWriteSerialCallback(int(*Callback)(BYTE *, int, int));
-    	
-#endif
+
+    // Set baudrate to the host handler of the user-defined UART handler
+    UF_API void UF_SetSetupSerialCallback(void (*Callback)(int));
+    // Read serial data by the host handler of the user-defined UART handler
+    UF_API void UF_SetReadSerialCallback(int (*Callback)(BYTE *, int, int));
+    // Write serial data by the host handler of the user-defined UART handler
+    UF_API void UF_SetWriteSerialCallback(int (*Callback)(BYTE *, int, int));
 
     //
     // Basic packet interface

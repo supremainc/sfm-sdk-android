@@ -3,7 +3,7 @@
  */
 
 /*  
- *  Copyright (c) 2001-2019 Suprema Inc. All Rights Reserved.
+ *  Copyright (c) 2001-2020 Suprema Inc. All Rights Reserved.
  * 
  *  This software is the confidential and proprietary information of 
  *  Suprema Inc. ("Confidential Information").  You shall not
@@ -23,6 +23,18 @@
 
 #define UF_SYS_PARAMETER_NOT_FOUND 0xffffffff
 #define UF_SYS_PARAMETER_NOT_READ 0x00
+
+typedef struct
+{
+	int parameter;
+	UINT32 value;
+} SysParameter;
+
+/* System Parameter */
+extern SysParameter s_SysParameter[];
+
+/* System Parameter List (String Name)*/
+extern char s_SysParameterList[][20];
 
 typedef enum
 {
