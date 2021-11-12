@@ -25,10 +25,13 @@ public enum UF_MODULE_VERSION {
     UF_VERSION_2_3(23),
     UF_VERSION_2_4(24),
     UF_VERSION_3_0(30),
-    UF_VERSION_3_1(30),
-    UF_VERSION_3_2(30),
-    UF_VERSION_3_3(30),
+    UF_VERSION_3_1(31),
+    UF_VERSION_3_2(32),
+    UF_VERSION_3_3(33),
     UF_VERSION_3_4(34),
+    UF_VERSION_3_5(35),
+    UF_VERSION_3_6(36),
+    UF_VERSION_3_7(37),
     UF_VERSION_UNKNOWN(-1),
     ;
     private int value;
