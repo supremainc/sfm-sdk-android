@@ -22,8 +22,9 @@ allprojects {
 
 ```gradle
 dependencies {
-        implementation 'com.github.supremainc:sfm-sdk-android:v0.4.0'
+        implementation 'com.github.supremainc:sfm-sdk-android:v0.6.0'
 }
 ```
+
 
 
